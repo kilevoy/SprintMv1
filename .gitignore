@@ -1,0 +1,10 @@
+# Temporary test/tool output
+testsprite_tests/tmp/
+
+# Excel lock files
+~$*.xlsx
+~$*.xlsm
+
+# Local editor/system noise
+.DS_Store
+Thumbs.db
