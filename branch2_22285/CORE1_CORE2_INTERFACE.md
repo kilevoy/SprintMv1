@@ -20,3 +20,34 @@ Core 2 принимает/хранит: номер ТЗ, город, объек�
 
 Нужно сопоставить адреса/идентификаторы из первой части Sprint M с полями `22285.xlsx` на одном и том же ТЗ и на одном рабочем наборе прайсов. До этого нельзя считать расчётную границу Core 1/Core 2 закрытой.
 
+## Предварительный контракт A.1
+
+`source_in_legacy_excel` указывает только на реально найденную ячейку/зону. Если поле похоже на ожидаемый параметр, но его consumer не найден, оно не считается доказанным интерфейсом.
+
+| field_name | business_name | source_in_legacy_excel | unit | type | required | core1_source | core2_consumers | current_status | notes |
+|---|---|---|---|---|---|---|---|---|---|
+| `city` | город строительства | `B6` | текст | string | provisional | неизвестно | нет доказанных формульных consumers | PARTIALLY VERIFIED | хранится и отображается; климатический lookup не доказан |
+| `span` | пролёт | `C8` | м | number | yes | исходный ввод/возможный Core 1 input | количества профилей, площади, геометрия | VERIFIED | локальный драйвер |
+| `length` | длина | `C9` | м | number | yes | исходный ввод/возможный Core 1 input | рамная сетка, профили, площади, водосток | VERIFIED | локальный драйвер |
+| `height` | высота | `C10` | м | number | yes | исходный ввод/возможный Core 1 input | профили, стены, утеплитель, дополнительные элементы | VERIFIED | локальный драйвер |
+| `frame_step` | шаг рам | `C11` | м | number | yes | исходный ввод/возможный Core 1 input | `I17`, продольные количества | VERIFIED | локальный драйвер |
+| `frame_count` | число рам/позиций | `I17`, `J16` | шт./геометрический множитель | formula result | yes | не доказан | BOM quantities, нижние расчёты | PARTIALLY VERIFIED | Core 2 считает две связанные величины; физический смысл `J16` требует подтверждения |
+| `snow` | снеговая зона/нагрузка | `C5` | неизвестно | number | provisional | вероятно Core 1/климат | dependents не найдены | REQUIRES CORE 1 | значение 3 сохранено, но в расчёте не прослеживается |
+| `wind` | ветровая зона/нагрузка | `D5` | неизвестно | number | provisional | вероятно Core 1/климат | dependents не найдены | REQUIRES CORE 1 | значение 2 сохранено, но в расчёте не прослеживается |
+| `responsibility` | уровень ответственности | `G8` | код | number | provisional | неизвестно | dependents не найдены | PARTIALLY VERIFIED | поле есть, потребитель не найден |
+| `beam_profile` | профиль балки/ригелей | отдельного Core 1 поля нет; названия в справочных колонках | профиль | string | yes | Core 1 candidate | BOM labels/price lookups, но не input contract | UNKNOWN | текст профиля не равен выбранному сечению |
+| `column_profile` | профиль колонны | отдельного поля нет | профиль | string | yes | Core 1 candidate | отдельного consumer не доказано | UNKNOWN | нужен результат предрасчёта колонн |
+| `purlin_profile` | профиль прогона | отдельного поля нет | профиль | string | yes | Core 1 candidate | отдельного consumer не доказано | REQUIRES CORE 1 | нужны файлы подбора прогонов |
+| `purlin_step` | шаг прогонов | отдельного поля нет | м | number | yes | Core 1 candidate | отдельного consumer не доказано | REQUIRES CORE 1 | не выводить из `frame_step` |
+| `ties` | затяжки | BOM/вспомогательные строки, без Core 1 input | шт./м? | quantity | provisional | неизвестно | отдельные BOM quantities | UNKNOWN | единица и источник сечения не доказаны |
+| `bracing` | связи | BOM/вспомогательные строки, без Core 1 input | шт./м? | quantity | provisional | неизвестно | отдельные BOM quantities | UNKNOWN | не доказан источник конструктивного решения |
+| `spacers` | распорки | BOM/вспомогательные строки, без Core 1 input | шт./м? | quantity | provisional | неизвестно | отдельные BOM quantities | UNKNOWN | не доказана граница Core 1/Core 2 |
+| `bolts` | болты | BOM/крепёжные строки | шт./комплект | quantity | provisional | неизвестно | `C/F/G` строк крепежа | INDEPENDENT CALCULATION | Core 2 считает BOM-количество; Core 1 duplicate не найден |
+| `plates` | фасонки/пластины | BOM/листовые позиции | шт./кг? | quantity | provisional | неизвестно | `C/F/G` строк листа/фасонок | INDEPENDENT CALCULATION | exact unit/source requires catalog |
+| `frame_weight` | масса рам | суммы `G` каркасных строк | кг | calculated | yes | возможен Core 1 result | `G` group totals, commercial frame block | PARTIALLY VERIFIED | формула Core 2 доказана, upstream `H` часто внешний |
+| `structural_weight` | масса несущей системы | итоговые `G` основных/доп. материалов | кг | calculated | yes | возможен Core 1 result | mass per m² and total output | UNKNOWN | возможный duplicate; состав надо сопоставить |
+| `other_structural_results` | прочие результаты Core 1 | отсутствуют | varies | object | provisional | Core 1 candidate | прямых consumers не найдено | UNKNOWN | нужны явные output IDs и units |
+
+## Правило владения
+
+Пока Core 1 не предоставит идентифицированный результат с единицей и составом, Core 2 владеет своими локальными quantities/costs, но не получает право объявлять их заменой инженерного результата Core 1. Передача должна быть по ID ТЗ и типу конструктивной ветки, а не по совпадению названия профиля.
