@@ -1,6 +1,6 @@
 # Core 1 TypeScript data layer
 
-Это browser-ready foundation для Calculation Engine. Реализованы InputValidation, ClimateResolver, FrameSelector, PurlinCalculator, SecondarySteelCalculator и WindowGirtCalculator; React UI, backend, OpeningMassCalculator, StructuralSummary и Core 2 пока отсутствуют.
+Это browser-ready foundation для Calculation Engine. Реализованы InputValidation, ClimateResolver, FrameSelector, PurlinCalculator, SecondarySteelCalculator, WindowGirtCalculator и OpeningMassCalculator; React UI, backend, StructuralSummary и Core 2 пока отсутствуют.
 
 ## Data flow
 
@@ -48,8 +48,8 @@ Vitest проверяет путь GitHub Pages, lazy loading, кеширова�
 напрямую соответствует `Лист1!B8`; canonical labels — `Тип 1`…`Тип 5`.
 Исторические ID3/ID4/ID5 не требуются runtime: снег и ветер берутся из
 локальных листов основной книги. Формульная цепочка окон доказана для
-реализации; до написания `WindowGirtCalculator` orchestration возвращает
-`WindowGirtCalculator` реализован для доказанного локального domain; отсутствие
+реализации; `WindowGirtCalculator` реализован для доказанного локального
+domain; отсутствие
 non-zero golden oracle блокирует только `PARITY_PROVEN`.
 
 Статусы оконной ветки: `WINDOW_CALCULATOR_IMPLEMENTED=true`,
@@ -101,8 +101,8 @@ windows.enabled + window_type + ClimateResult + FrameResult
 
 `WindowGirtCalculator` не читает `Core1Input` целиком, не использует J20 или
 внешние ID3/ID4/ID5 и не вызывается при `windows.enabled=false`. Его результат
-уже доступен в `context.windows`; `OpeningMassCalculator` и
-`StructuralSummary` остаются следующими модулями.
+доступен в `context.windows`; затем `OpeningMassCalculator` агрегирует только
+доказанную дополнительную массу проёмов и доступен в `context.openings`.
 
 ## Frame selection lifecycle
 
@@ -181,7 +181,8 @@ Core1Input
 ```
 
 `calculateCore1` реализует этот orchestration boundary и завершает этап
-`PurlinCalculator`. Ожидаемые
+`OpeningMassCalculator`. Ожидаемые
 legacy-сценарии возвращаются как `legacy_error`, неподдержанные ветви — как
 `unsupported`, а обычный supported input пока завершается внутренним
-`NOT_IMPLEMENTED`; инженерный результат не подставляется.
+`NOT_IMPLEMENTED`; инженерный результат не подставляется. Следующий модуль —
+`StructuralSummary`.

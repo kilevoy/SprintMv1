@@ -5,6 +5,7 @@ import { selectFrame } from "../frame";
 import { calculatePurlin } from "../purlin";
 import { calculateSecondarySteel } from "../secondary";
 import { calculateWindowGirts } from "../window";
+import { calculateOpeningMass } from "../opening";
 import { createCore1Diagnostic } from "../diagnostics";
 import { resolveClimateInput, resolveWindowsInput, validateCore1InputDomain } from "../validation";
 import type { Core1DataRepository } from "../data";
@@ -123,7 +124,7 @@ export async function calculateCore1(
     return { status: "unknown_domain", code: "UNKNOWN_CLIMATE_DATA", result: null, diagnostics: climateResolution.diagnostics };
   }
   const context = { climate: climateResolution.climate };
-  let finalContext: { climate: Core1ClimateResult; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult; windows?: WindowGirtResult | null } = context;
+  let finalContext: { climate: Core1ClimateResult; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult; windows?: WindowGirtResult | null; openings?: import("../opening").OpeningMassResult | null } = context;
 
   try {
     if (domain.state === "SUPPORTED_WITH_LEGACY_ANOMALY") {
@@ -247,6 +248,7 @@ export async function calculateCore1(
     finalContext = secondaryContext;
 
     const windowsInput = resolveWindowsInput(value);
+    let windowResult: WindowGirtResult | null = null;
     if (windowsInput.enabled) {
       const windowDataset = await repository.loadWindowDataset("window_profile_candidates");
       const windowResolution = calculateWindowGirts(
@@ -265,10 +267,26 @@ export async function calculateCore1(
       if (windowResolution.status !== "success" || !windowResolution.windowGirts) {
         return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context: secondaryContext, diagnostics: [...domain.diagnostics, ...windowResolution.diagnostics] };
       }
-      finalContext = { ...secondaryContext, windows: windowResolution.windowGirts };
+      windowResult = windowResolution.windowGirts;
+      finalContext = { ...secondaryContext, windows: windowResult };
     } else {
       finalContext = { ...secondaryContext, windows: null };
     }
+    const openingResolution = calculateOpeningMass({
+      gate_count_le_6m: value.gates_le_6m_count,
+      gate_count_gt_6m: value.gates_gt_6m_count,
+      door_count: value.doors_count,
+      windows: windowsInput,
+      frame: frameResolution.frame,
+      span_m: value.span_m,
+      building_length_m: value.building_length_m,
+      secondarySteel: secondaryResolution.secondary,
+      windowGirts: windowResult,
+    });
+    if (openingResolution.status !== "success" || !openingResolution.openingMass) {
+      return { status: "invalid_input", code: "INVALID_INPUT", result: null, context: finalContext, diagnostics: [...domain.diagnostics, ...openingResolution.diagnostics] };
+    }
+    finalContext = { ...finalContext, openings: openingResolution.openingMass };
   } catch (error) {
     return datasetLoadFailureResult(error);
   }
@@ -286,9 +304,9 @@ export async function calculateCore1(
         severity: "warning",
         classification: "required_module_not_implemented",
         module: "CalculationEngine",
-        message: "Downstream-модули OpeningMassCalculator и StructuralSummary ещё не реализованы; промежуточный инженерный результат сохранён в context.",
+        message: "StructuralSummary ещё не реализован; промежуточный инженерный результат сохранён в context.",
         source: ["CORE1_V1_PLAN.md"],
-        details: { next_module: "OpeningMassCalculator", completed_modules: ["ClimateResolver", "FrameSelector", "PurlinCalculator", "SecondarySteelCalculator", ...(finalContext.windows ? ["WindowGirtCalculator"] : [])] },
+        details: { next_module: "StructuralSummary", completed_modules: ["ClimateResolver", "FrameSelector", "PurlinCalculator", "SecondarySteelCalculator", ...(finalContext.windows ? ["WindowGirtCalculator"] : []), "OpeningMassCalculator"] },
       }),
     ],
   };

@@ -45,6 +45,9 @@ export interface WindowGirtResult {
   upper_girt_profile: string;
   upper_girt_steel: string;
   upper_girt_utilization: number;
+  /** Selected local profile unit masses used by the strip-window branch (kg/m). */
+  lower_girt_mass_kg_per_m: number;
+  upper_girt_mass_kg_per_m: number;
   window_girts_weight_kg: number;
   trace: WindowGirtTrace;
 }

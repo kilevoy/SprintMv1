@@ -92,6 +92,8 @@ describe("Core 1 input validation and orchestration", () => {
     expect(result.context?.windows?.trace).toMatchObject({ normative_system: "SP_20", window_type: 1, wind_branch: "SP_20" });
     expect(result.context?.windows?.lower_girt_profile).toBeTruthy();
     expect(result.context?.windows?.upper_girt_profile).toBeTruthy();
+    expect(result.context?.openings?.trace).toMatchObject({ window_strip_length_m: 6 });
+    expect(result.context?.openings?.window_mass_kg).toBeGreaterThan(0);
   });
 
   it("routes KZ SP_RK_EN directly without the legacy J20 switch", async () => {
@@ -127,6 +129,7 @@ describe("Core 1 input validation and orchestration", () => {
     expect(result.context?.frame).toMatchObject({ frame_step_m: 6, beam_profile: "ПГС300/20х80х2,5", beam_utilization: 85, column_profile: "ПГС245/20х80х2", column_utilization: 65 });
     expect(result.context?.purlin).toMatchObject({ purlin_profile: "2ПС 200х65х2", purlin_steel: "М.п.390", purlin_step_mm: 2140, purlin_kg_per_m2: 7.539000000000001, purlin_weight_kg: 1550.88 });
     expect(result.context?.secondarySteel).toMatchObject({ M16_quantity: 4, fittings_weight_kg: 233 });
+    expect(result.context?.openings).toMatchObject({ opening_mass_kg: 0, opening_mass_kg_per_m2: 0, opening_mass_t: 0 });
   });
 
   it("requires an explicit normative system for KZ", async () => {
@@ -204,6 +207,16 @@ describe("Core 1 input validation and orchestration", () => {
     expect(result.status).toBe("legacy_error");
     expect(resultCode(result)).toBe("LEGACY_REF");
     expect(result.diagnostics.some((diagnostic) => diagnostic.excel_error === "#REF!")).toBe(true);
+  });
+
+  it("passes non-zero gate and door counts to OpeningMassCalculator", async () => {
+    const input = await inputFor("baseline_12m") as Record<string, unknown>;
+    input.gates_le_6m_count = 1;
+    input.gates_gt_6m_count = 1;
+    input.doors_count = 1;
+    const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
+    expect(result.status).toBe("required_module_not_implemented");
+    expect(result.context?.openings).toMatchObject({ gate_le_6m_mass_kg: 350 * 1.05, gate_gt_6m_mass_kg: 450 * 1.05, door_mass_kg: (6 + 4) * 7.2 * 1.05 });
   });
 
   it("keeps dataset loading lazy for a supported input", async () => {

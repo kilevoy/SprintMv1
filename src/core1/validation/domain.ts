@@ -120,9 +120,6 @@ export function validateCore1InputDomain(input: unknown): Core1InputDomainResult
   const unknownNumericDomain =
     value.building_length_m !== 18 ||
     value.building_height_m !== 3 ||
-    value.gates_le_6m_count !== 0 ||
-    value.gates_gt_6m_count !== 0 ||
-    value.doors_count !== 0 ||
     (value.frame_step_override_m !== undefined && value.frame_step_override_m !== null && value.frame_step_override_m !== 0) ||
     (value.purlin_max_step_override_mm !== undefined && value.purlin_max_step_override_mm !== null && value.purlin_max_step_override_mm !== 0 && value.purlin_max_step_override_mm !== 500) ||
     (value.purlin_min_step_mm !== undefined && value.purlin_min_step_mm !== 0);
@@ -141,9 +138,6 @@ export function validateCore1InputDomain(input: unknown): Core1InputDomainResult
         details: {
           building_length_m: value.building_length_m,
           building_height_m: value.building_height_m,
-          gates_le_6m_count: value.gates_le_6m_count,
-          gates_gt_6m_count: value.gates_gt_6m_count,
-          doors_count: value.doors_count,
           frame_step_override_m: value.frame_step_override_m ?? null,
           purlin_max_step_override_mm: value.purlin_max_step_override_mm ?? null,
           purlin_min_step_mm: value.purlin_min_step_mm ?? null,

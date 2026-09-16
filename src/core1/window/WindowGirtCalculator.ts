@@ -150,6 +150,8 @@ export function calculateWindowGirts(input: WindowGirtInput, bundle: WindowGirtD
       upper_girt_profile: upper.candidate.profile,
       upper_girt_steel: upper.candidate.steel,
       upper_girt_utilization: upper.upperUtil,
+      lower_girt_mass_kg_per_m: lower.candidate.mass_kg_m,
+      upper_girt_mass_kg_per_m: upper.candidate.mass_kg_m,
       window_girts_weight_kg: totalMass,
       trace: {
         window_type: windows.window_type,

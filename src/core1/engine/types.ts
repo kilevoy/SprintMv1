@@ -3,6 +3,7 @@ import type { FrameResult } from "../frame";
 import type { PurlinResultValue } from "../purlin";
 import type { SecondarySteelResult } from "../secondary";
 import type { WindowGirtResult } from "../window";
+import type { OpeningMassResult } from "../opening";
 
 export type Core1EngineStatus =
   | "success"
@@ -27,7 +28,7 @@ export type Core1EngineCode =
 export interface Core1EngineBase {
   status: Core1EngineStatus;
   diagnostics: Core1Diagnostic[];
-  context?: { climate: Core1ClimateResult; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult; windows?: WindowGirtResult | null };
+  context?: { climate: Core1ClimateResult; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult; windows?: WindowGirtResult | null; openings?: OpeningMassResult | null };
 }
 
 export interface Core1EngineSuccess extends Core1EngineBase {

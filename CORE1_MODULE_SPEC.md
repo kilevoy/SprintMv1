@@ -57,10 +57,10 @@
 ## OpeningMassCalculator
 
 - Inputs: gate/door counts, window inputs, supported `WindowGirtCalculator` result, building plan area.
-- Outputs: `openings_weight_kg_per_m2`, `openings_weight_t`, exact derived `openings_weight_kg`.
+- Outputs: gate/door/window component masses in kg, `opening_mass_kg`, exact `opening_mass_kg_per_m2` (D68 equivalent), and `opening_mass_t` (E68 equivalent) with provenance trace.
 - Static datasets: local opening rules and supported window result layout.
 - Excel source: `вывод!D60:D68`, `Лист1!O28:O29`.
-- Known anomalies: ненулевые окна наследуют window unsupported/error; не заменять ошибку нулевой массой; доказанный сохранённый fixture имеет нулевые openings.
+- Known anomalies: ненулевые окна требуют предварительный `WindowGirtResult`; D65 ribbon-window branch is separate from D66; доказанный сохранённый fixture имеет нулевые openings, поэтому non-zero parity ещё не подтверждён.
 
 ## StructuralSummary
 
