@@ -9,6 +9,7 @@ export * from "./purlin";
 export * from "./secondary";
 export * from "./window";
 export * from "./opening";
+export * from "./summary";
 export {
   BrowserCore1DataRepository,
   BrowserDataSource,

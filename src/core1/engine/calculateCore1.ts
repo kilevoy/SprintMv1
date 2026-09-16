@@ -6,6 +6,7 @@ import { calculatePurlin } from "../purlin";
 import { calculateSecondarySteel } from "../secondary";
 import { calculateWindowGirts } from "../window";
 import { calculateOpeningMass } from "../opening";
+import { calculateStructuralSummary } from "../summary";
 import { createCore1Diagnostic } from "../diagnostics";
 import { resolveClimateInput, resolveWindowsInput, validateCore1InputDomain } from "../validation";
 import type { Core1DataRepository } from "../data";
@@ -64,8 +65,9 @@ function datasetLoadFailureResult(error: unknown): Core1EngineResult {
 }
 
 /**
- * Orchestration boundary for Core 1 v1. Climate, frame and purlin modules are
- * executed; later modules keep the typed NOT_IMPLEMENTED boundary.
+ * Orchestration boundary for Core 1 v1. Supported scenarios execute the
+ * proven module chain through StructuralSummary and return a full result;
+ * legacy/unsupported branches exit before engineering output is produced.
  */
 export async function calculateCore1(
   input: unknown,
@@ -287,27 +289,73 @@ export async function calculateCore1(
       return { status: "invalid_input", code: "INVALID_INPUT", result: null, context: finalContext, diagnostics: [...domain.diagnostics, ...openingResolution.diagnostics] };
     }
     finalContext = { ...finalContext, openings: openingResolution.openingMass };
+    const summaryResolution = calculateStructuralSummary({
+      scenario: { span_m: value.span_m, building_length_m: value.building_length_m, frame_step_override_m: value.frame_step_override_m ?? null },
+      frame: frameResolution.frame,
+      purlin: purlinResolution.purlin,
+      secondarySteel: secondaryResolution.secondary,
+      windows: windowResult,
+      openings: openingResolution.openingMass,
+    });
+    if (summaryResolution.status !== "success") {
+      return { status: "invalid_input", code: "INVALID_INPUT", result: null, context: finalContext, diagnostics: [...domain.diagnostics, ...summaryResolution.diagnostics] };
+    }
+    const windowOutput = windowResult
+      ? [{ lower_girt_profile: windowResult.lower_girt_profile, lower_girt_steel: windowResult.lower_girt_steel, lower_girt_utilization: windowResult.lower_girt_utilization, upper_girt_profile: windowResult.upper_girt_profile, upper_girt_steel: windowResult.upper_girt_steel, upper_girt_utilization: windowResult.upper_girt_utilization, mass_kg: windowResult.window_girts_weight_kg }]
+      : [];
+    const result = {
+      scenario: value,
+      climate: context.climate,
+      frame_step_m: frameResolution.frame.frame_step_m,
+      beam_profile: frameResolution.frame.beam_profile,
+      beam_steel: frameResolution.frame.beam_steel,
+      beam_utilization: frameResolution.frame.beam_utilization,
+      column_profile: frameResolution.frame.column_profile,
+      column_steel: frameResolution.frame.column_steel,
+      column_utilization: frameResolution.frame.column_utilization,
+      purlin_profile: purlinResolution.purlin.purlin_profile,
+      purlin_steel: purlinResolution.purlin.purlin_steel,
+      purlin_assignment: purlinResolution.purlin.purlin_assignment,
+      purlin_step_mm: purlinResolution.purlin.purlin_step_mm,
+      purlin_kg_per_m2: purlinResolution.purlin.purlin_kg_per_m2,
+      purlin_weight_kg: purlinResolution.purlin.purlin_weight_kg,
+      ties: secondaryResolution.secondary.ties,
+      suspensions: secondaryResolution.secondary.suspensions,
+      spacers: secondaryResolution.secondary.spacers,
+      horizontal_bracing: secondaryResolution.secondary.horizontal_bracing,
+      vertical_bracing: secondaryResolution.secondary.vertical_bracing,
+      gable_posts: secondaryResolution.secondary.gable_posts,
+      portal_bracing: secondaryResolution.secondary.portal_bracing,
+      secondary_beams: secondaryResolution.secondary.secondary_beams,
+      secondary_columns: secondaryResolution.secondary.secondary_columns,
+      plates: secondaryResolution.secondary.plates,
+      bolts: secondaryResolution.secondary.bolts.map(({ name, pattern, source_cell }) => ({ name, pattern, source_cell })),
+      M16_quantity: secondaryResolution.secondary.M16_quantity,
+      fittings_weight_kg: secondaryResolution.secondary.fittings_weight_kg,
+      window_girts: windowOutput,
+      window_lower_girt_profile: windowResult?.lower_girt_profile ?? null,
+      window_upper_girt_profile: windowResult?.upper_girt_profile ?? null,
+      window_lower_girt_utilization: windowResult?.lower_girt_utilization ?? null,
+      window_upper_girt_utilization: windowResult?.upper_girt_utilization ?? null,
+      window_girts_weight_kg: windowResult?.window_girts_weight_kg ?? 0,
+      openings_weight_kg_per_m2: openingResolution.openingMass.opening_mass_kg_per_m2,
+      openings_weight_t: openingResolution.openingMass.opening_mass_t,
+      openings_weight_kg: openingResolution.openingMass.opening_mass_kg,
+      openings: {
+        gate_le_6m_mass_kg: openingResolution.openingMass.gate_le_6m_mass_kg,
+        gate_gt_6m_mass_kg: openingResolution.openingMass.gate_gt_6m_mass_kg,
+        door_mass_kg: openingResolution.openingMass.door_mass_kg,
+        window_mass_kg: openingResolution.openingMass.window_mass_kg,
+        opening_mass_kg: openingResolution.openingMass.opening_mass_kg,
+      },
+      kg_per_m2: summaryResolution.summary.kg_per_m2,
+      engineering_loads: null,
+      compatibility_diagnostics: [...domain.diagnostics],
+    };
+    return { status: "success", result, context: { ...finalContext, openings: openingResolution.openingMass }, diagnostics: [...domain.diagnostics] };
   } catch (error) {
     return datasetLoadFailureResult(error);
   }
 
-  return {
-    status: "required_module_not_implemented",
-    code: "NOT_IMPLEMENTED",
-    internal_status: "NOT_IMPLEMENTED",
-    result: null,
-    context: finalContext,
-    diagnostics: [
-      ...domain.diagnostics,
-      createCore1Diagnostic({
-        code: "NOT_IMPLEMENTED",
-        severity: "warning",
-        classification: "required_module_not_implemented",
-        module: "CalculationEngine",
-        message: "StructuralSummary ещё не реализован; промежуточный инженерный результат сохранён в context.",
-        source: ["CORE1_V1_PLAN.md"],
-        details: { next_module: "StructuralSummary", completed_modules: ["ClimateResolver", "FrameSelector", "PurlinCalculator", "SecondarySteelCalculator", ...(finalContext.windows ? ["WindowGirtCalculator"] : []), "OpeningMassCalculator"] },
-      }),
-    ],
-  };
+  return { status: "invalid_input", code: "INVALID_INPUT", result: null, context: finalContext, diagnostics: [createCore1Diagnostic({ code: "INVALID_INPUT", severity: "error", classification: "error", module: "CalculationEngine", message: "Не удалось завершить StructuralSummary.", source: ["CORE1_STRUCTURAL_SUMMARY_AUDIT.md"] })] };
 }

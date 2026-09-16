@@ -1,6 +1,6 @@
 # Core 1 TypeScript data layer
 
-Это browser-ready foundation для Calculation Engine. Реализованы InputValidation, ClimateResolver, FrameSelector, PurlinCalculator, SecondarySteelCalculator, WindowGirtCalculator и OpeningMassCalculator; React UI, backend, StructuralSummary и Core 2 пока отсутствуют.
+Это browser-ready foundation для Calculation Engine. Реализованы InputValidation, ClimateResolver, FrameSelector, PurlinCalculator, SecondarySteelCalculator, WindowGirtCalculator, OpeningMassCalculator и StructuralSummary; React UI, backend и Core 2 пока отсутствуют.
 
 ## Data flow
 
@@ -104,6 +104,18 @@ windows.enabled + window_type + ClimateResult + FrameResult
 доступен в `context.windows`; затем `OpeningMassCalculator` агрегирует только
 доказанную дополнительную массу проёмов и доступен в `context.openings`.
 
+## Structural summary lifecycle
+
+```text
+FrameResult + PurlinResult + SecondarySteelResult + OpeningMassResult
+  → exact legacy D69 aggregation
+  → StructuralSummaryResult.kg_per_m2
+```
+
+`StructuralSummary` не пересчитывает upstream-модули. В `D69` используется
+только `OpeningMassResult.opening_mass_kg_per_m2` (эквивалент `D68`); `E68`
+в тоннах и отдельная масса оконных ригелей повторно не суммируются.
+
 ## Frame selection lifecycle
 
 ```text
@@ -180,9 +192,7 @@ Core1Input
   → Core1Result
 ```
 
-`calculateCore1` реализует этот orchestration boundary и завершает этап
-`OpeningMassCalculator`. Ожидаемые
-legacy-сценарии возвращаются как `legacy_error`, неподдержанные ветви — как
-`unsupported`, а обычный supported input пока завершается внутренним
-`NOT_IMPLEMENTED`; инженерный результат не подставляется. Следующий модуль —
-`StructuralSummary`.
+`calculateCore1` реализует полный orchestration boundary до
+`StructuralSummary`. Ожидаемые legacy-сценарии возвращаются как
+`legacy_error`, неподдержанные ветви — как `unsupported`, а supported input
+возвращает типизированный `success` с `Core1Result`. Следующий этап — UI/Core 2.

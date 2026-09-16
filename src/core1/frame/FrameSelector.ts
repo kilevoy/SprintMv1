@@ -4,6 +4,7 @@ import type { Core1Diagnostic, Core1ClimateResult } from "../types";
 import type { FrameDatasetView, FrameSelectionResult, FrameSelectorInput } from "./types";
 
 const FRAME_STEEL = "М.п.350";
+const FRAME_TIE_UNIT_MASS_KG: Readonly<Record<9 | 12 | 15 | 18 | 21, number>> = { 9: 115, 12: 148, 15: 181, 18: 224, 21: 290 };
 const SUPPORTED_SPANS = new Set([9, 12, 15, 18, 21]);
 const HEIGHT_BANDS = [
   { max: 3.8, datasetHeight: 3.6 },
@@ -170,6 +171,7 @@ export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView
     return { status: "no_match", frame: null, diagnostics: [diagnostic("FRAME_NO_MATCH", "unsupported", "Строка рамы содержит неполные cached values.", { branch, row: block.row, start: block.start })] };
   }
   const frameMass = number(valueAt(dataset.records, `${columnName(base + 16)}${block.row}`));
+  const tubeMass = number(valueAt(dataset.records, `${columnName(base + 21)}${block.row}`));
   return {
     status: "success",
     diagnostics: [],
@@ -182,6 +184,8 @@ export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView
       column_steel: FRAME_STEEL,
       column_utilization: columnUtilization,
       frame_mass_kg: frameMass,
+      frame_tie_unit_mass_kg: FRAME_TIE_UNIT_MASS_KG[input.span_m as 9 | 12 | 15 | 18 | 21] ?? null,
+      tube_mass_kg_per_m2: tubeMass,
       trace: {
         selected_span_dataset: `frame_${input.span_m}m_cells`,
         selected_branch: `${block.start}${block.row}:${branch}/${band.datasetHeight}`,

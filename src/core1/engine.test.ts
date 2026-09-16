@@ -27,10 +27,6 @@ function resultCode(result: Core1EngineResult): string | undefined {
   return "code" in result ? result.code : undefined;
 }
 
-function internalStatus(result: Core1EngineResult): string | undefined {
-  return "internal_status" in result ? result.internal_status : undefined;
-}
-
 async function inputFor(id: string): Promise<unknown> {
   const envelope = await source.getJson<{ input: unknown }>(`core1/fixtures/${id}.input.json`);
   return envelope.input;
@@ -70,9 +66,10 @@ describe("Core 1 input validation and orchestration", () => {
     const input = { ...(await inputFor("baseline_12m") as Record<string, unknown>), span_m: span };
     expect(validateCore1InputDomain(input).state).toBe("VALID");
     const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
-    expect(result.status).toBe("required_module_not_implemented");
-    expect(resultCode(result)).toBe("NOT_IMPLEMENTED");
-    expect(internalStatus(result)).toBe("NOT_IMPLEMENTED");
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    expect(result.result.kg_per_m2).toBeTypeOf("number");
+    expect(Number.isFinite(result.result.kg_per_m2)).toBe(true);
   });
 
   it("preserves the span 24 m legacy #N/A contract", async () => {
@@ -87,8 +84,7 @@ describe("Core 1 input validation and orchestration", () => {
   it("routes non-zero windows to the proven local module boundary without using J20", async () => {
     const input = await inputFor("nonzero_windows_unsupported");
     const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
-    expect(result.status).toBe("required_module_not_implemented");
-    expect(resultCode(result)).toBe("NOT_IMPLEMENTED");
+    expect(result.status).toBe("success");
     expect(result.context?.windows?.trace).toMatchObject({ normative_system: "SP_20", window_type: 1, wind_branch: "SP_20" });
     expect(result.context?.windows?.lower_girt_profile).toBeTruthy();
     expect(result.context?.windows?.upper_girt_profile).toBeTruthy();
@@ -104,8 +100,7 @@ describe("Core 1 input validation and orchestration", () => {
     const first = await calculateCore1(input, new BrowserCore1DataRepository(source));
     const second = await calculateCore1(input, new BrowserCore1DataRepository(source));
     expect(second).toEqual(first);
-    expect(first.status).toBe("required_module_not_implemented");
-    expect(resultCode(first)).toBe("NOT_IMPLEMENTED");
+    expect(first.status).toBe("success");
     expect(first.context?.windows?.trace).toMatchObject({ normative_system: "SP_RK_EN", window_type: 3, wind_branch: "SP_RK_EN" });
     expect(first.diagnostics.some((diagnostic) => (diagnostic.source ?? []).some((sourceCell) => sourceCell.includes("v2.0")))).toBe(false);
   });
@@ -124,7 +119,7 @@ describe("Core 1 input validation and orchestration", () => {
     expect(validateCore1InputDomain(input).state).toBe("VALID");
     expect(resolveClimateInput(input as unknown as Core1Input).mode).toBe("CITY_LOOKUP");
     const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
-    expect(result.status).toBe("required_module_not_implemented");
+    expect(result.status).toBe("success");
     expect(result.context?.climate).toMatchObject({ source: "CITY_LOOKUP", snow_region: "III", snow_load: 1.5, wind_region: "II", wind_load: 0.3 });
     expect(result.context?.frame).toMatchObject({ frame_step_m: 6, beam_profile: "ПГС300/20х80х2,5", beam_utilization: 85, column_profile: "ПГС245/20х80х2", column_utilization: 65 });
     expect(result.context?.purlin).toMatchObject({ purlin_profile: "2ПС 200х65х2", purlin_steel: "М.п.390", purlin_step_mm: 2140, purlin_kg_per_m2: 7.539000000000001, purlin_weight_kg: 1550.88 });
@@ -136,6 +131,15 @@ describe("Core 1 input validation and orchestration", () => {
     const input = await canonicalInput({ mode: "MANUAL", country: "KZ", normative_system: "SP_RK_EN", snow_region: "IV", snow_load: 1.85, wind_region: "III", wind_load: 0.38, seismicity: null });
     expect(validateCore1InputDomain(input).state).toBe("VALID");
     expect(resolveClimateInput(input as unknown as Core1Input)).toMatchObject({ country: "KZ", normative_system: "SP_RK_EN" });
+  });
+
+  it("routes KZ SP_20 through the same complete Core 1 path", async () => {
+    const input = await canonicalInput({ mode: "MANUAL", country: "KZ", normative_system: "SP_20", snow_region: "III", snow_load: 1.5, wind_region: "II", wind_load: 0.3, seismicity: null });
+    const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    expect(result.result.climate?.normative_system).toBe("SP_20");
+    expect(Number.isFinite(result.result.kg_per_m2)).toBe(true);
   });
 
   it("rejects legacy flat KZ input without an explicit normative system", async () => {
@@ -169,7 +173,7 @@ describe("Core 1 input validation and orchestration", () => {
       getText: async (assetPath: string) => { calls.push(assetPath); return source.getText(assetPath); },
     };
     const result = await calculateCore1(manual, new BrowserCore1DataRepository(loggingSource));
-    expect(result.status).toBe("required_module_not_implemented");
+    expect(result.status).toBe("success");
     expect(calls.some((path) => path.includes("climate_"))).toBe(false);
     expect(result.context?.climate).toMatchObject({ source: "MANUAL", snow_region: "III", snow_load: 1.2, wind_region: "II", wind_load: 0.3 });
   });
@@ -181,8 +185,7 @@ describe("Core 1 input validation and orchestration", () => {
     );
     expect(validateCore1InputDomain(input).state).toBe("VALID");
     const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
-    expect(result.status).toBe("required_module_not_implemented");
-    expect(resultCode(result)).toBe("NOT_IMPLEMENTED");
+    expect(result.status).toBe("success");
     expect(result.context?.windows?.trace.window_type).toBe(windowType);
   });
 
@@ -215,7 +218,7 @@ describe("Core 1 input validation and orchestration", () => {
     input.gates_gt_6m_count = 1;
     input.doors_count = 1;
     const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
-    expect(result.status).toBe("required_module_not_implemented");
+    expect(result.status).toBe("success");
     expect(result.context?.openings).toMatchObject({ gate_le_6m_mass_kg: 350 * 1.05, gate_gt_6m_mass_kg: 450 * 1.05, door_mass_kg: (6 + 4) * 7.2 * 1.05 });
   });
 
@@ -229,7 +232,7 @@ describe("Core 1 input validation and orchestration", () => {
       },
     };
     const result = await calculateCore1(await inputFor("normal_18m"), new BrowserCore1DataRepository(loggingSource));
-    expect(result.status).toBe("required_module_not_implemented");
+    expect(result.status).toBe("success");
     expect(calls).toContain("core1/data/frame_18m_cells.csv");
     expect(calls).toContain("core1/data/purlin_calculation_constants.csv");
     expect(calls).toContain("core1/data/purlin_selection_rules.csv");
@@ -241,6 +244,20 @@ describe("Core 1 input validation and orchestration", () => {
     expect(calls.some((path) => path.includes("window_profile_candidates"))).toBe(false);
     expect(calls.some((path) => path.includes("external"))).toBe(false);
     expect(calls.some((path) => /frame_(9|12|15|21|24)m/.test(path))).toBe(false);
+  });
+
+  it("matches every proven field of the 12 m end-to-end golden fixture", async () => {
+    const result = await calculateCore1(await inputFor("baseline_12m"), new BrowserCore1DataRepository(source));
+    const expected = await source.getJson<{ expected_output: { values: Record<string, unknown> } }>("core1/fixtures/baseline_12m.expected.json");
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    const actual = result.result as unknown as Record<string, unknown>;
+    for (const [key, value] of Object.entries(expected.expected_output.values)) {
+      const received = actual[key];
+      if (typeof value === "number") expect(received).toBeCloseTo(value, 10);
+      else expect(received).toEqual(value);
+    }
+    expect(Object.keys(expected.expected_output.values)).toHaveLength(32);
   });
 
   it("classifies all 17 golden fixtures without treating UNKNOWN as PASS oracle", async () => {
@@ -255,10 +272,11 @@ describe("Core 1 input validation and orchestration", () => {
       statuses.set(fixture.status, (statuses.get(fixture.status) ?? 0) + 1);
       if (fixture.status === "EXPECTED_LEGACY_ERROR") expect(result.status).toBe("legacy_error");
       else if (fixture.status === "READY") {
-        expect(result.status).toBe("required_module_not_implemented");
-        expect(internalStatus(result)).toBe("NOT_IMPLEMENTED");
+        expect(result.status).toBe("success");
       } else {
-        expect(result.status).not.toBe("success");
+        // UNKNOWN is a fixture metadata state, not a PASS oracle; deterministic
+        // success is allowed but is never compared to an expected numeric output.
+        expect(["success", "unsupported", "unknown_domain", "city_not_found"]).toContain(result.status);
       }
     }
     expect(Object.fromEntries(statuses)).toEqual({ READY: 4, UNKNOWN: 11, EXPECTED_LEGACY_ERROR: 2 });

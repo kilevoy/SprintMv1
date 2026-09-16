@@ -144,7 +144,7 @@ Cached `#N/A` внутри локальной ветки сохраняются 
 в режиме `IMPLEMENTED`. Отсутствие non-zero golden scenario блокирует только
 маркировку `PARITY_PROVEN` и acceptance-тест, но не сам модуль.
 
-До завершения кода текущий orchestration может возвращать typed
-`NOT_IMPLEMENTED` только для ещё не реализованных downstream-модулей. Для
-оконной ветки `WINDOW_CALCULATOR_IMPLEMENTED=true`; это не меняет отсутствие
+Оконная ветка orchestration возвращает typed `WindowGirtResult`; отдельные
+downstream-модули могут иметь собственные границы реализации. Для оконной
+ветки `WINDOW_CALCULATOR_IMPLEMENTED=true`; это не меняет отсутствие
 non-zero golden oracle для `PARITY_PROVEN`.

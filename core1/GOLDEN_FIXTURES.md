@@ -24,10 +24,9 @@ Expected status:
 |---|---:|---|
 | `READY` | 4 | baseline 12 м, zero openings, snow retention `нет`, enclosure purlin `нет` |
 | `EXPECTED_LEGACY_ERROR` | 2 | 24 м `#N/A`, purlin step 500 `#REF!` |
-| `UNKNOWN` | 11 | включая ненулевые окна без независимого golden oracle |
-| `UNKNOWN` | 10 | нормальные 9/15/18/21 м, флаги `есть`, manual frame step, roof/deck variants, responsibility 1,0 |
+| `UNKNOWN` | 11 | включая ненулевые окна без независимого golden oracle, нормальные 9/15/18/21 м, флаги `есть`, manual frame step, roof/deck variants и responsibility 1,0 |
 
-READY-сценарии используют один доказанный сохранённый Excel state и поэтому не считаются четырьмя независимыми пересчётами. Baseline содержит 31 конкретное поле результата; `engineering_loads` оставлено `null`, потому что единый утверждённый output object нагрузки не был зафиксирован.
+READY-сценарии используют один доказанный сохранённый Excel state и поэтому не считаются четырьмя независимыми пересчётами. Baseline содержит 32 конкретных поля результата; `engineering_loads` оставлено `null`, потому что единый утверждённый output object нагрузки не был зафиксирован.
 
 ## Доказанный baseline
 

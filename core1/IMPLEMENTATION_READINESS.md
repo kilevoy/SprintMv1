@@ -19,7 +19,7 @@
 
 ## Доказанные expected outputs
 
-Сохранённый baseline 12 м доказывает 31 конкретное top-level поле результата, включая профили, стали, utilizations, frame step, прогон, вторичную сталь, крепёж, массы проёмов и `kg_per_m2`. Он также доказывает, что zero-window scenario имеет нулевой вклад и не требует ID 3/4/5.
+Сохранённый baseline 12 м доказывает 32 конкретных top-level поля результата, включая профили, стали, utilizations, frame step, прогон, вторичную сталь, крепёж, массы проёмов и `kg_per_m2`. Он также доказывает, что zero-window scenario имеет нулевой вклад и не требует ID 3/4/5.
 
 Отдельно доказаны ожидаемые diagnostics:
 
@@ -38,13 +38,24 @@
 - произвольные city inputs за пределами proven local successful lookup set;
 - golden expected outputs всех ненулевых оконных сценариев.
 
-## Можно ли начинать Calculation Engine
+## Итоговый статус Calculation Engine
+
+- `CORE1_ENGINE_IMPLEMENTED: true`
+- `CORE1_12M_PARITY_PROVEN: true` (32/32 proven fields)
+- `CORE1_OTHER_SPANS_PARITY_STATUS: NOT_PROVEN` (9/15/18/21 deterministic path, golden values UNKNOWN)
+- `WINDOW_PARITY_STATUS: NOT_PROVEN` (local non-zero chain implemented, oracle отсутствует)
+- `KZ_PARITY_STATUS: NOT_PROVEN` для `SP_20` и `SP_RK_EN` (маршрутизация реализована, KZ golden oracle отсутствует)
+- `KNOWN_LEGACY_ERRORS: span 24 → #N/A; purlin step 500 → #REF!`
+- `KNOWN_UNKNOWN_FIXTURES: 11` согласно manifest
+
+## Можно ли использовать Calculation Engine
 
 **Да, с ограничением области.** Можно реализовывать data loaders, Excel-compatible value/error semantics и non-window модули для baseline и доказанных локальных datasets. Нельзя объявлять полный parity или закрывать acceptance для 9/15/18/21 и вариантов с `UNKNOWN`, пока не появятся независимые expected values.
 
-`WindowGirtCalculator` реализован по доказанной локальной формульной границе.
-До реализации downstream-модулей orchestration возвращает только общий
-`NOT_IMPLEMENTED` после сохранения результата в `context.windows`.
+`WindowGirtCalculator`, `OpeningMassCalculator` и `StructuralSummary` реализованы
+по доказанной локальной формульной границе. Для supported scenarios
+orchestration возвращает полноценный `success` с `Core1Result`; `NOT_IMPLEMENTED`
+больше не является штатным финальным статусом.
 Исправление 24 м и восстановление ссылки шага 500 мм не входят в разрешённую
 реализацию.
 
@@ -56,3 +67,4 @@
 4. Legacy errors возвращаются без исправления.
 5. UNKNOWN fixtures не используются как доказательство корректности.
 6. Ненулевые окна возвращают `WindowGirtResult`; числовой parity oracle ещё не утверждён.
+7. `calculateCore1()` возвращает полноценный `success` для supported 9/12/15/18/21 м; 24 м и шаг 500 мм сохраняют legacy errors.

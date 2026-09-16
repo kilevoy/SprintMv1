@@ -66,6 +66,14 @@ export interface Core1Result {
   openings_weight_kg_per_m2?: number | null;
   openings_weight_t?: number | null;
   openings_weight_kg?: number | null;
+  /** Public component summary; detailed provenance remains in engine context. */
+  openings?: {
+    gate_le_6m_mass_kg: number;
+    gate_gt_6m_mass_kg: number;
+    door_mass_kg: number;
+    window_mass_kg: number;
+    opening_mass_kg: number;
+  } | null;
   kg_per_m2?: number | null;
   engineering_loads?: Record<string, unknown> | null;
   compatibility_diagnostics: import("./diagnostic").Core1Diagnostic[];
