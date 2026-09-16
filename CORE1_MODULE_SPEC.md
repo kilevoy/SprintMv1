@@ -36,11 +36,14 @@
 
 ## SecondarySteelCalculator
 
-- Inputs: normalized geometry, selected frame branch, effective frame step, horizontal-bracing override.
+- Inputs: normalized geometry, `ClimateResult`, `FrameResult`, `PurlinResult`,
+  effective frame step and horizontal-bracing override. The calculator does not
+  re-run climate, frame or purlin selection.
 - Outputs: ties, suspensions, spacers, horizontal/vertical bracing, gable posts, portal bracing, secondary beams/columns, plates, bolts, M16 quantity, fittings weight.
 - Static datasets: `secondary_steel_rules`, `bolts_plates_fittings`.
 - Excel source: `подбор!U14:AI15`, `вывод!D36:E57`.
-- Known anomalies: часть результатов — literal legacy rules; нельзя «оптимизировать» фиксированные профили/стали.
+- Known anomalies: часть результатов — literal legacy rules; нельзя «оптимизировать» фиксированные профили/стали. `D29="+"` is a scenario branch;
+  exported secondary formulas contain no proven `*0` term.
 
 ## WindowGirtCalculator
 
@@ -80,4 +83,3 @@ FrameSelector + PurlinCalculator + SecondarySteelCalculator
 ```
 
 `WindowGirtCalculator` не должен блокировать сценарий без окон. При ненулевых окнах его unsupported/error обязан блокировать оконный вклад и итог, зависящий от него.
-

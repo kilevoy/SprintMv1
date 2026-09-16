@@ -6,6 +6,7 @@ export * from "./engine";
 export * from "./climate";
 export * from "./frame";
 export * from "./purlin";
+export * from "./secondary";
 export {
   BrowserCore1DataRepository,
   BrowserDataSource,

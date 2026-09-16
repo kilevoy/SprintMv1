@@ -3,12 +3,14 @@ import { BrowserCore1DataRepository, BrowserDataSource } from "../data";
 import { resolveClimate } from "../climate";
 import { selectFrame } from "../frame";
 import { calculatePurlin } from "../purlin";
+import { calculateSecondarySteel } from "../secondary";
 import { createCore1Diagnostic } from "../diagnostics";
 import { resolveClimateInput, resolveWindowsInput, validateCore1InputDomain } from "../validation";
 import type { Core1DataRepository } from "../data";
 import type { Core1ClimateResult, Core1Input } from "../types";
 import type { FrameResult } from "../frame";
 import type { PurlinDatasetBundle, PurlinResultValue } from "../purlin";
+import type { SecondarySteelResult } from "../secondary";
 import type { Core1EngineResult } from "./types";
 
 function invalidInputResult(errors: unknown[]): Core1EngineResult {
@@ -119,7 +121,7 @@ export async function calculateCore1(
     return { status: "unknown_domain", code: "UNKNOWN_CLIMATE_DATA", result: null, diagnostics: climateResolution.diagnostics };
   }
   const context = { climate: climateResolution.climate };
-  let finalContext: { climate: Core1ClimateResult; frame?: FrameResult; purlin?: PurlinResultValue } = context;
+  let finalContext: { climate: Core1ClimateResult; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult } = context;
 
   try {
     if (domain.state === "SUPPORTED_WITH_LEGACY_ANOMALY") {
@@ -216,7 +218,31 @@ export async function calculateCore1(
       return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context: frameContext, diagnostics: [...domain.diagnostics, ...purlinResolution.diagnostics] };
     }
     const purlinContext = { ...frameContext, purlin: purlinResolution.purlin };
-    finalContext = purlinContext;
+    const [secondaryRules, boltsPlatesFittings] = await Promise.all([
+      repository.loadSecondarySteelData(),
+      repository.loadBoltsPlatesFittings(),
+    ]);
+    const secondaryResolution = calculateSecondarySteel(
+      {
+        span_m: value.span_m,
+        building_length_m: value.building_length_m,
+        building_height_m: value.building_height_m,
+        frame_step_m: frameResolution.frame.frame_step_m,
+        horizontal_bracing_override: value.horizontal_bracing_override,
+      },
+      context.climate,
+      frameResolution.frame,
+      purlinResolution.purlin,
+      { rules: secondaryRules, boltsPlatesFittings },
+    );
+    if (secondaryResolution.status === "invalid_input") {
+      return { status: "invalid_input", code: "INVALID_INPUT", result: null, context: purlinContext, diagnostics: [...domain.diagnostics, ...secondaryResolution.diagnostics] };
+    }
+    if (secondaryResolution.status !== "success") {
+      return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context: purlinContext, diagnostics: [...domain.diagnostics, ...secondaryResolution.diagnostics] };
+    }
+    const secondaryContext = { ...purlinContext, secondarySteel: secondaryResolution.secondary };
+    finalContext = secondaryContext;
 
     if (resolveWindowsInput(value).enabled) {
       return {
@@ -224,11 +250,12 @@ export async function calculateCore1(
         code: "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED",
         internal_status: "REQUIRED_MODULE_NOT_IMPLEMENTED",
         result: null,
-        context: purlinContext,
+        context: secondaryContext,
         diagnostics: [
           ...domain.diagnostics,
           ...frameResolution.diagnostics,
           ...purlinResolution.diagnostics,
+          ...secondaryResolution.diagnostics,
           createCore1Diagnostic({
             code: "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED",
             severity: "warning",
@@ -239,7 +266,7 @@ export async function calculateCore1(
             legacy_equivalent: null,
             trigger: "windows.enabled=true",
             affected_outputs: ["window_lower_girt_profile", "window_upper_girt_profile", "window_girts_weight_kg", "openings_weight_kg"],
-            details: { module_status: "REQUIRED_MODULE_NOT_IMPLEMENTED", completed_modules: ["ClimateResolver", "FrameSelector", "PurlinCalculator"] },
+            details: { module_status: "REQUIRED_MODULE_NOT_IMPLEMENTED", completed_modules: ["ClimateResolver", "FrameSelector", "PurlinCalculator", "SecondarySteelCalculator"] },
           }),
         ],
       };
@@ -263,7 +290,7 @@ export async function calculateCore1(
         module: "CalculationEngine",
         message: "Расчётные модули Core 1 ещё не реализованы; инженерный результат не подставлен.",
         source: ["CORE1_V1_PLAN.md"],
-        details: { next_module: "SecondarySteelCalculator", completed_modules: ["ClimateResolver", "FrameSelector", "PurlinCalculator"] },
+        details: { next_module: "WindowGirtCalculator", completed_modules: ["ClimateResolver", "FrameSelector", "PurlinCalculator", "SecondarySteelCalculator"] },
       }),
     ],
   };

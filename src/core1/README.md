@@ -120,6 +120,30 @@ ClimateResult + FrameResult + roof/deck inputs
 сохраняет typed legacy `#REF!`; отсутствие допустимого кандидата — typed
 `#N/A` diagnostic. Внешние книги ID 1/2 runtime не используются.
 
+## Secondary steel lifecycle
+
+```text
+FrameResult + PurlinResult + geometry + climate flags
+  → secondary element rules (`secondary_steel_rules`)
+  → quantities/masses from `bolts_plates_fittings`
+  → SecondarySteelResult in context.secondarySteel
+```
+
+Модуль включает затяжки, подвесы, распорки, горизонтальные и вертикальные
+связи, торцевые стойки, портальные связи, вторичные балки/стойки, пластины,
+болтовые схемы, количество M16 и массу фасонок. Оконные ригели, прогоны,
+основные балки/колонны и цены в него не входят.
+
+Zero-controlled expressions не удаляются: trace хранит
+`calculated_value`, `inclusion_factor`, `effective_value` и классификацию.
+В экспортированных secondary datasets выражений `*0` или `IF(...,0,...)` не
+обнаружено; управляющий `D29="+"` сохраняется как отдельная ветка.
+
+Для baseline 12 м статус `PROVEN_12M_BASELINE`; для остальных пролётов
+реализованный локальный путь имеет статус `LOCAL_DETERMINISTIC`, но не
+`PARITY_PROVEN`. Коммерческие цены и Core 2 закупочные данные остаются за
+границей Core 1.
+
 ## Execution lifecycle
 
 ```text

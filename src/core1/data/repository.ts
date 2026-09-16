@@ -70,6 +70,10 @@ export class BrowserCore1DataRepository implements Core1DataRepository {
     return this.loadDataset("secondary_steel_rules");
   }
 
+  public loadBoltsPlatesFittings(): Promise<LoadedDataset> {
+    return this.loadDataset("bolts_plates_fittings");
+  }
+
   public loadConstants(): Promise<LoadedDataset> {
     return this.loadDataset("purlin_calculation_constants");
   }

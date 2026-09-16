@@ -110,6 +110,7 @@ describe("Core 1 input validation and orchestration", () => {
     expect(result.context?.climate).toMatchObject({ source: "CITY_LOOKUP", snow_region: "III", snow_load: 1.5, wind_region: "II", wind_load: 0.3 });
     expect(result.context?.frame).toMatchObject({ frame_step_m: 6, beam_profile: "ПГС300/20х80х2,5", beam_utilization: 85, column_profile: "ПГС245/20х80х2", column_utilization: 65 });
     expect(result.context?.purlin).toMatchObject({ purlin_profile: "2ПС 200х65х2", purlin_steel: "М.п.390", purlin_step_mm: 2140, purlin_kg_per_m2: 7.539000000000001, purlin_weight_kg: 1550.88 });
+    expect(result.context?.secondarySteel).toMatchObject({ M16_quantity: 4, fittings_weight_kg: 233 });
   });
 
   it("requires an explicit normative system for KZ", async () => {
@@ -198,6 +199,8 @@ describe("Core 1 input validation and orchestration", () => {
     expect(calls).toContain("core1/data/purlin_profile_catalogue.csv");
     expect(calls).toContain("core1/data/roof_properties.csv");
     expect(calls).toContain("core1/data/deck_properties.csv");
+    expect(calls).toContain("core1/data/secondary_steel_rules.csv");
+    expect(calls).toContain("core1/data/bolts_plates_fittings.csv");
     expect(calls.some((path) => path.includes("external"))).toBe(false);
     expect(calls.some((path) => /frame_(9|12|15|21|24)m/.test(path))).toBe(false);
   });

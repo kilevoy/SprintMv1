@@ -71,6 +71,26 @@ describe("PurlinCalculator", () => {
     if (result.status === "success") expect(result.purlin.trace).toMatchObject({ snow_retention_purlin: "есть", enclosure_purlin: "есть" });
   });
 
+  it.each([
+    { snow_retention_purlin: "есть" as const, enclosure_purlin: "нет" as const },
+    { snow_retention_purlin: "нет" as const, enclosure_purlin: "есть" as const },
+    { snow_retention_purlin: "нет" as const, enclosure_purlin: "нет" as const },
+  ])("keeps snow-retention/enclosure flags explicit (%s)", async (flags) => {
+    const result = calculatePurlin({ ...input, ...flags }, climate, frame, await datasets());
+    expect(result.status).toBe("success");
+    if (result.status === "success") expect(result.purlin.trace).toMatchObject(flags);
+  });
+
+  it("honors the local roof/deck step limit and preserves both steel branches", async () => {
+    const limited = calculatePurlin({ ...input, purlin_max_step_override_mm: 505 }, climate, frame, await datasets());
+    expect(limited.status).toBe("success");
+    if (limited.status === "success") expect(limited.purlin.purlin_step_mm).toBe(505);
+    const lightClimate: Core1ClimateResult = { ...climate, snow_load: 0 };
+    const light = calculatePurlin({ ...input, span_m: 9, roof_covering: "профлист" }, lightClimate, frame, await datasets());
+    expect(light.status).toBe("success");
+    if (light.status === "success") expect(["М.п.350", "М.п.390"]).toContain(light.purlin.purlin_steel);
+  });
+
   it("returns typed #N/A when the deck is not in the local dataset", async () => {
     const result = calculatePurlin({ ...input, roof_deck_grade: "unknown-deck" as PurlinInput["roof_deck_grade"] }, climate, frame, await datasets());
     expect(result.status).toBe("no_match");

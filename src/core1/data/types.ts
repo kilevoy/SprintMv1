@@ -97,6 +97,7 @@ export interface Core1DataRepository {
   loadDeckProperties(): Promise<LoadedDataset>;
   loadClimateDataset(id: ClimateDatasetId): Promise<LoadedDataset>;
   loadSecondarySteelData(): Promise<LoadedDataset>;
+  loadBoltsPlatesFittings(): Promise<LoadedDataset>;
   loadConstants(): Promise<LoadedDataset>;
   loadFixtureManifest(): Promise<Core1FixtureManifest>;
   loadFixture(id: string): Promise<Core1Fixture>;
