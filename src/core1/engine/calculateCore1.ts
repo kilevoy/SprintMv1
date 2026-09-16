@@ -1,7 +1,8 @@
 import { validateCore1Input } from "../compatibility";
 import { BrowserCore1DataRepository, BrowserDataSource } from "../data";
+import { resolveClimate } from "../climate";
 import { createCore1Diagnostic } from "../diagnostics";
-import { resolveWindowsInput, validateCore1InputDomain } from "../validation";
+import { resolveClimateInput, resolveWindowsInput, validateCore1InputDomain } from "../validation";
 import type { Core1DataRepository } from "../data";
 import type { Core1Input } from "../types";
 import type { Core1EngineResult } from "./types";
@@ -94,6 +95,27 @@ export async function calculateCore1(
     };
   }
 
+  const climateInput = resolveClimateInput(value);
+  const climateResolution = await (async () => {
+    if (climateInput.mode === "MANUAL") return resolveClimate(climateInput);
+    try {
+      const dataset = await repository.loadClimateDataset("climate_lookup_sparse");
+      return resolveClimate(climateInput, dataset);
+    } catch {
+      return resolveClimate(climateInput);
+    }
+  })();
+  if (climateResolution.status === "city_not_found") {
+    return { status: "city_not_found", code: "CITY_NOT_FOUND", result: null, diagnostics: climateResolution.diagnostics };
+  }
+  if (climateResolution.status === "unknown_climate_data") {
+    return { status: "unknown_domain", code: "UNKNOWN_CLIMATE_DATA", result: null, diagnostics: climateResolution.diagnostics };
+  }
+  if (climateResolution.status !== "success") {
+    return { status: "unknown_domain", code: "UNKNOWN_CLIMATE_DATA", result: null, diagnostics: climateResolution.diagnostics };
+  }
+  const context = { climate: climateResolution.climate };
+
   try {
     if (domain.state === "SUPPORTED_WITH_LEGACY_ANOMALY") {
       const legacyNa = domain.diagnostics.find((diagnostic) => diagnostic.code === "LEGACY_NA");
@@ -101,18 +123,18 @@ export async function calculateCore1(
         try {
           await repository.loadFrameDataset(value.span_m);
         } catch (error) {
-          return { status: "legacy_error", code: "LEGACY_NA", result: null, diagnostics: [...domain.diagnostics, datasetLoadFailureDiagnostic(error)] };
+          return { status: "legacy_error", code: "LEGACY_NA", result: null, context, diagnostics: [...domain.diagnostics, datasetLoadFailureDiagnostic(error)] };
         }
-        return { status: "legacy_error", code: "LEGACY_NA", result: null, diagnostics: domain.diagnostics };
+        return { status: "legacy_error", code: "LEGACY_NA", result: null, context, diagnostics: domain.diagnostics };
       }
       const legacyRef = domain.diagnostics.find((diagnostic) => diagnostic.code === "LEGACY_REF");
       if (legacyRef) {
         try {
           await repository.loadPurlinDataset("purlin_calculation_constants");
         } catch (error) {
-          return { status: "legacy_error", code: "LEGACY_REF", result: null, diagnostics: [...domain.diagnostics, datasetLoadFailureDiagnostic(error)] };
+          return { status: "legacy_error", code: "LEGACY_REF", result: null, context, diagnostics: [...domain.diagnostics, datasetLoadFailureDiagnostic(error)] };
         }
-        return { status: "legacy_error", code: "LEGACY_REF", result: null, diagnostics: domain.diagnostics };
+        return { status: "legacy_error", code: "LEGACY_REF", result: null, context, diagnostics: domain.diagnostics };
       }
     }
 
@@ -122,6 +144,7 @@ export async function calculateCore1(
         code: "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED",
         internal_status: "REQUIRED_MODULE_NOT_IMPLEMENTED",
         result: null,
+        context,
         diagnostics: [
           ...domain.diagnostics,
           createCore1Diagnostic({
@@ -153,6 +176,7 @@ export async function calculateCore1(
     code: "NOT_IMPLEMENTED",
     internal_status: "NOT_IMPLEMENTED",
     result: null,
+    context,
     diagnostics: [
       ...domain.diagnostics,
       createCore1Diagnostic({

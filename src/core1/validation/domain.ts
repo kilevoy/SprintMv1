@@ -15,8 +15,6 @@ export interface Core1InputDomainResult {
   diagnostics: Core1Diagnostic[];
 }
 
-const PROVEN_FRAME_CITY_FIXTURES = new Set(["RU|Роза|SP_20"]);
-
 export function resolveWindowsInput(input: Core1Input): WindowsInput {
   if (input.windows) return input.windows;
   const height = input.window_height_m ?? 0;
@@ -69,25 +67,6 @@ export function validateCore1InputDomain(input: unknown): Core1InputDomainResult
   if (!schemaResult.valid) return invalidInputResult(schemaResult.errors);
   const value = schemaResult.data as Core1Input;
   const diagnostics: Core1Diagnostic[] = [];
-  const climate = resolveClimateInput(value);
-
-  if (climate.mode === "CITY_LOOKUP" && !PROVEN_FRAME_CITY_FIXTURES.has(`${climate.country}|${climate.city}|${climate.normative_system}`)) {
-    diagnostics.push(
-      createCore1Diagnostic({
-        code: "CITY_NOT_FOUND",
-        severity: "unsupported",
-        classification: "unsupported",
-        module: "ClimateResolver",
-        message: "Населённый пункт отсутствует в доказанной климатической базе; укажите климат вручную.",
-        source: ["CORE1_CLIMATE_DATA_CONTRACT.md", "core1/data/climate_cities_sparse.csv"],
-        legacy_equivalent: null,
-        trigger: `city=${climate.city}`,
-        affected_outputs: ["snow_region", "snow_load", "wind_region", "wind_load", "beam_profile", "column_profile", "kg_per_m2"],
-        details: { country: climate.country, normative_system: climate.normative_system, city: climate.city, proven_keys: [...PROVEN_FRAME_CITY_FIXTURES], recommendation: "MANUAL" },
-      }),
-    );
-  }
-
   if (value.span_m === 24) {
     diagnostics.push(
       createCore1Diagnostic({
@@ -159,7 +138,6 @@ export function validateCore1InputDomain(input: unknown): Core1InputDomainResult
     );
   }
 
-  if (diagnostics.some((diagnostic) => diagnostic.code === "CITY_NOT_FOUND")) return { state: "CITY_NOT_FOUND", diagnostics };
   if (diagnostics.some((diagnostic) => diagnostic.code === "UNKNOWN_DOMAIN")) return { state: "UNKNOWN_DOMAIN", diagnostics };
   if (diagnostics.some((diagnostic) => diagnostic.classification === "legacy_anomaly")) return { state: "SUPPORTED_WITH_LEGACY_ANOMALY", diagnostics };
   return { state: "VALID", diagnostics };

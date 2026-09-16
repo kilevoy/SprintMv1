@@ -42,6 +42,21 @@ describe("Core 1 TypeScript data layer", () => {
     expect(inputResult.valid).toBe(true);
     const resultResult = validateCore1Result({
       scenario: inputEnvelope.input,
+      climate: {
+        mode: "CITY_LOOKUP",
+        source: "CITY_LOOKUP",
+        climate_source: "CITY_LOOKUP",
+        country: "RU",
+        city: "Роза",
+        normative_system: "SP_20",
+        snow_region: "III",
+        snow_load: 1.5,
+        wind_region: "II",
+        wind_load: 0.3,
+        seismicity: null,
+        source_note: null,
+        units: { snow_load: "kN/m²", wind_load: "kN/m²" },
+      },
       ...expectedEnvelope.expected_output.values,
       compatibility_diagnostics: [],
     });

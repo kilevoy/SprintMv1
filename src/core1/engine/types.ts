@@ -1,4 +1,4 @@
-import type { Core1Diagnostic, Core1Result } from "../types";
+import type { Core1ClimateResult, Core1Diagnostic, Core1Result } from "../types";
 
 export type Core1EngineStatus =
   | "success"
@@ -24,6 +24,7 @@ export type Core1EngineCode =
 export interface Core1EngineBase {
   status: Core1EngineStatus;
   diagnostics: Core1Diagnostic[];
+  context?: { climate: Core1ClimateResult };
 }
 
 export interface Core1EngineSuccess extends Core1EngineBase {

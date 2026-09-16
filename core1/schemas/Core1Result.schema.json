@@ -23,7 +23,16 @@
         "wind_load": {"type": ["number", "null"], "description": "kN/m²"},
         "seismicity": {"type": ["string", "number", "null"]},
         "source": {"type": ["string", "null"]},
-        "source_note": {"type": ["string", "null"]}
+        "source_note": {"type": ["string", "null"]},
+        "units": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["snow_load", "wind_load"],
+          "properties": {
+            "snow_load": {"const": "kN/m²"},
+            "wind_load": {"const": "kN/m²"}
+          }
+        }
       }
     },
     "frame_step_m": {"type": ["number", "null"], "description": "m"},

@@ -25,6 +25,7 @@ export interface Core1ClimateResult {
   seismicity?: string | number | null;
   source?: string | null;
   source_note?: string | null;
+  units?: { snow_load: "kN/m²"; wind_load: "kN/m²" };
 }
 
 export interface Core1Result {

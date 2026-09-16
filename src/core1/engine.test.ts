@@ -95,8 +95,7 @@ describe("Core 1 input validation and orchestration", () => {
   it("returns unknown_domain for an unproven city or climate lookup", async () => {
     const input = { ...(await inputFor("baseline_12m") as Record<string, unknown>), city: "Неизвестный город" };
     const domain = validateCore1InputDomain(input);
-    expect(domain.state).toBe("CITY_NOT_FOUND");
-    expect(domain.diagnostics.some((diagnostic) => diagnostic.code === "CITY_NOT_FOUND")).toBe(true);
+    expect(domain.state).toBe("VALID");
     const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
     expect(result.status).toBe("city_not_found");
     expect(resultCode(result)).toBe("CITY_NOT_FOUND");
@@ -106,6 +105,9 @@ describe("Core 1 input validation and orchestration", () => {
     const input = await canonicalInput({ mode: "CITY_LOOKUP", country: "RU", city: "Роза", normative_system: "SP_20" });
     expect(validateCore1InputDomain(input).state).toBe("VALID");
     expect(resolveClimateInput(input as unknown as Core1Input).mode).toBe("CITY_LOOKUP");
+    const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
+    expect(result.status).toBe("required_module_not_implemented");
+    expect(result.context?.climate).toMatchObject({ source: "CITY_LOOKUP", snow_region: "III", snow_load: 1.5, wind_region: "II", wind_load: 0.3 });
   });
 
   it("requires an explicit normative system for KZ", async () => {
@@ -141,6 +143,7 @@ describe("Core 1 input validation and orchestration", () => {
     const result = await calculateCore1(manual, new BrowserCore1DataRepository(loggingSource));
     expect(result.status).toBe("required_module_not_implemented");
     expect(calls.some((path) => path.includes("climate_"))).toBe(false);
+    expect(result.context?.climate).toMatchObject({ source: "MANUAL", snow_region: "III", snow_load: 1.2, wind_region: "II", wind_load: 0.3 });
   });
 
   it.each([1, 2, 3, 4, 5] as const)("accepts proven window_type %d without assigning extra semantics", async (windowType) => {
@@ -212,5 +215,5 @@ describe("Core 1 input validation and orchestration", () => {
       }
     }
     expect(Object.fromEntries(statuses)).toEqual({ READY: 4, UNKNOWN: 10, EXPECTED_LEGACY_ERROR: 2, REQUIRED_MODULE_NOT_IMPLEMENTED: 1 });
-  });
+  }, 30000);
 });

@@ -3,6 +3,7 @@ export * from "./compatibility";
 export * from "./diagnostics";
 export * from "./validation";
 export * from "./engine";
+export * from "./climate";
 export {
   BrowserCore1DataRepository,
   BrowserDataSource,

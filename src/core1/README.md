@@ -65,6 +65,21 @@ Core 1: до реализации `WindowGirtCalculator` они возвраща
 классифицирована как `UNKNOWN`: доказанного влияния на structural formulas нет,
 поэтому в инженерный расчёт оно не включается.
 
+## Climate resolution flow
+
+```text
+CITY_LOOKUP: city → climate_lookup_sparse (exact match) → ClimateResult
+MANUAL:     manual values → ClimateResult
+```
+
+В runtime используется только `climate_lookup_sparse`; для parity доказан
+сохранённый exact tuple `RU|Роза|SP_20`. Неизвестный город даёт
+`CITY_NOT_FOUND`, а найденная строка без доказанной ветки страны/норматива —
+`UNKNOWN_CLIMATE_DATA`. Fuzzy/nearest-city fallback отсутствует.
+
+После успешного разрешения `calculateCore1` помещает `ClimateResult` в typed
+`context.climate`; последующие модули получают его без повторного lookup.
+
 ## Execution lifecycle
 
 ```text
