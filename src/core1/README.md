@@ -44,10 +44,13 @@ Vitest проверяет путь GitHub Pages, lazy loading, кеширова�
 ## Input contract updates
 
 Новый контракт разделяет `windows.window_type` (доказанные схемы `1..5`) и
-`windows.glazing_construction`. Ненулевые окна являются обязательной частью
-Core 1: до реализации `WindowGirtCalculator` они возвращают
-`required_module_not_implemented` с диагностикой
-`WINDOW_GIRT_MODULE_NOT_IMPLEMENTED`, а не `UNSUPPORTED_FOR_PARITY`.
+`windows.glazing_construction`. При `windows.enabled=true` тип обязателен и
+напрямую соответствует `Лист1!B8`; canonical labels — `Тип 1`…`Тип 5`.
+Исторические ID3/ID4/ID5 не требуются runtime: снег и ветер берутся из
+локальных листов основной книги. Формульная цепочка окон доказана для
+реализации; до написания `WindowGirtCalculator` orchestration возвращает
+`WINDOW_GIRT_MODULE_NOT_IMPLEMENTED`, а отсутствие non-zero golden oracle
+блокирует только `PARITY_PROVEN`.
 
 Климат задаётся discriminated union `ClimateInput`:
 
@@ -76,6 +79,9 @@ MANUAL:     manual values → ClimateResult
 сохранённый exact tuple `RU|Роза|SP_20`. Неизвестный город даёт
 `CITY_NOT_FOUND`, а найденная строка без доказанной ветки страны/норматива —
 `UNKNOWN_CLIMATE_DATA`. Fuzzy/nearest-city fallback отсутствует.
+
+Новый Core не использует `Лист1!J20`: это legacy implementation detail для
+проверки старого Excel-поведения, а не пользовательский input или blocker.
 
 После успешного разрешения `calculateCore1` помещает `ClimateResult` в typed
 `context.climate`; последующие модули получают его без повторного lookup.

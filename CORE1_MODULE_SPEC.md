@@ -12,11 +12,11 @@
 
 ## ClimateResolver
 
-- Inputs: `city`, `responsibility_factor`, consumer context; для окна — `terrain_type` и normative request.
-- Outputs: frame climate codes/loads with provenance; window membership flag or typed unsupported error.
-- Static datasets: `main_city_climate`, `roof_load_mapping`; позднее — точный `window_city_legacy`.
+- Inputs: `city`, `responsibility_factor`, explicit `normative_system`; для окна — `terrain_type`.
+- Outputs: frame climate codes/loads with provenance; local SP_20 or SP_RK_EN `ClimateResult`.
+- Static datasets: `main_city_climate`, `roof_load_mapping`; оконная ветка использует локальные city/climate snapshots.
 - Excel source: `Города п.К`, `снегветер`, `Лист1!J18:K18,J19`.
-- Known anomalies: ID 3 version conflict; exact/first-match обязателен; current `Роза` window lookup gives `#N/A → нет`.
+- Known anomalies: исторический ID3 redundant для runtime; exact/first-match обязателен; current `Роза` window lookup gives `#N/A → нет`; this does not prevent direct normative routing.
 
 ## FrameSelector
 
@@ -48,11 +48,11 @@
 ## WindowGirtCalculator
 
 - Inputs: window geometry/type/construction, building geometry, terrain, responsibility, climate/window membership, normative request.
-- Outputs: lower/upper window girts, checks, mass criterion or typed unsupported/error.
-- Static datasets: `window_profile_candidates`, `window_result_layout`; для полного parity нужны `window_city_legacy`, `window_wind_legacy` и ID 5 inputs.
+- Outputs: lower/upper window girts, checks, utilization and mass criterion or typed module/error result.
+- Static datasets: `window_profile_candidates`, `window_result_layout`, `Города п.К`, `снегветер`, `Ветер СП`, `Ветер по СП РК EN`.
 - Excel source: `Лист1`, `Расчет`, `Ветер СП`, `Ветер по СП РК EN`.
-- Known anomalies: `J20` unreachable EN switch; IDs 3/4/5 incomplete; sentinel `999999999`; v2.0 запрещён как fallback.
-- V1 boundary: вычисление профиля разрешено только для будущих approved fixtures; при ненулевых окнах сейчас возвращается `WINDOW_LEGACY_SOURCE_UNAVAILABLE`.
+- Known anomalies: `J20` has no producer and is legacy-only; historical IDs 3/4/5 are redundant references; sentinel `999999999`; v2.0 запрещён как fallback.
+- V1 boundary: local formula chain and per-type coefficients are proven for implementation. Until code is written, return `WINDOW_GIRT_MODULE_NOT_IMPLEMENTED`; missing non-zero golden blocks parity acceptance only.
 
 ## OpeningMassCalculator
 

@@ -9,6 +9,7 @@
 - автономный расчёт прогонов по локальным таблицам;
 - вторичная сталь, пластины, болты, М16 и фасонки;
 - масса ворот/дверей в утверждённых golden scenarios и нулевой оконный сценарий;
+- локальная формульная цепочка оконных ригелей для `window_type=1..5`; parity acceptance для неё требует отдельного non-zero golden oracle;
 - структурный итог `kg_per_m2` и полный payload Core 1 → Core 2;
 - typed diagnostics и provenance каждого результата.
 
@@ -33,14 +34,14 @@ Parity означает совпадение текста/ошибки точн�
 - не найденный lookup → `LOOKUP_NO_MATCH` / `#N/A`;
 - отсутствие допустимого кандидата → исходный `#N/A` или sentinel behavior;
 - активные `#VALUE!` и `#DIV/0!` → одноимённые typed errors;
-- запрос штатно недостижимой EN-ветки окон → `WINDOW_EN_SWITCH_UNREACHABLE`.
+- legacy-запрос штатно недостижимой EN-ветки окон → `WINDOW_EN_SWITCH_UNREACHABLE`; новый API не использует этот switch.
+- несуществующий/не реализованный оконный модуль → `WINDOW_GIRT_MODULE_NOT_IMPLEMENTED` без подстановки числового результата.
 
 ## 4. Что временно unsupported
 
-- строгий оконный подбор при ненулевых окнах;
-- произвольный city membership по ID 3;
-- пересчёт старой ветровой методики ID 4;
-- EN-ветка, требующая ID 5;
+- parity-утверждение чисел оконного подбора до появления non-zero golden oracle;
+- произвольный city membership вне подтверждённого локального snapshot;
+- новый API не блокируется J20: EN выбирается `normative_system=SP_RK_EN`;
 - числовые значения длины, высоты, ручного шага и количеств проёмов вне утверждённого golden-domain;
 - нормальный конструктивный результат для пролёта 24 м;
 - отдельный материал стены: такого legacy-входа нет;
@@ -54,7 +55,8 @@ Parity означает совпадение текста/ошибки точн�
 4. Экспортировать frame tables 9–21 м и selection rules; 24 м — отдельно с raw errors.
 5. Экспортировать локальные climate lookup и сформировать exact supported-city manifest.
 6. Экспортировать secondary steel, bolts, plates and fittings.
-7. Экспортировать window profile candidates только как заблокированный dataset для будущего модуля.
+7. Экспортировать window profile candidates, коэффициенты `I34:L38`, glazing
+   mapping и локальные SP_20/SP_RK_EN sheets как доказанный data/trace слой.
 
 Каждый экспорт проверяется количеством строк/ячеек, raw types, source addresses и checksum. Конфликтующие внешние кандидаты не смешиваются с canonical data.
 
@@ -66,7 +68,7 @@ Parity означает совпадение текста/ошибки точн�
 4. `FrameSelector` для 9–21 м и legacy-error path 24 м.
 5. `PurlinCalculator`, включая candidate trace и шаг 500 error.
 6. `SecondarySteelCalculator`.
-7. `WindowGirtCalculator` как честная support gate/typed error, без недоказанного расчёта.
+7. `WindowGirtCalculator` по локальной формульной цепочке; до написания кода — typed `WINDOW_GIRT_MODULE_NOT_IMPLEMENTED`.
 8. `OpeningMassCalculator` для поддержанных сценариев.
 9. `StructuralSummary` и Core 1 → Core 2 payload.
 
@@ -97,8 +99,9 @@ Parity означает совпадение текста/ошибки точн�
 - first-match на дублирующемся ключе и tie-breaking равных кандидатов;
 - no intermediate rounding;
 - нулевые окна не вызывают window-source error;
-- ненулевые окна возвращают `WINDOW_LEGACY_SOURCE_UNAVAILABLE`;
-- запрос EN возвращает `WINDOW_EN_SWITCH_UNREACHABLE`;
+- ненулевые окна с `window_type=1..5` доходят до WindowGirtCalculator; отсутствие реализации возвращает `WINDOW_GIRT_MODULE_NOT_IMPLEMENTED`;
+- KZ: явный выбор «нет» маршрутизирует `SP_20`, «да» — `SP_RK_EN`;
+- отсутствие ID3/ID4/ID5 не является runtime blocker: используются локальные листы основной книги;
 - conflicting 82,4% city dataset никогда не загружается как canonical.
 
 ### Interface
@@ -111,4 +114,3 @@ Parity означает совпадение текста/ошибки точн�
 ## Definition of done для Core 1 v1
 
 V1 готов к подключению потребителя только когда экспортированные datasets воспроизводимы по checksum, все supported golden tests проходят, все обязательные legacy-error tests возвращают договорённые typed errors, а unsupported оконные сценарии не выдают числовой инженерный результат.
-

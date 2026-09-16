@@ -248,7 +248,7 @@
     },
     {
       "id": "nonzero_windows_unsupported",
-      "description": "Ненулевые окна требуют ещё не реализованный WindowGirtCalculator",
+      "description": "Ненулевые окна; локальная формульная цепочка доказана, модуль ещё не реализован",
       "supported_domain": "SUPPORTED",
       "legacy_scenario": false,
       "input_file": "nonzero_windows_unsupported.input.json",

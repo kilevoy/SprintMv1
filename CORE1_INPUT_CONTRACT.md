@@ -5,6 +5,7 @@
 | Name | Excel cell | Type | Unit / allowed values | Required | Default | Downstream effect | Auto |
 |---|---|---|---|---|---|---|---|
 | `city` | `вывод!D2` | string | точный ключ города | yes | `Роза` | снег, ветер, нормативная ветка, окна | no |
+| `normative_system` | новый Core API; legacy ветки `Ветер СП` / `Ветер по СП РК EN` | enum | `SP_20` / `SP_RK_EN`; для `country=KZ` обязателен явный выбор | yes | — | выбор локальной снеговой/ветровой ветки | no |
 | `span_m` | `D4` | number/enum | м; 9, 12, 15, 18, 21, 24 | yes | 12 | таблица пролёта, профили, масса | no |
 | `building_length_m` | `D5` | number | м | yes | 18 | число рам, прогоны, массы | no |
 | `building_height_m` | `D6` | number | м | yes | 3 | таблица высоты, ветер, профили | no |
@@ -33,9 +34,9 @@
 | `purlin_min_step_mm` | `вывод!D25` | number | 0 | нижняя граница специальной ветки |
 | `terrain_type` | `Лист1!B14` | `А` / `В` / `С` | `В` | ветер окон; должен быть явным или определяемым проектом |
 | `window_scheme_factor` | `Лист1!B3` | 1,1 / 1 / 0,8 | 1 | множитель оконной нагрузки |
-| `window_type` | `Лист1!B8` | enum из `I34:I38` | связанный сценарий | выбор схемы ригелей |
+| `window_type` | `Лист1!B8` | enum `1 | 2 | 3 | 4 | 5` | обязателен при `windows.enabled=true`; canonical labels: `Тип 1`…`Тип 5` | выбор схемы ригелей |
 | `window_utilization_limit` | `Лист1!B20` | number | workbook value | предел подбора ригеля |
-| `wind_code_choices` | `Лист1!D15:D16` | строки СП / СП РК EN | workbook values | подписи нормативных веток; не заменяют bugged `J20` |
+| `wind_code_choices` | `Лист1!D15:D16` | строки СП / СП РК EN | workbook values | legacy подписи; новый Core использует `normative_system`, не `J20` |
 | `purlin_candidate_limits` | `Подбор прогонов 2!B21:B24,B28:B31` | `по умолчанию`, 90, 95 | `по умолчанию` | ограничения использования кандидатов |
 
 ## SYSTEM DEFAULT
@@ -65,7 +66,7 @@
 |---|---|---|
 | `purlin_norms_validation` | local name `нормы` → external ID 2 | список Data Validation; активное `B11` уже literal |
 | `purlin_insulation_validation` | name `утеплитель` → external ID 1 | список 150/200/250; активный `B18` derived |
-| `window_en_switch` | `Лист1!J20` | пустая ячейка без producer; условия D9/F9, вероятный formula bug |
+| `window_en_switch` | `Лист1!J20` | legacy-only, blank без producer | не является API input; учитывается только при проверке старого Excel-поведения |
 
 ## UNKNOWN
 

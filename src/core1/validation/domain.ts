@@ -67,6 +67,20 @@ export function validateCore1InputDomain(input: unknown): Core1InputDomainResult
   if (!schemaResult.valid) return invalidInputResult(schemaResult.errors);
   const value = schemaResult.data as Core1Input;
   const diagnostics: Core1Diagnostic[] = [];
+  if (value.country === "KZ" && !value.normative_system && !value.climate?.normative_system) {
+    diagnostics.push(
+      createCore1Diagnostic({
+        code: "INVALID_INPUT",
+        severity: "error",
+        classification: "error",
+        module: "InputValidation",
+        message: "Для country=KZ требуется явный normative_system: SP_20 или SP_RK_EN.",
+        source: ["CORE1_INPUT_CONTRACT.md"],
+        details: { country: "KZ", required: ["SP_20", "SP_RK_EN"] },
+      }),
+    );
+  }
+  if (diagnostics.some((diagnostic) => diagnostic.code === "INVALID_INPUT")) return { state: "INVALID_INPUT", diagnostics };
   if (value.span_m === 24) {
     diagnostics.push(
       createCore1Diagnostic({

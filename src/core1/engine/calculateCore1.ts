@@ -244,7 +244,8 @@ export async function calculateCore1(
     const secondaryContext = { ...purlinContext, secondarySteel: secondaryResolution.secondary };
     finalContext = secondaryContext;
 
-    if (resolveWindowsInput(value).enabled) {
+    const windowsInput = resolveWindowsInput(value);
+    if (windowsInput.enabled) {
       return {
         status: "required_module_not_implemented",
         code: "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED",
@@ -261,12 +262,18 @@ export async function calculateCore1(
             severity: "warning",
             classification: "required_module_not_implemented",
             module: "WindowGirtCalculator",
-            message: "Подбор оконных ригелей обязателен, но модуль ещё не реализован.",
-            source: ["CORE1_WINDOWS_SUPPORT.md", "CORE1_V1_PLAN.md"],
+            message: "Локальная формульная цепочка окон доказана; WindowGirtCalculator ещё не реализован. Внешние книги не требуются.",
+            source: ["CORE1_WINDOW_BRANCH_AUDIT.md", "WINDOW_WIND_BRANCH_AUDIT.md"],
             legacy_equivalent: null,
+            excel_error: null,
             trigger: "windows.enabled=true",
             affected_outputs: ["window_lower_girt_profile", "window_upper_girt_profile", "window_girts_weight_kg", "openings_weight_kg"],
-            details: { module_status: "REQUIRED_MODULE_NOT_IMPLEMENTED", completed_modules: ["ClimateResolver", "FrameSelector", "PurlinCalculator", "SecondarySteelCalculator"] },
+            details: {
+              implementation_boundary: "LOCAL_FORMULA_CHAIN_PROVEN",
+              normative_system: climateResolution.climate.normative_system,
+              window_type: windowsInput.window_type,
+              completed_modules: ["ClimateResolver", "FrameSelector", "PurlinCalculator", "SecondarySteelCalculator"],
+            },
           }),
         ],
       };

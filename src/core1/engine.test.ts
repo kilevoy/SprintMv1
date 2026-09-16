@@ -84,12 +84,28 @@ describe("Core 1 input validation and orchestration", () => {
     expect(result.diagnostics.some((diagnostic) => diagnostic.excel_error === "#N/A")).toBe(true);
   });
 
-  it("requires the window-girt module for non-zero windows", async () => {
+  it("routes non-zero windows to the proven local module boundary without using J20", async () => {
     const input = await inputFor("nonzero_windows_unsupported");
     const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
     expect(result.status).toBe("required_module_not_implemented");
     expect(resultCode(result)).toBe("WINDOW_GIRT_MODULE_NOT_IMPLEMENTED");
-    expect(result.diagnostics.some((diagnostic) => diagnostic.code === "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED")).toBe(true);
+    const diagnostic = result.diagnostics.find((item) => item.code === "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED");
+    expect(diagnostic?.details).toMatchObject({ implementation_boundary: "LOCAL_FORMULA_CHAIN_PROVEN", normative_system: "SP_20", window_type: 1 });
+    expect(diagnostic?.message).not.toContain("J20");
+  });
+
+  it("routes KZ SP_RK_EN directly without the legacy J20 switch", async () => {
+    const input = await canonicalInput(
+      { mode: "MANUAL", country: "KZ", normative_system: "SP_RK_EN", snow_region: "IV", snow_load: 1.85, wind_region: "III", wind_load: 0.38, seismicity: null },
+      { enabled: true, window_type: 3, window_height_m: 1, window_strip_length_m: 6, separate_window_count: 1, glazing_construction: "2ой стеклопакет" },
+    );
+    const first = await calculateCore1(input, new BrowserCore1DataRepository(source));
+    const second = await calculateCore1(input, new BrowserCore1DataRepository(source));
+    expect(second).toEqual(first);
+    expect(first.status).toBe("required_module_not_implemented");
+    expect(first.diagnostics.some((diagnostic) => diagnostic.code === "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED")).toBe(true);
+    expect(first.diagnostics.find((diagnostic) => diagnostic.code === "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED")?.details).toMatchObject({ normative_system: "SP_RK_EN", window_type: 3 });
+    expect(first.diagnostics.some((diagnostic) => (diagnostic.source ?? []).some((sourceCell) => sourceCell.includes("v2.0")))).toBe(false);
   });
 
   it("returns unknown_domain for an unproven city or climate lookup", async () => {
@@ -117,6 +133,12 @@ describe("Core 1 input validation and orchestration", () => {
     const input = await canonicalInput({ mode: "MANUAL", country: "KZ", normative_system: "SP_RK_EN", snow_region: "IV", snow_load: 1.85, wind_region: "III", wind_load: 0.38, seismicity: null });
     expect(validateCore1InputDomain(input).state).toBe("VALID");
     expect(resolveClimateInput(input as unknown as Core1Input)).toMatchObject({ country: "KZ", normative_system: "SP_RK_EN" });
+  });
+
+  it("rejects legacy flat KZ input without an explicit normative system", async () => {
+    const input = { ...(await inputFor("baseline_12m") as Record<string, unknown>), country: "KZ" };
+    delete (input as Record<string, unknown>).normative_system;
+    expect(validateCore1InputDomain(input).state).toBe("INVALID_INPUT");
   });
 
   it("preserves MANUAL climate values and provenance without lookup replacement", async () => {
@@ -157,6 +179,7 @@ describe("Core 1 input validation and orchestration", () => {
     expect(validateCore1InputDomain(input).state).toBe("VALID");
     const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
     expect(result.status).toBe("required_module_not_implemented");
+    expect(resultCode(result)).toBe("WINDOW_GIRT_MODULE_NOT_IMPLEMENTED");
   });
 
   it("rejects a window_type outside 1..5 at schema validation", async () => {

@@ -22,10 +22,10 @@
 | `purlin_validation_metadata` | names `нормы`, `утеплитель`; local list `L45:L47` | raw option string/value | `старым/новым`, 150/200/250, `по умолчанию/90/95` | enum, mm, % | 2 + 3 + 3 | medium/high | IDs 1/2 only as legacy validation cache; runtime not needed |
 | `secondary_steel_rules` | output rules feeding `вывод!D36:E49` | component name + branch | profile, steel, condition, order | profile/grade | about 14 output rows | high for literal/formula contract | none |
 | `bolts_plates_fittings` | `подбор!X14:AF15` and `вывод!D48:E57` | selected frame branch + component | plate thickness/steel, bolt patterns, M16 count, fittings mass | mm, grade, pcs, kg | 2 branch rows + 10 output rows | high | none |
-| `window_profile_candidates` | `Расчет!P4:V413`, `X4:Y413` | original row/profile order | section properties, checks, mass criterion | source-labelled | 410 | high for profiles/selection structure | loads depend on IDs 3/4 |
-| `window_result_layout` | `Расчет!B21:B23,B26:B28`; `Лист1!B24:D33,B37:D46` | window type/position | lower/upper girt result fields | profile/check/result | 6 selected cells + 20 presentation rows | medium | IDs 3/4 for numeric parity |
-| `window_city_legacy` | required `[3]СП РК EN!B3:C1000` | exact city, first match | city + membership/value | text/raw | unknown | unknown/unavailable | ID 3 required; 82,4% candidate prohibited |
-| `window_wind_legacy` | required `[4]Ветер СП!G25:G26`, `[4]Ветер по СП РК EN!D28:D29` plus their inputs | scenario inputs | wind components | source-labelled | unknown | unknown/unavailable | ID 4 required |
+| `window_profile_candidates` | `Расчет!P4:V413`, `X4:Y413` | original row/profile order | section properties, checks, mass criterion | source-labelled | 410 | high for profiles/selection structure | local load inputs still need domain proof |
+| `window_result_layout` | `Расчет!B21:B23,B26:B28`; `Лист1!B24:D33,B37:D46` | window type/position | lower/upper girt result fields | profile/check/result | 6 selected cells + 20 presentation rows | medium | local wind/controller domain incomplete |
+| `window_local_wind_sp20` | `Ветер СП` lookup/coefficient blocks, `G25:G26` | local scenario inputs | SP_20 wind components | source-labelled | local sheet | medium/high structure | historical ID4 token is redundant |
+| `window_local_wind_sp_rk_en` | `Ветер по СП РК EN!B2:B12,D28:D29,Z:AC` | local EN scenario inputs | SP_RK_EN wind components | source-labelled | local sheet | medium structure | historical ID4/5 tokens redundant; selected by explicit normative_system |
 
 ## Приоритет экспорта
 
@@ -36,5 +36,6 @@
 5. window profile candidates как локальная структура, но без объявления расчётного parity.
 6. таблицу 24 м экспортировать вместе с ошибками только для compatibility tests.
 
-Недоступные `window_city_legacy` и `window_wind_legacy` не блокируют экспорт остальных datasets и не заменяются конфликтующими файлами.
-
+Исторические внешние ID3/4/5 не экспортируются как runtime datasets: основная
+книга с её локальными листами является canonical source. Конфликтующие файлы
+не используются.

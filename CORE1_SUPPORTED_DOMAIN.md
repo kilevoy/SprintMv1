@@ -27,12 +27,12 @@
 | материал стены | отдельного входа нет | `SUPPORTED` | Core принимает отсутствие поля; переданное поле не участвует в parity-расчёте |
 | ворота/двери | целые количества; доказанный fixture — нули | `UNKNOWN` | отрицательные и дробные значения отклонить; ненулевые значения требуют golden tests до объявления полного диапазона |
 | окна отсутствуют | `window_height_m=0`, `window_strip_length_m=0`, `separate_windows_count=0` | `SUPPORTED` | оконный подбор не требуется |
-| окна присутствуют | любое ненулевое окно, требующее ветровой нагрузки/подбора ригеля | `UNSUPPORTED_FOR_PARITY` | вернуть `WINDOW_LEGACY_SOURCE_UNAVAILABLE`; не подставлять v2.0 |
+| окна присутствуют | ненулевые `D64:D66`, обязательный `window_type` 1..5 | `SUPPORTED` для реализации локальной формульной цепочки; `PARITY_PROVEN` ожидает non-zero golden oracle | реализовать `WindowGirtCalculator`; до реализации вернуть typed module diagnostic, не подставлять v2.0 |
 | `city` для основного каркаса | только exact keys, которые после экспорта локальных таблиц основной книги успешно разрешаются во всех обязательных frame/climate lookup | `SUPPORTED` | ключ с lookup error → typed climate error; без fuzzy matching |
-| `city` для Kazakhstan membership окон | точная таблица ID 3 не доказана | `UNSUPPORTED_FOR_PARITY` | допускается лишь сохранённый fixture с `J18=#N/A`, `J19="нет"`; произвольный город не обещает parity |
-| `terrain_type` | `А`, `В`, `С` как enum | `SUPPORTED_WITH_LEGACY_ANOMALY` | значение валидируется, но при активных окнах итог блокируется отсутствием ID 4 |
-| normative branch основного каркаса | локальная ветка основной книги, выбранная её собственными lookup | `SUPPORTED` | ошибки lookup передаются без замены |
-| normative branch окон | фактическая ветка SP при пустом `J20`; EN требует `J20="да"` | `UNSUPPORTED_FOR_PARITY` | SP нельзя пересчитать для произвольных inputs без ID 4; EN недостижима штатно и зависит от ID 5 |
+| `city` для Kazakhstan membership окон | локальный lookup `Лист1!J18:K18:J19` и snapshots основной книги | `SUPPORTED` для доказанных локальных ключей; `UNKNOWN` вне них | exact-match; fuzzy/fallback запрещены |
+| `terrain_type` | `А`, `В`, `С` как enum | `SUPPORTED` | значение передаётся в локальную ветровую ветку; J20 не является blocker |
+| normative branch основного каркаса | локальная ветка основной книги, выбранная явным `normative_system` | `SUPPORTED` | ошибки lookup передаются без замены |
+| normative branch окон | локальные `Ветер СП` (`SP_20`) и `Ветер по СП РК EN` (`SP_RK_EN`); для KZ выбор обязателен: «нет»→`SP_20`, «да»→`SP_RK_EN` | `SUPPORTED` для реализации; parity требует non-zero golden | маршрутизировать напрямую по API; J20 только legacy trace |
 
 ## Пролёты
 
@@ -50,4 +50,3 @@
 ## Числовая валидация
 
 Исходные документы не доказывают общие min/max для длины, высоты, ручного шага и количеств проёмов. V1 не должен придумывать инженерные пределы. До утверждения набора golden scenarios поддерживаемое числовое подмножество задаётся явно versioned fixture-манифестом; остальные значения получают `INPUT_DOMAIN_UNKNOWN`, а не приблизительный расчёт.
-
