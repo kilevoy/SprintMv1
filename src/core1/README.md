@@ -99,9 +99,26 @@ Excel parity зафиксирована только для сохранённо
 возвращает legacy `#N/A`, а отсутствие строки или ручного шага — typed
 `FRAME_NO_MATCH`/`UNKNOWN_FRAME_DOMAIN` без исключения.
 
-После выбора рамы результат доступен как `context.frame`; следующий этап
-оркестрации — `PurlinCalculator`. Результат `IMPLEMENTED` для остальных
+После выбора рамы результат доступен как `context.frame`; затем оркестрация
+лениво загружает локальные purlin/profile/roof/deck datasets и вызывает
+`PurlinCalculator`. Результат доступен как `context.purlin`; следующий этап
+оркестрации — `SecondarySteelCalculator`. Результат `IMPLEMENTED` для остальных
 пролётов не следует называть `PARITY_PROVEN` без отдельного golden oracle.
+
+## Purlin calculation lifecycle
+
+```text
+ClimateResult + FrameResult + roof/deck inputs
+  → local purlin datasets (selection rules, profile catalogue, axis, constants)
+  → exact step enumeration (500, 505, …) and local candidate evaluation
+  → MP350/MP390 branch and mass calculation
+  → PurlinResult in context.purlin
+```
+
+Для baseline 12 м значения `P28:V28` совпадают с локальным cached результатом
+(`2ПС 200х65х2`, `М.п.390`, 2140 мм, 7.539 кг/м², 1550.88 кг). Шаг 500 мм
+сохраняет typed legacy `#REF!`; отсутствие допустимого кандидата — typed
+`#N/A` diagnostic. Внешние книги ID 1/2 runtime не используются.
 
 ## Execution lifecycle
 
@@ -115,7 +132,8 @@ Core1Input
   → Core1Result
 ```
 
-`calculateCore1` реализует только этот orchestration boundary. Ожидаемые
+`calculateCore1` реализует этот orchestration boundary и завершает этап
+`PurlinCalculator`. Ожидаемые
 legacy-сценарии возвращаются как `legacy_error`, неподдержанные ветви — как
 `unsupported`, а обычный supported input пока завершается внутренним
 `NOT_IMPLEMENTED`; инженерный результат не подставляется.

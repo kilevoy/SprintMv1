@@ -2,11 +2,13 @@ import { validateCore1Input } from "../compatibility";
 import { BrowserCore1DataRepository, BrowserDataSource } from "../data";
 import { resolveClimate } from "../climate";
 import { selectFrame } from "../frame";
+import { calculatePurlin } from "../purlin";
 import { createCore1Diagnostic } from "../diagnostics";
 import { resolveClimateInput, resolveWindowsInput, validateCore1InputDomain } from "../validation";
 import type { Core1DataRepository } from "../data";
 import type { Core1ClimateResult, Core1Input } from "../types";
 import type { FrameResult } from "../frame";
+import type { PurlinDatasetBundle, PurlinResultValue } from "../purlin";
 import type { Core1EngineResult } from "./types";
 
 function invalidInputResult(errors: unknown[]): Core1EngineResult {
@@ -57,8 +59,8 @@ function datasetLoadFailureResult(error: unknown): Core1EngineResult {
 }
 
 /**
- * Orchestration boundary for Core 1 v1. Engineering modules are intentionally
- * not called yet; supported inputs end in NOT_IMPLEMENTED after lazy loading.
+ * Orchestration boundary for Core 1 v1. Climate, frame and purlin modules are
+ * executed; later modules keep the typed NOT_IMPLEMENTED boundary.
  */
 export async function calculateCore1(
   input: unknown,
@@ -117,7 +119,7 @@ export async function calculateCore1(
     return { status: "unknown_domain", code: "UNKNOWN_CLIMATE_DATA", result: null, diagnostics: climateResolution.diagnostics };
   }
   const context = { climate: climateResolution.climate };
-  let finalContext: { climate: Core1ClimateResult; frame?: FrameResult } = context;
+  let finalContext: { climate: Core1ClimateResult; frame?: FrameResult; purlin?: PurlinResultValue } = context;
 
   try {
     if (domain.state === "SUPPORTED_WITH_LEGACY_ANOMALY") {
@@ -168,7 +170,53 @@ export async function calculateCore1(
       return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context, diagnostics: [...domain.diagnostics, ...frameResolution.diagnostics] };
     }
     const frameContext = { ...context, frame: frameResolution.frame };
-    finalContext = frameContext;
+    let purlinBundle: PurlinDatasetBundle;
+    try {
+      const [selectionRules, profileCatalogue, calculationAxis, calculationConstants, literals, steelGrades, roofProperties, deckProperties] = await Promise.all([
+        repository.loadPurlinDataset("purlin_selection_rules"),
+        repository.loadPurlinDataset("purlin_profile_catalogue"),
+        repository.loadPurlinDataset("purlin_calculation_axis"),
+        repository.loadPurlinDataset("purlin_calculation_constants"),
+        repository.loadPurlinDataset("purlin_literals"),
+        repository.loadPurlinDataset("purlin_steel_grades"),
+        repository.loadRoofProperties(),
+        repository.loadDeckProperties(),
+      ]);
+      purlinBundle = { selectionRules, profileCatalogue, calculationAxis, calculationConstants, literals, steelGrades, roofProperties, deckProperties };
+    } catch (error) {
+      return datasetLoadFailureResult(error);
+    }
+    const purlinResolution = calculatePurlin(
+      {
+        span_m: value.span_m,
+        building_length_m: value.building_length_m,
+        responsibility_factor: value.responsibility_factor,
+        roof_covering: value.roof_covering,
+        roof_deck_grade: value.roof_deck_grade,
+        snow_retention_purlin: value.snow_retention_purlin,
+        enclosure_purlin: value.enclosure_purlin,
+        purlin_max_step_override_mm: value.purlin_max_step_override_mm ?? null,
+        purlin_min_step_mm: value.purlin_min_step_mm ?? 0,
+        building_roof_type: value.building_roof_type,
+      },
+      context.climate,
+      frameResolution.frame,
+      purlinBundle,
+    );
+    if (purlinResolution.status === "legacy_error") {
+      return { status: "legacy_error", code: "LEGACY_REF", result: null, context: frameContext, diagnostics: [...domain.diagnostics, ...purlinResolution.diagnostics] };
+    }
+    if (purlinResolution.status === "invalid_input") {
+      return { status: "invalid_input", code: "INVALID_INPUT", result: null, context: frameContext, diagnostics: [...domain.diagnostics, ...purlinResolution.diagnostics] };
+    }
+    if (purlinResolution.status === "no_match") {
+      return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context: frameContext, diagnostics: [...domain.diagnostics, ...purlinResolution.diagnostics] };
+    }
+    if (purlinResolution.status !== "success" || !purlinResolution.purlin) {
+      return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context: frameContext, diagnostics: [...domain.diagnostics, ...purlinResolution.diagnostics] };
+    }
+    const purlinContext = { ...frameContext, purlin: purlinResolution.purlin };
+    finalContext = purlinContext;
 
     if (resolveWindowsInput(value).enabled) {
       return {
@@ -176,10 +224,11 @@ export async function calculateCore1(
         code: "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED",
         internal_status: "REQUIRED_MODULE_NOT_IMPLEMENTED",
         result: null,
-        context: frameContext,
+        context: purlinContext,
         diagnostics: [
           ...domain.diagnostics,
           ...frameResolution.diagnostics,
+          ...purlinResolution.diagnostics,
           createCore1Diagnostic({
             code: "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED",
             severity: "warning",
@@ -190,7 +239,7 @@ export async function calculateCore1(
             legacy_equivalent: null,
             trigger: "windows.enabled=true",
             affected_outputs: ["window_lower_girt_profile", "window_upper_girt_profile", "window_girts_weight_kg", "openings_weight_kg"],
-            details: { module_status: "REQUIRED_MODULE_NOT_IMPLEMENTED" },
+            details: { module_status: "REQUIRED_MODULE_NOT_IMPLEMENTED", completed_modules: ["ClimateResolver", "FrameSelector", "PurlinCalculator"] },
           }),
         ],
       };
@@ -214,7 +263,7 @@ export async function calculateCore1(
         module: "CalculationEngine",
         message: "Расчётные модули Core 1 ещё не реализованы; инженерный результат не подставлен.",
         source: ["CORE1_V1_PLAN.md"],
-        details: { next_module: "PurlinCalculator" },
+        details: { next_module: "SecondarySteelCalculator", completed_modules: ["ClimateResolver", "FrameSelector", "PurlinCalculator"] },
       }),
     ],
   };
