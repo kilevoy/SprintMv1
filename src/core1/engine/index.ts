@@ -4,6 +4,7 @@ export type {
   Core1EngineCode,
   Core1EngineInvalidInput,
   Core1EngineLegacyError,
+  Core1EngineRequiredModuleNotImplemented,
   Core1EngineResult,
   Core1EngineStatus,
   Core1EngineSuccess,

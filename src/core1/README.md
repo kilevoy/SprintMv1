@@ -80,6 +80,29 @@ MANUAL:     manual values → ClimateResult
 После успешного разрешения `calculateCore1` помещает `ClimateResult` в typed
 `context.climate`; последующие модули получают его без повторного lookup.
 
+## Frame selection lifecycle
+
+```text
+ClimateResult
+  → span dataset (только выбранный frame_<span>m_cells)
+  → candidate branches (снег/ветер, высотная группа, legacy reliability branch)
+  → first-match / exact manual-step selection
+  → FrameResult
+```
+
+`FrameSelector` — чистая функция: загрузка выполняется репозиторием, а выбор
+балки, колонны, шага и коэффициентов — по cached values локального dataset.
+В сохранённом baseline подписи reliability-блоков листа инвертированы
+относительно входного `responsibility_factor`; это сохранено как legacy mapping.
+Пролёты 9/12/15/18/21 имеют реализованный deterministic path; доказанная
+Excel parity зафиксирована только для сохранённого 12‑м baseline. Пролёт 24 м
+возвращает legacy `#N/A`, а отсутствие строки или ручного шага — typed
+`FRAME_NO_MATCH`/`UNKNOWN_FRAME_DOMAIN` без исключения.
+
+После выбора рамы результат доступен как `context.frame`; следующий этап
+оркестрации — `PurlinCalculator`. Результат `IMPLEMENTED` для остальных
+пролётов не следует называть `PARITY_PROVEN` без отдельного golden oracle.
+
 ## Execution lifecycle
 
 ```text

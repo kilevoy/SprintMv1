@@ -29,7 +29,11 @@ export type Core1DiagnosticCode =
   | "NO_ELIGIBLE_PROFILE"
   | "LEGACY_VALUE_ERROR"
   | "LEGACY_DIV_ZERO"
-  | "INPUT_DOMAIN_UNKNOWN";
+  | "INPUT_DOMAIN_UNKNOWN"
+  | "FRAME_NO_MATCH"
+  | "FRAME_LEGACY_NA"
+  | "UNKNOWN_FRAME_DOMAIN"
+  | "INVALID_FRAME_INPUT";
 
 export interface Core1Diagnostic {
   code: Core1DiagnosticCode;

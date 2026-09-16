@@ -4,6 +4,7 @@ export * from "./diagnostics";
 export * from "./validation";
 export * from "./engine";
 export * from "./climate";
+export * from "./frame";
 export {
   BrowserCore1DataRepository,
   BrowserDataSource,

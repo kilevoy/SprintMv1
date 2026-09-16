@@ -1,10 +1,12 @@
 import { validateCore1Input } from "../compatibility";
 import { BrowserCore1DataRepository, BrowserDataSource } from "../data";
 import { resolveClimate } from "../climate";
+import { selectFrame } from "../frame";
 import { createCore1Diagnostic } from "../diagnostics";
 import { resolveClimateInput, resolveWindowsInput, validateCore1InputDomain } from "../validation";
 import type { Core1DataRepository } from "../data";
-import type { Core1Input } from "../types";
+import type { Core1ClimateResult, Core1Input } from "../types";
+import type { FrameResult } from "../frame";
 import type { Core1EngineResult } from "./types";
 
 function invalidInputResult(errors: unknown[]): Core1EngineResult {
@@ -115,6 +117,7 @@ export async function calculateCore1(
     return { status: "unknown_domain", code: "UNKNOWN_CLIMATE_DATA", result: null, diagnostics: climateResolution.diagnostics };
   }
   const context = { climate: climateResolution.climate };
+  let finalContext: { climate: Core1ClimateResult; frame?: FrameResult } = context;
 
   try {
     if (domain.state === "SUPPORTED_WITH_LEGACY_ANOMALY") {
@@ -138,15 +141,45 @@ export async function calculateCore1(
       }
     }
 
+    const frameDataset = await repository.loadFrameDataset(value.span_m);
+    const frameResolution = selectFrame(
+      {
+        span_m: value.span_m,
+        building_height_m: value.building_height_m,
+        responsibility_factor: value.responsibility_factor,
+        frame_step_override_m: value.frame_step_override_m ?? null,
+        climate: context.climate,
+      },
+      frameDataset,
+    );
+    if (frameResolution.status === "legacy_na") {
+      return { status: "legacy_error", code: "LEGACY_NA", result: null, context, diagnostics: [...domain.diagnostics, ...frameResolution.diagnostics] };
+    }
+    if (frameResolution.status === "invalid_input") {
+      return { status: "invalid_input", code: "INVALID_INPUT", result: null, context, diagnostics: [...domain.diagnostics, ...frameResolution.diagnostics] };
+    }
+    if (frameResolution.status === "unknown_domain") {
+      return { status: "unknown_domain", code: "UNKNOWN_DOMAIN", result: null, context, diagnostics: [...domain.diagnostics, ...frameResolution.diagnostics] };
+    }
+    if (frameResolution.status === "no_match") {
+      return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context, diagnostics: [...domain.diagnostics, ...frameResolution.diagnostics] };
+    }
+    if (frameResolution.status !== "success" || !frameResolution.frame) {
+      return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context, diagnostics: [...domain.diagnostics, ...frameResolution.diagnostics] };
+    }
+    const frameContext = { ...context, frame: frameResolution.frame };
+    finalContext = frameContext;
+
     if (resolveWindowsInput(value).enabled) {
       return {
         status: "required_module_not_implemented",
         code: "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED",
         internal_status: "REQUIRED_MODULE_NOT_IMPLEMENTED",
         result: null,
-        context,
+        context: frameContext,
         diagnostics: [
           ...domain.diagnostics,
+          ...frameResolution.diagnostics,
           createCore1Diagnostic({
             code: "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED",
             severity: "warning",
@@ -162,11 +195,6 @@ export async function calculateCore1(
         ],
       };
     }
-
-    await Promise.all([
-      repository.loadFrameDataset(value.span_m),
-      repository.loadPurlinDataset("purlin_calculation_constants"),
-    ]);
   } catch (error) {
     return datasetLoadFailureResult(error);
   }
@@ -176,7 +204,7 @@ export async function calculateCore1(
     code: "NOT_IMPLEMENTED",
     internal_status: "NOT_IMPLEMENTED",
     result: null,
-    context,
+    context: finalContext,
     diagnostics: [
       ...domain.diagnostics,
       createCore1Diagnostic({
@@ -186,7 +214,7 @@ export async function calculateCore1(
         module: "CalculationEngine",
         message: "Расчётные модули Core 1 ещё не реализованы; инженерный результат не подставлен.",
         source: ["CORE1_V1_PLAN.md"],
-        details: { next_module: "FrameSelector" },
+        details: { next_module: "PurlinCalculator" },
       }),
     ],
   };

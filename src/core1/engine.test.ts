@@ -108,6 +108,7 @@ describe("Core 1 input validation and orchestration", () => {
     const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
     expect(result.status).toBe("required_module_not_implemented");
     expect(result.context?.climate).toMatchObject({ source: "CITY_LOOKUP", snow_region: "III", snow_load: 1.5, wind_region: "II", wind_load: 0.3 });
+    expect(result.context?.frame).toMatchObject({ frame_step_m: 6, beam_profile: "ПГС300/20х80х2,5", beam_utilization: 85, column_profile: "ПГС245/20х80х2", column_utilization: 65 });
   });
 
   it("requires an explicit normative system for KZ", async () => {
@@ -191,7 +192,7 @@ describe("Core 1 input validation and orchestration", () => {
     const result = await calculateCore1(await inputFor("normal_18m"), new BrowserCore1DataRepository(loggingSource));
     expect(result.status).toBe("required_module_not_implemented");
     expect(calls).toContain("core1/data/frame_18m_cells.csv");
-    expect(calls).toContain("core1/data/purlin_calculation_constants.csv");
+    expect(calls).not.toContain("core1/data/purlin_calculation_constants.csv");
     expect(calls.some((path) => /frame_(9|12|15|21|24)m/.test(path))).toBe(false);
   });
 
