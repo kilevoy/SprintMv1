@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0.0",
+  "id": "snow_retention_no",
+  "expected_output": {
+    "status": "PROVEN",
+    "values": {
+      "frame_step_m": 6,
+      "beam_profile": "ПГС300/20х80х2,5",
+      "beam_steel": "М.п.350",
+      "beam_utilization": 85,
+      "column_profile": "ПГС245/20х80х2",
+      "column_steel": "М.п.350",
+      "column_utilization": 65,
+      "purlin_profile": "2ПС 200х65х2",
+      "purlin_steel": "М.п.390",
+      "purlin_assignment": "любая",
+      "purlin_step_mm": 2140,
+      "purlin_kg_per_m2": 7.539000000000001,
+      "purlin_weight_kg": 1550.88,
+      "ties": {
+        "name": "Затяжки",
+        "profile": "┘└2уг. 63х5",
+        "steel": "С345",
+        "source_cell": "вывод!D36:E36",
+        "status": "ok"
+      },
+      "suspensions": {
+        "name": "Подвески",
+        "profile": "┘└2уг. 63х5",
+        "steel": "С345",
+        "source_cell": "вывод!D37:E37",
+        "status": "ok"
+      },
+      "spacers": {
+        "name": "Распорки",
+        "profile": "80х3",
+        "steel": "С245",
+        "source_cell": "вывод!D38:E38",
+        "status": "ok"
+      },
+      "horizontal_bracing": [
+        {
+          "name": "Связи горизонтальные 1",
+          "profile": "80x3",
+          "steel": "С245",
+          "source_cell": "вывод!D39:E39",
+          "status": "ok"
+        },
+        {
+          "name": "Связи горизонтальные 2",
+          "profile": "кв. 80х3",
+          "steel": "С245",
+          "source_cell": "вывод!D43:E43",
+          "status": "ok"
+        }
+      ],
+      "vertical_bracing": [
+        {
+          "name": "Связи вертикальные 1",
+          "profile": "120х3",
+          "steel": "С245",
+          "source_cell": "вывод!D40:E40",
+          "status": "ok"
+        },
+        {
+          "name": "Связи вертикальные 2",
+          "profile": "кв. 80х3",
+          "steel": "С245",
+          "source_cell": "вывод!D44:E44",
+          "status": "ok"
+        }
+      ],
+      "gable_posts": {
+        "name": "Стойки фахверка",
+        "profile": "кв. 160х4",
+        "steel": "С245",
+        "source_cell": "вывод!D41:E41",
+        "status": "ok"
+      },
+      "portal_bracing": {
+        "name": "Связи В. портальные",
+        "profile": "кв. 100х4 (N=-33)",
+        "steel": "С245",
+        "source_cell": "вывод!D42:E42",
+        "status": "ok"
+      },
+      "secondary_beams": [
+        {
+          "name": "Г.Балка",
+          "profile": "I30Б1",
+          "steel": "С245",
+          "source_cell": "вывод!D45:E45",
+          "status": "ok"
+        },
+        {
+          "name": "В.Балка",
+          "profile": "I18Б1",
+          "steel": "С245",
+          "source_cell": "вывод!D46:E46",
+          "status": "ok"
+        }
+      ],
+      "secondary_columns": {
+        "name": "Ст. перекрытия",
+        "profile": "кв. 100х4",
+        "steel": "С245",
+        "source_cell": "вывод!D47:E47",
+        "status": "ok"
+      },
+      "plates": [
+        {
+          "name": "Пластина карниз, конек",
+          "profile": "t5",
+          "steel": "С255",
+          "source_cell": "вывод!D48:E48",
+          "status": "ok"
+        },
+        {
+          "name": "Пластина опора",
+          "profile": "t6",
+          "steel": "С255",
+          "source_cell": "вывод!D49:E49",
+          "status": "ok"
+        }
+      ],
+      "bolts": [
+        {
+          "name": "Балки конек",
+          "pattern": "7х2",
+          "source_cell": "вывод!D52"
+        },
+        {
+          "name": "Балки карниз",
+          "pattern": "9х2",
+          "source_cell": "вывод!D53"
+        },
+        {
+          "name": "Колонны опора",
+          "pattern": "6х2",
+          "source_cell": "вывод!D54"
+        },
+        {
+          "name": "Колонны карниз",
+          "pattern": "9х2",
+          "source_cell": "вывод!D55"
+        }
+      ],
+      "M16_quantity": 4,
+      "fittings_weight_kg": 233,
+      "window_girts": [],
+      "openings_weight_kg_per_m2": 0,
+      "openings_weight_t": 0,
+      "openings_weight_kg": 0,
+      "kg_per_m2": 30.25967361111111,
+      "engineering_loads": null
+    }
+  },
+  "expected_diagnostics": [],
+  "source_cells": [
+    "вывод!D26",
+    "Подбор прогонов 2!B16",
+    "Подбор прогонов 2!P28:V28"
+  ],
+  "confidence": "high"
+}

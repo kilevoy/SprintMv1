@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "id": "manual_frame_step_6m",
+  "expected_output": {
+    "status": "UNKNOWN",
+    "values": {}
+  },
+  "expected_diagnostics": [],
+  "source_cells": [
+    "вывод!D9",
+    "вывод!F8",
+    "подбор!AA14"
+  ],
+  "confidence": "unknown"
+}

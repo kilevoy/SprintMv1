@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Core1Input.schema.json",
+  "title": "Core1Input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "city", "span_m", "building_length_m", "building_height_m",
+    "responsibility_factor", "roof_covering", "roof_deck_grade",
+    "snow_retention_purlin", "enclosure_purlin", "gates_le_6m_count",
+    "gates_gt_6m_count", "doors_count", "window_height_m",
+    "window_strip_length_m", "separate_windows_count", "window_construction"
+  ],
+  "properties": {
+    "city": {"type": "string", "minLength": 1},
+    "span_m": {"type": "number", "enum": [9, 12, 15, 18, 21, 24]},
+    "building_length_m": {"type": "number"},
+    "building_height_m": {"type": "number"},
+    "responsibility_factor": {"type": "number", "enum": [0.8, 1.0]},
+    "frame_step_override_m": {"type": ["number", "null"]},
+    "roof_covering": {
+      "type": "string",
+      "enum": [
+        "наше 100 мм", "наше 150 мм", "наше 200 мм", "наше 250 мм",
+        "наше 150 мм с 1 слоем гвл", "наше 150 мм с 2 слоем гвл",
+        "наше 200 мм с 1 слоем гвл", "наше 200 мм с 2 слоем гвл",
+        "наше 250 мм с 1 слоем гвл", "наше 250 мм с 2 слоем гвл",
+        "С-П 50", "С-П 80", "С-П 100", "С-П 120", "С-П 150",
+        "С-П 200", "С-П 250", "малоуклонная кровля с подв. п.",
+        "малоуклонная кровля без подв. п.", "профлист"
+      ]
+    },
+    "roof_deck_grade": {
+      "type": "string",
+      "enum": ["С44-1000-0,5", "С44-1000-0,7", "Н60-845-0,7", "Н60-845-0,8"]
+    },
+    "snow_retention_purlin": {"type": "string", "enum": ["есть", "нет"]},
+    "enclosure_purlin": {"type": "string", "enum": ["есть", "нет"]},
+    "horizontal_bracing_override": {"type": ["string", "null"], "enum": ["+", null]},
+    "gates_le_6m_count": {"type": "integer", "minimum": 0},
+    "gates_gt_6m_count": {"type": "integer", "minimum": 0},
+    "doors_count": {"type": "integer", "minimum": 0},
+    "window_height_m": {"type": "number", "minimum": 0},
+    "window_strip_length_m": {"type": "number", "minimum": 0},
+    "separate_windows_count": {"type": "integer", "minimum": 0},
+    "window_construction": {"type": "string", "minLength": 1},
+    "selection_mode": {"type": "string", "enum": ["стандарт", "подбор"]},
+    "building_roof_type": {"type": "string", "enum": ["двускатное", "односкатное"]},
+    "purlin_max_step_override_mm": {"type": ["number", "null"]},
+    "purlin_min_step_mm": {"type": "number"},
+    "terrain_type": {"type": "string", "enum": ["А", "В", "С"]},
+    "window_scheme_factor": {"type": "number", "enum": [1.1, 1.0, 0.8]},
+    "window_type": {"type": "integer", "enum": [1, 2, 3, 4, 5]},
+    "window_utilization_limit": {"type": "number"},
+    "normative_branch": {"type": "string", "enum": ["по СП РК EN", "по СП 20.13330.20ХХ"]}
+  }
+}

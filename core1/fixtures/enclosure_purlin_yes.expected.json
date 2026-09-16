@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "id": "enclosure_purlin_yes",
+  "expected_output": {
+    "status": "UNKNOWN",
+    "values": {}
+  },
+  "expected_diagnostics": [],
+  "source_cells": [
+    "вывод!D27",
+    "Подбор прогонов 2!B17",
+    "Подбор прогонов 2!P28:V28"
+  ],
+  "confidence": "unknown"
+}

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Core1Result.schema.json",
+  "title": "Core1Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["scenario", "compatibility_diagnostics"],
+  "properties": {
+    "scenario": {"$ref": "Core1Input.schema.json"},
+    "frame_step_m": {"type": ["number", "null"], "description": "m"},
+    "beam_profile": {"type": ["string", "null"]},
+    "beam_steel": {"type": ["string", "null"]},
+    "beam_utilization": {"type": ["number", "null"], "description": "%"},
+    "column_profile": {"type": ["string", "null"]},
+    "column_steel": {"type": ["string", "null"]},
+    "column_utilization": {"type": ["number", "null"], "description": "%"},
+    "purlin_profile": {"type": ["string", "null"]},
+    "purlin_steel": {"type": ["string", "null"]},
+    "purlin_assignment": {"type": ["string", "null"]},
+    "purlin_step_mm": {"type": ["number", "null"], "description": "mm"},
+    "purlin_kg_per_m2": {"type": ["number", "null"], "description": "kg/m²"},
+    "purlin_weight_kg": {"type": ["number", "null"], "description": "kg"},
+    "ties": {"$ref": "#/$defs/component"},
+    "suspensions": {"$ref": "#/$defs/component"},
+    "spacers": {"$ref": "#/$defs/component"},
+    "horizontal_bracing": {"$ref": "#/$defs/componentList"},
+    "vertical_bracing": {"$ref": "#/$defs/componentList"},
+    "gable_posts": {"$ref": "#/$defs/component"},
+    "portal_bracing": {"$ref": "#/$defs/component"},
+    "secondary_beams": {"$ref": "#/$defs/componentList"},
+    "secondary_columns": {"$ref": "#/$defs/component"},
+    "plates": {"$ref": "#/$defs/componentList"},
+    "bolts": {"type": ["array", "null"], "items": {"type": "object"}},
+    "M16_quantity": {"type": ["integer", "null"], "description": "pcs"},
+    "fittings_weight_kg": {"type": ["number", "null"], "description": "kg"},
+    "window_girts": {"type": ["array", "null"], "items": {"type": "object"}},
+    "openings_weight_kg_per_m2": {"type": ["number", "null"], "description": "kg/m²"},
+    "openings_weight_t": {"type": ["number", "null"], "description": "t"},
+    "openings_weight_kg": {"type": ["number", "null"], "description": "kg"},
+    "kg_per_m2": {"type": ["number", "null"], "description": "kg/m²"},
+    "engineering_loads": {"type": ["object", "null"]},
+    "compatibility_diagnostics": {
+      "type": "array",
+      "items": {"$ref": "Core1Diagnostic.schema.json"}
+    }
+  },
+  "$defs": {
+    "component": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"type": "string"},
+        "profile": {"type": ["string", "number", "null"]},
+        "steel": {"type": ["string", "null"]},
+        "source_cell": {"type": "string"},
+        "status": {"type": "string"}
+      }
+    },
+    "componentList": {
+      "type": ["array", "null"],
+      "items": {"$ref": "#/$defs/component"}
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "id": "roof_deck_profiled_h60_08",
+  "expected_output": {
+    "status": "UNKNOWN",
+    "values": {}
+  },
+  "expected_diagnostics": [],
+  "source_cells": [
+    "вывод!D20:D21",
+    "Подбор прогонов 2!N44:P63",
+    "вывод!O6:O11",
+    "вывод!AP1:AZ63"
+  ],
+  "confidence": "unknown"
+}

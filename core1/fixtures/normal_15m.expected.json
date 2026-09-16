@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "id": "normal_15m",
+  "expected_output": {
+    "status": "UNKNOWN",
+    "values": {}
+  },
+  "expected_diagnostics": [],
+  "source_cells": [
+    "вывод!D4",
+    "15м!A1:SE19"
+  ],
+  "confidence": "unknown"
+}

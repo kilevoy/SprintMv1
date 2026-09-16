@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "id": "legacy_purlin_step_500_ref",
+  "expected_output": {
+    "status": "LEGACY_ERROR",
+    "values": {}
+  },
+  "expected_diagnostics": [
+    {
+      "code": "PURLIN_STEP_500_REF",
+      "excel_error": "#REF!",
+      "module": "PurlinCalculator",
+      "source_cells": [
+        "Расчеты*!B73:B76",
+        "Расчеты*!B128:B131"
+      ],
+      "trigger": "selected candidate step is 500 mm and candidate reaches final selection",
+      "affected_outputs": [
+        "purlin_profile",
+        "purlin_step_mm",
+        "purlin_kg_per_m2",
+        "purlin_weight_kg",
+        "kg_per_m2"
+      ],
+      "severity": "error",
+      "message_ru": "Исходный Excel содержит разрушенную ссылку для шага прогона 500 мм; результат сохранён как legacy #REF!."
+    }
+  ],
+  "source_cells": [
+    "Расчеты 2!B73:B76",
+    "Расчеты 2!B128:B131",
+    "Расчеты 2!D81:D84",
+    "Расчеты 2!D136:D139"
+  ],
+  "confidence": "high"
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Core1Diagnostic.schema.json",
+  "title": "Core1Diagnostic",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["code", "excel_error", "module", "source_cells", "severity", "message_ru"],
+  "properties": {
+    "code": {
+      "type": "string",
+      "enum": [
+        "PURLIN_STEP_500_REF",
+        "SPAN_24_LEGACY_NA",
+        "WINDOW_EN_SWITCH_UNREACHABLE",
+        "WINDOW_LEGACY_SOURCE_UNAVAILABLE",
+        "WINDOW_CITY_DATASET_VERSION_CONFLICT",
+        "WINDOW_EN_INPUT_SOURCE_UNAVAILABLE",
+        "LOOKUP_NO_MATCH",
+        "NO_ELIGIBLE_PROFILE",
+        "LEGACY_VALUE_ERROR",
+        "LEGACY_DIV_ZERO",
+        "INPUT_DOMAIN_UNKNOWN"
+      ]
+    },
+    "excel_error": {
+      "type": ["string", "null"],
+      "enum": ["#N/A", "#REF!", "#VALUE!", "#DIV/0!", null]
+    },
+    "module": {"type": "string"},
+    "source_cells": {"type": "array", "items": {"type": "string"}},
+    "trigger": {"type": ["string", "null"]},
+    "affected_outputs": {"type": "array", "items": {"type": "string"}},
+    "severity": {"type": "string", "enum": ["warning", "unsupported", "error"]},
+    "message_ru": {"type": "string", "minLength": 1}
+  }
+}

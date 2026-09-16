@@ -1,0 +1,266 @@
+{
+  "schema_version": "1.0.0",
+  "source_workbook": "Таблица по подбору сечений теплых ангаров пролетами 9м, 12м, 15м, 18м, 21м, 24м версия 1,5.xlsx",
+  "extraction_date": "2026-09-16",
+  "fixture_count": 17,
+  "fixtures": [
+    {
+      "id": "baseline_12m",
+      "description": "Сохранённый сценарий 12 м без проёмов",
+      "supported_domain": "SUPPORTED",
+      "legacy_scenario": false,
+      "input_file": "baseline_12m.input.json",
+      "expected_file": "baseline_12m.expected.json",
+      "excel_source_cells": [
+        "вывод!D2",
+        "вывод!D4:D9",
+        "вывод!D20:D29",
+        "вывод!D33:F57",
+        "вывод!D60:D69",
+        "Подбор прогонов 2!P28:V28",
+        "Лист1!J18:J20",
+        "Лист1!O28:O29"
+      ],
+      "confidence": "high",
+      "status": "READY"
+    },
+    {
+      "id": "normal_9m",
+      "description": "Нормальный сценарий пролёта 9 м",
+      "supported_domain": "SUPPORTED",
+      "legacy_scenario": false,
+      "input_file": "normal_9m.input.json",
+      "expected_file": "normal_9m.expected.json",
+      "excel_source_cells": [
+        "вывод!D4",
+        "9м!A1:SE19"
+      ],
+      "confidence": "unknown",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "normal_15m",
+      "description": "Нормальный сценарий пролёта 15 м",
+      "supported_domain": "SUPPORTED",
+      "legacy_scenario": false,
+      "input_file": "normal_15m.input.json",
+      "expected_file": "normal_15m.expected.json",
+      "excel_source_cells": [
+        "вывод!D4",
+        "15м!A1:SE19"
+      ],
+      "confidence": "unknown",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "normal_18m",
+      "description": "Нормальный сценарий пролёта 18 м",
+      "supported_domain": "SUPPORTED",
+      "legacy_scenario": false,
+      "input_file": "normal_18m.input.json",
+      "expected_file": "normal_18m.expected.json",
+      "excel_source_cells": [
+        "вывод!D4",
+        "18м!A1:SE19"
+      ],
+      "confidence": "unknown",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "normal_21m",
+      "description": "Нормальный сценарий пролёта 21 м",
+      "supported_domain": "SUPPORTED",
+      "legacy_scenario": false,
+      "input_file": "normal_21m.input.json",
+      "expected_file": "normal_21m.expected.json",
+      "excel_source_cells": [
+        "вывод!D4",
+        "21м!A1:SE19"
+      ],
+      "confidence": "unknown",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "legacy_24m_na",
+      "description": "Пролёт 24 м сохраняет активный #N/A",
+      "supported_domain": "SUPPORTED_WITH_LEGACY_ANOMALY",
+      "legacy_scenario": true,
+      "input_file": "legacy_24m_na.input.json",
+      "expected_file": "legacy_24m_na.expected.json",
+      "excel_source_cells": [
+        "вывод!D4",
+        "24м!A1:XC40",
+        "подбор!U7:AI14"
+      ],
+      "confidence": "high",
+      "status": "EXPECTED_LEGACY_ERROR"
+    },
+    {
+      "id": "legacy_purlin_step_500_ref",
+      "description": "Кандидат шага прогона 500 мм сохраняет #REF!",
+      "supported_domain": "SUPPORTED_WITH_LEGACY_ANOMALY",
+      "legacy_scenario": true,
+      "input_file": "legacy_purlin_step_500_ref.input.json",
+      "expected_file": "legacy_purlin_step_500_ref.expected.json",
+      "excel_source_cells": [
+        "Расчеты 2!B73:B76",
+        "Расчеты 2!B128:B131",
+        "Расчеты 2!D81:D84",
+        "Расчеты 2!D136:D139"
+      ],
+      "confidence": "high",
+      "status": "EXPECTED_LEGACY_ERROR"
+    },
+    {
+      "id": "zero_openings_windows",
+      "description": "Нулевые окна и проёмы не требуют ID 3/4/5",
+      "supported_domain": "SUPPORTED",
+      "legacy_scenario": false,
+      "input_file": "zero_openings_windows.input.json",
+      "expected_file": "zero_openings_windows.expected.json",
+      "excel_source_cells": [
+        "вывод!D60:D68",
+        "Лист1!O28:O29"
+      ],
+      "confidence": "high",
+      "status": "READY"
+    },
+    {
+      "id": "snow_retention_yes",
+      "description": "Дополнительный прогон под снегозадержание",
+      "supported_domain": "SUPPORTED",
+      "legacy_scenario": false,
+      "input_file": "snow_retention_yes.input.json",
+      "expected_file": "snow_retention_yes.expected.json",
+      "excel_source_cells": [
+        "вывод!D26",
+        "Подбор прогонов 2!B16",
+        "Подбор прогонов 2!P28:V28"
+      ],
+      "confidence": "unknown",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "snow_retention_no",
+      "description": "Без дополнительного прогона под снегозадержание",
+      "supported_domain": "SUPPORTED",
+      "legacy_scenario": false,
+      "input_file": "snow_retention_no.input.json",
+      "expected_file": "snow_retention_no.expected.json",
+      "excel_source_cells": [
+        "вывод!D26",
+        "Подбор прогонов 2!B16",
+        "Подбор прогонов 2!P28:V28"
+      ],
+      "confidence": "high",
+      "status": "READY"
+    },
+    {
+      "id": "enclosure_purlin_yes",
+      "description": "Дополнительный прогон под ограждение",
+      "supported_domain": "SUPPORTED",
+      "legacy_scenario": false,
+      "input_file": "enclosure_purlin_yes.input.json",
+      "expected_file": "enclosure_purlin_yes.expected.json",
+      "excel_source_cells": [
+        "вывод!D27",
+        "Подбор прогонов 2!B17",
+        "Подбор прогонов 2!P28:V28"
+      ],
+      "confidence": "unknown",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "enclosure_purlin_no",
+      "description": "Без дополнительного прогона под ограждение",
+      "supported_domain": "SUPPORTED",
+      "legacy_scenario": false,
+      "input_file": "enclosure_purlin_no.input.json",
+      "expected_file": "enclosure_purlin_no.expected.json",
+      "excel_source_cells": [
+        "вывод!D27",
+        "Подбор прогонов 2!B17",
+        "Подбор прогонов 2!P28:V28"
+      ],
+      "confidence": "high",
+      "status": "READY"
+    },
+    {
+      "id": "manual_frame_step_6m",
+      "description": "Ручной шаг рам 6 м; expected требует отдельного Excel fixture",
+      "supported_domain": "UNKNOWN",
+      "legacy_scenario": false,
+      "input_file": "manual_frame_step_6m.input.json",
+      "expected_file": "manual_frame_step_6m.expected.json",
+      "excel_source_cells": [
+        "вывод!D9",
+        "вывод!F8",
+        "подбор!AA14"
+      ],
+      "confidence": "unknown",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "roof_deck_sp150_c44_05",
+      "description": "Покрытие С-П 150 и настил С44-1000-0,5",
+      "supported_domain": "SUPPORTED",
+      "legacy_scenario": false,
+      "input_file": "roof_deck_sp150_c44_05.input.json",
+      "expected_file": "roof_deck_sp150_c44_05.expected.json",
+      "excel_source_cells": [
+        "вывод!D20:D21",
+        "Подбор прогонов 2!N44:P63",
+        "вывод!O6:O11",
+        "вывод!AP1:AZ63"
+      ],
+      "confidence": "unknown",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "roof_deck_profiled_h60_08",
+      "description": "Профлист и настил Н60-845-0,8",
+      "supported_domain": "SUPPORTED",
+      "legacy_scenario": false,
+      "input_file": "roof_deck_profiled_h60_08.input.json",
+      "expected_file": "roof_deck_profiled_h60_08.expected.json",
+      "excel_source_cells": [
+        "вывод!D20:D21",
+        "Подбор прогонов 2!N44:P63",
+        "вывод!O6:O11",
+        "вывод!AP1:AZ63"
+      ],
+      "confidence": "unknown",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "responsibility_1_0",
+      "description": "Коэффициент ответственности 1,0",
+      "supported_domain": "SUPPORTED",
+      "legacy_scenario": false,
+      "input_file": "responsibility_1_0.input.json",
+      "expected_file": "responsibility_1_0.expected.json",
+      "excel_source_cells": [
+        "вывод!D7",
+        "подбор!AJ9:BE14"
+      ],
+      "confidence": "unknown",
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "nonzero_windows_unsupported",
+      "description": "Ненулевые окна требуют недоказанных ID 3/4",
+      "supported_domain": "UNSUPPORTED_FOR_PARITY",
+      "legacy_scenario": false,
+      "input_file": "nonzero_windows_unsupported.input.json",
+      "expected_file": "nonzero_windows_unsupported.expected.json",
+      "excel_source_cells": [
+        "вывод!D64:D67",
+        "Лист1!J18:J20",
+        "Расчет!D9",
+        "Расчет!F9"
+      ],
+      "confidence": "high",
+      "status": "UNSUPPORTED_FOR_PARITY"
+    }
+  ]
+}

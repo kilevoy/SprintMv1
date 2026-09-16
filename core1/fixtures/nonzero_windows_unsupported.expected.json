@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "id": "nonzero_windows_unsupported",
+  "expected_output": {
+    "status": "UNSUPPORTED",
+    "values": {}
+  },
+  "expected_diagnostics": [
+    {
+      "code": "WINDOW_LEGACY_SOURCE_UNAVAILABLE",
+      "excel_error": null,
+      "module": "WindowGirtCalculator",
+      "source_cells": [
+        "Расчет!D9",
+        "Расчет!F9"
+      ],
+      "trigger": "nonzero window inputs require recalculation outside saved cache fixture",
+      "affected_outputs": [
+        "window_girts",
+        "openings_weight_kg_per_m2",
+        "openings_weight_t",
+        "openings_weight_kg",
+        "kg_per_m2"
+      ],
+      "severity": "unsupported",
+      "message_ru": "Точная legacy-версия ветрового расчёта окон недоступна; строгий результат не может быть вычислен."
+    }
+  ],
+  "source_cells": [
+    "вывод!D64:D67",
+    "Лист1!J18:J20",
+    "Расчет!D9",
+    "Расчет!F9"
+  ],
+  "confidence": "high"
+}
