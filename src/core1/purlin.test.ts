@@ -50,7 +50,44 @@ describe("PurlinCalculator", () => {
     expect(result.status).toBe("success");
     if (result.status !== "success") return;
     expect(result.purlin).toMatchObject({ purlin_profile: "2ПС 200х65х2", purlin_steel: "М.п.390", purlin_assignment: "любая", purlin_step_mm: 2140, purlin_kg_per_m2: 7.539000000000001, purlin_weight_kg: 1550.88, purlin_auxiliary_value: 0 });
+    expect(result.purlin.trace).toMatchObject({ deck_key: "С44-1000-0,7", deck_step_limit_mm: 2150, configured_step_limit_mm: 2150, manual_step_limit_mm: null, effective_step_limit_mm: 2150, selected_step_mm: 2140 });
     expect(result.purlin.trace.parity).toBe("PROVEN_12M_BASELINE");
+  });
+
+  it("applies the C44-0.5 deck limit and preserves the audited Scenario B result", async () => {
+    const result = calculatePurlin({ ...input, roof_deck_grade: "С44-1000-0,5" }, climate, frame, await datasets());
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    expect(result.purlin).toMatchObject({
+      purlin_profile: "2ПС 150х65х1,5",
+      purlin_steel: "М.п.390",
+      purlin_step_mm: 1000,
+      purlin_weight_kg: 1756.44,
+    });
+    expect(result.purlin.purlin_kg_per_m2).toBeCloseTo(8.53825, 12);
+    expect(result.purlin.trace).toMatchObject({
+      deck_key: "С44-1000-0,5",
+      deck_step_limit_mm: 1150,
+      configured_step_limit_mm: 2150,
+      manual_step_limit_mm: null,
+      effective_step_limit_mm: 1150,
+      selected_step_mm: 1000,
+    });
+  });
+
+  it.each([
+    ["С44-1000-0,5", 1150],
+    ["С44-1000-0,7", 2150],
+    ["Н60-845-0,7", 2700],
+    ["Н60-845-0,8", 3000],
+  ] as const)("uses the audited deck lookup limit for %s", async (deck, limit) => {
+    const first = calculatePurlin({ ...input, roof_deck_grade: deck }, climate, frame, await datasets());
+    const second = calculatePurlin({ ...input, roof_deck_grade: deck }, climate, frame, await datasets());
+    expect(first).toEqual(second);
+    expect(first.status).toBe("success");
+    if (first.status !== "success") return;
+    expect(first.purlin.trace.deck_step_limit_mm).toBe(limit);
+    expect(first.purlin.purlin_step_mm).toBeLessThanOrEqual(limit);
   });
 
   it.each([9, 15, 18, 21] as const)("returns deterministic local result for %dm", async (span) => {

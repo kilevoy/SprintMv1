@@ -4,7 +4,7 @@ import type { DatasetRecord } from "../data";
 import type { ClimateDatasetView, ClimateResolveResult } from "./types";
 
 const LOAD_UNITS = "kN/m²";
-const PROVEN_LOOKUP_KEY = "RU|Роза|SP_20";
+const PROVEN_LOOKUP_KEYS = new Set(["RU|Роза|SP_20", "RU|Сургут|SP_20"]);
 
 function cellParts(cell: string): { column: string; row: number } | null {
   const match = /^([A-Z]+)(\d+)$/.exec(cell);
@@ -83,6 +83,45 @@ function cityNotFound(input: Extract<ClimateInput, { mode: "CITY_LOOKUP" }>): Cl
   };
 }
 
+function climateFromRow(input: Extract<ClimateInput, { mode: "CITY_LOOKUP" }>, values: Map<string, DatasetRecord>): Core1ClimateResult | null {
+  const city = textValue(values.get("B")) ?? textValue(values.get("AR"));
+  const snowRegion = textValue(values.get("F")) ?? textValue(values.get("AV"));
+  const snowLoad = numericValue(values.get("G")) ?? numericValue(values.get("AW"));
+  const windRegion = textValue(values.get("H")) ?? textValue(values.get("AX"));
+  const windLoad = numericValue(values.get("I")) ?? numericValue(values.get("AY"));
+  if (city !== input.city || snowRegion === null || snowLoad === null || windRegion === null || windLoad === null) return null;
+  return {
+    mode: "CITY_LOOKUP",
+    source: "CITY_LOOKUP",
+    climate_source: "CITY_LOOKUP",
+    country: input.country,
+    city: input.city,
+    normative_system: input.normative_system,
+    snow_region: snowRegion,
+    snow_load: snowLoad,
+    wind_region: windRegion,
+    wind_load: windLoad,
+    seismicity: null,
+    source_note: null,
+    units: { snow_load: LOAD_UNITS, wind_load: LOAD_UNITS },
+  } as Core1ClimateResult;
+}
+
+/**
+ * Exact local lookup for presentation only. This intentionally does not widen
+ * the proven Core 1 calculation contract below the PROVEN_LOOKUP_KEYS gate.
+ */
+export function previewClimate(input: Extract<ClimateInput, { mode: "CITY_LOOKUP" }>, dataset?: ClimateDatasetView): ClimateResolveResult {
+  if (!dataset) return unknownData(input, "Для предпросмотра не загружен climate dataset.", { city: input.city });
+  const rows = cityRows(dataset.records, input.city);
+  if (rows.length === 0) return cityNotFound(input);
+  for (const row of rows) {
+    const climate = climateFromRow(input, rowMap(dataset.records, row));
+    if (climate) return { status: "success", diagnostics: [], climate };
+  }
+  return unknownData(input, "Для найденного города отсутствуют все обязательные климатические поля.", { city: input.city, rows });
+}
+
 export function resolveClimate(input: ClimateInput, dataset?: ClimateDatasetView): ClimateResolveResult {
   if (input.mode === "MANUAL") {
     return {
@@ -105,46 +144,17 @@ export function resolveClimate(input: ClimateInput, dataset?: ClimateDatasetView
     };
   }
 
-  if (!dataset) return unknownData(input, "Для CITY_LOOKUP не загружен доказанный climate dataset.", { city: input.city });
-  const rows = cityRows(dataset.records, input.city);
-  if (rows.length === 0) return cityNotFound(input);
-  if (`${input.country}|${input.city}|${input.normative_system}` !== PROVEN_LOOKUP_KEY) {
+  const preview = previewClimate(input, dataset);
+  if (preview.status !== "success") return preview;
+  const lookupKey = `${input.country}|${input.city}|${input.normative_system}`;
+  if (!PROVEN_LOOKUP_KEYS.has(lookupKey)) {
     return unknownData(input, "Для выбранной страны и нормативной ветки нет доказанного lookup-набора.", {
       country: input.country,
       city: input.city,
       normative_system: input.normative_system,
-      proven_lookup: PROVEN_LOOKUP_KEY,
+      proven_lookup: [...PROVEN_LOOKUP_KEYS],
     });
   }
 
-  for (const row of rows) {
-    const values = rowMap(dataset.records, row);
-    const city = textValue(values.get("B")) ?? textValue(values.get("AR"));
-    const snowRegion = textValue(values.get("F")) ?? textValue(values.get("AV"));
-    const snowLoad = numericValue(values.get("G")) ?? numericValue(values.get("AW"));
-    const windRegion = textValue(values.get("H")) ?? textValue(values.get("AX"));
-    const windLoad = numericValue(values.get("I")) ?? numericValue(values.get("AY"));
-    if (city === input.city && snowRegion !== null && snowLoad !== null && windRegion !== null && windLoad !== null) {
-      return {
-        status: "success",
-        diagnostics: [],
-        climate: {
-          mode: "CITY_LOOKUP",
-          source: "CITY_LOOKUP",
-          climate_source: "CITY_LOOKUP",
-          country: input.country,
-          city: input.city,
-          normative_system: input.normative_system,
-          snow_region: snowRegion,
-          snow_load: snowLoad,
-          wind_region: windRegion,
-          wind_load: windLoad,
-          seismicity: null,
-          source_note: null,
-          units: { snow_load: LOAD_UNITS, wind_load: LOAD_UNITS },
-        } as Core1ClimateResult,
-      };
-    }
-  }
-  return unknownData(input, "Для найденного города отсутствуют все обязательные климатические поля.", { city: input.city, rows });
+  return preview;
 }

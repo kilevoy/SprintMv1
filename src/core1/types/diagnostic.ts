@@ -32,7 +32,9 @@ export type Core1DiagnosticCode =
   | "FRAME_NO_MATCH"
   | "FRAME_LEGACY_NA"
   | "UNKNOWN_FRAME_DOMAIN"
-  | "INVALID_FRAME_INPUT";
+  | "INVALID_FRAME_INPUT"
+  | "CORE1_OPENINGS_NOT_REPRESENTABLE"
+  | "CORE1_GATE_CLASSIFICATION_UNVERIFIED";
 
 export interface Core1Diagnostic {
   code: Core1DiagnosticCode;

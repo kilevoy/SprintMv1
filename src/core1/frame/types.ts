@@ -17,7 +17,7 @@ export interface FrameSelectionTrace {
   selected_span_dataset: string;
   selected_branch: string;
   candidate_identifiers: string[];
-  selection_reason: "first_match" | "manual_step_match";
+  selection_reason: "first_match" | "automatic_step_match" | "manual_step_match";
 }
 
 export interface FrameResult {

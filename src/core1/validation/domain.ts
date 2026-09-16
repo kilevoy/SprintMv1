@@ -117,13 +117,21 @@ export function validateCore1InputDomain(input: unknown): Core1InputDomainResult
     );
   }
 
-  const unknownNumericDomain =
-    value.building_length_m !== 18 ||
-    value.building_height_m !== 3 ||
+  // The legacy workbook treats length as a positive arithmetic input (D5 has
+  // no list validation or explicit max) and maps a positive building height
+  // into the proven frame height bands. Keep the upper bound at the last
+  // proven FrameSelector band; do not invent a length maximum.
+  const unknownGeometryDomain =
+    !Number.isFinite(value.building_length_m) ||
+    value.building_length_m <= 0 ||
+    !Number.isFinite(value.building_height_m) ||
+    value.building_height_m <= 0 ||
+    value.building_height_m > 6.2;
+  const unknownManualDomain =
     (value.frame_step_override_m !== undefined && value.frame_step_override_m !== null && value.frame_step_override_m !== 0) ||
     (value.purlin_max_step_override_mm !== undefined && value.purlin_max_step_override_mm !== null && value.purlin_max_step_override_mm !== 0 && value.purlin_max_step_override_mm !== 500) ||
     (value.purlin_min_step_mm !== undefined && value.purlin_min_step_mm !== 0);
-  if (unknownNumericDomain) {
+  if (unknownGeometryDomain || unknownManualDomain) {
     diagnostics.push(
       createCore1Diagnostic({
         code: "UNKNOWN_DOMAIN",
@@ -133,7 +141,9 @@ export function validateCore1InputDomain(input: unknown): Core1InputDomainResult
         message: "Числовое значение находится вне доказанного domain Core 1 v1.",
         source: ["CORE1_SUPPORTED_DOMAIN.md", "CORE1_INPUT_CONTRACT.md"],
         legacy_equivalent: null,
-        trigger: "length/height/opening counts/manual frame step/purlin override is outside proven fixture domain",
+        trigger: unknownGeometryDomain
+          ? "length must be positive and height must be within the proven FrameSelector bands (0, 6.2]"
+          : "manual frame step/purlin override is outside the proven domain",
         affected_outputs: ["frame_step_m", "beam_profile", "column_profile", "purlin_profile", "openings_weight_kg", "kg_per_m2"],
         details: {
           building_length_m: value.building_length_m,

@@ -31,6 +31,11 @@ export interface PurlinSelectionTrace {
   candidate_count: number;
   evaluated_steps_mm: number[];
   selected_step_index: number;
+  deck_step_limit_mm: number | null;
+  configured_step_limit_mm: number | null;
+  manual_step_limit_mm: number | null;
+  effective_step_limit_mm: number | null;
+  selected_step_mm: number | null;
   roof_self_weight_kg_per_m2: number;
   deck_key: string;
   snow_retention_purlin: "есть" | "нет";

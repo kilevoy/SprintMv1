@@ -78,8 +78,9 @@ CITY_LOOKUP: city → climate_lookup_sparse (exact match) → ClimateResult
 MANUAL:     manual values → ClimateResult
 ```
 
-В runtime используется только `climate_lookup_sparse`; для parity доказан
-сохранённый exact tuple `RU|Роза|SP_20`. Неизвестный город даёт
+В runtime используется только `climate_lookup_sparse`; для production calculation
+доказаны exact tuples `RU|Роза|SP_20` и `RU|Сургут|SP_20` (для Сургута
+источник `22318_SOURCE_SELECTION.xlsx` подтверждает `IV/2` и `I/0,23`). Неизвестный город даёт
 `CITY_NOT_FOUND`, а найденная строка без доказанной ветки страны/норматива —
 `UNKNOWN_CLIMATE_DATA`. Fuzzy/nearest-city fallback отсутствует.
 
@@ -130,7 +131,10 @@ ClimateResult
 балки, колонны, шага и коэффициентов — по cached values локального dataset.
 В сохранённом baseline подписи reliability-блоков листа инвертированы
 относительно входного `responsibility_factor`; это сохранено как legacy mapping.
-Пролёты 9/12/15/18/21 имеют реализованный deterministic path; доказанная
+Пролёты 9/12/15/18/21 имеют реализованный deterministic path; высота проходит
+через доказанные legacy bands `3,6/4,8/6,0` при пользовательском диапазоне
+`(0,6,2]`; длина является положительным арифметическим входом без придуманного
+максимума. Доказанная
 Excel parity зафиксирована только для сохранённого 12‑м baseline. Пролёт 24 м
 возвращает legacy `#N/A`, а отсутствие строки или ручного шага — typed
 `FRAME_NO_MATCH`/`UNKNOWN_FRAME_DOMAIN` без исключения.
@@ -146,7 +150,8 @@ Excel parity зафиксирована только для сохранённо
 ```text
 ClimateResult + FrameResult + roof/deck inputs
   → local purlin datasets (selection rules, profile catalogue, axis, constants)
-  → exact step enumeration (500, 505, …) and local candidate evaluation
+  → exact D21 header/matrix lookup (deck limit from вывод!W11:W63)
+  → Excel-compatible SO/BFE candidate evaluation within effective step limit
   → MP350/MP390 branch and mass calculation
   → PurlinResult in context.purlin
 ```
@@ -154,7 +159,19 @@ ClimateResult + FrameResult + roof/deck inputs
 Для baseline 12 м значения `P28:V28` совпадают с локальным cached результатом
 (`2ПС 200х65х2`, `М.п.390`, 2140 мм, 7.539 кг/м², 1550.88 кг). Шаг 500 мм
 сохраняет typed legacy `#REF!`; отсутствие допустимого кандидата — typed
-`#N/A` diagnostic. Внешние книги ID 1/2 runtime не используются.
+`#N/A` diagnostic. `roof_deck_grade` выбирает exact колонку D21 в локальной
+матрице настила, а `trace` содержит `deck_step_limit_mm`,
+`configured_step_limit_mm`, `manual_step_limit_mm`, `effective_step_limit_mm`,
+`evaluated_steps_mm` и `selected_step_mm`. Ненулевой manual max заменяет
+deck-derived max как в `Подбор прогонов 2!B14`; cached `B14` не используется как
+неподтверждённый глобальный cap. Для Scenario B (`С-П 200` + `С44-1000-0,5`)
+воспроизведены `2ПС 150х65х1,5`, 1000 мм, 1756.44 кг и `D69 ≈ 31.2589236111`.
+Внешние книги ID 1/2 runtime не используются.
+
+`PURLIN_DECK_GAP = CLOSED`: deterministic local calculation is implemented;
+`PARITY_PROVEN` остаётся только для сохранённого 12‑м baseline и проверенного
+Scenario B replay. Для Н60-845-* требуются отдельные Excel golden outputs для
+полного parity.
 
 ## Secondary steel lifecycle
 

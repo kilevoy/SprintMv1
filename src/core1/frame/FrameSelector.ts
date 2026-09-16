@@ -6,6 +6,10 @@ import type { FrameDatasetView, FrameSelectionResult, FrameSelectorInput } from 
 const FRAME_STEEL = "М.п.350";
 const FRAME_TIE_UNIT_MASS_KG: Readonly<Record<9 | 12 | 15 | 18 | 21, number>> = { 9: 115, 12: 148, 15: 181, 18: 224, 21: 290 };
 const SUPPORTED_SPANS = new Set([9, 12, 15, 18, 21]);
+// Proven from вывод!D8 -> подбор!AA14/AA15 -> подбор!I2:I7/I9:I14
+// in 22318_SOURCE_SELECTION.xlsx. This is the automatic branch only;
+// a non-zero frame_step_override_m remains an explicit legacy override.
+const AUTOMATIC_FRAME_STEP_M: Readonly<Record<9 | 12 | 15 | 18 | 21, number>> = { 9: 6, 12: 6, 15: 4, 18: 4, 21: 4 };
 const HEIGHT_BANDS = [
   { max: 3.8, datasetHeight: 3.6 },
   { max: 5, datasetHeight: 4.8 },
@@ -116,21 +120,40 @@ function blockFactor(records: DatasetRecord[], start: string): "0.8" | "1.0" | n
   return null;
 }
 
-function selectBlock(records: DatasetRecord[], input: FrameSelectorInput, branch: string, datasetHeight: number): { start: string; row: number } | null {
-  // The workbook labels the two reliability blocks opposite to the input branch
-  // used by the saved baseline; retain that observed legacy mapping.
-  const wantedFactor = input.responsibility_factor === 0.8 ? "1.0" : "0.8";
+function matchingBlocks(records: DatasetRecord[], factor: "0.8" | "1.0", branch: string, datasetHeight: number, step: number | null): { start: string; row: number }[] {
+  const matches: { start: string; row: number }[] = [];
   for (const start of findBlockStarts(records)) {
-    if (blockFactor(records, start) !== wantedFactor) continue;
+    if (blockFactor(records, start) !== factor) continue;
     const base = columnNumber(start);
     for (let row = 6; row <= 15; row += 1) {
       const rowBranch = text(valueAt(records, `${start}${row}`));
       const height = number(valueAt(records, `${columnName(base + 1)}${row}`));
-      const step = number(valueAt(records, `${columnName(base + 2)}${row}`));
-      if (rowBranch === branch && height === datasetHeight && step !== null) return { start, row };
+      const rowStep = number(valueAt(records, `${columnName(base + 2)}${row}`));
+      if (rowBranch === branch && height === datasetHeight && rowStep !== null && (step === null || rowStep === step)) matches.push({ start, row });
     }
   }
-  return null;
+  return matches;
+}
+
+function selectBlock(records: DatasetRecord[], input: FrameSelectorInput, branch: string, datasetHeight: number, automaticStep: number | null): { start: string; row: number } | null {
+  // The workbook labels the two reliability blocks opposite to the input branch
+  // used by the saved baseline; retain that observed legacy mapping.
+  const wantedFactor = input.responsibility_factor === 0.8 ? "1.0" : "0.8";
+  const otherFactor = wantedFactor === "0.8" ? "1.0" : "0.8";
+  // For automatic selection, the proven D8/AA14 rule is authoritative over
+  // the old first-row approximation. Keep the observed factor preference first
+  // so the 12 m baseline remains byte-for-byte compatible; if that block has no
+  // row for the proven step, select the matching row from the other block.
+  if (automaticStep !== null) {
+    return matchingBlocks(records, wantedFactor, branch, datasetHeight, automaticStep)[0]
+      ?? matchingBlocks(records, otherFactor, branch, datasetHeight, automaticStep)[0]
+      ?? matchingBlocks(records, wantedFactor, branch, datasetHeight, null)[0]
+      ?? matchingBlocks(records, otherFactor, branch, datasetHeight, null)[0]
+      ?? null;
+  }
+  return matchingBlocks(records, wantedFactor, branch, datasetHeight, null)[0]
+    ?? matchingBlocks(records, otherFactor, branch, datasetHeight, null)[0]
+    ?? null;
 }
 
 export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView): FrameSelectionResult {
@@ -154,12 +177,13 @@ export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView
   const band = HEIGHT_BANDS.find((candidate) => input.building_height_m <= candidate.max);
   if (!band) return { status: "unknown_domain", frame: null, diagnostics: [diagnostic("UNKNOWN_FRAME_DOMAIN", "unsupported", "Высота выходит за доказанные высотные таблицы FrameSelector.", { building_height_m: input.building_height_m })] };
 
-  const block = selectBlock(dataset.records, input, branch, band.datasetHeight);
+  const requestedStep = input.frame_step_override_m ?? null;
+  const automaticStep = requestedStep === null ? AUTOMATIC_FRAME_STEP_M[input.span_m as 9 | 12 | 15 | 18 | 21] ?? null : null;
+  const block = selectBlock(dataset.records, input, branch, band.datasetHeight, automaticStep);
   if (!block) return { status: "no_match", frame: null, diagnostics: [diagnostic("FRAME_NO_MATCH", "unsupported", "Для сочетания ветки климата, высоты и ответственности нет строки подбора рамы.", { branch, dataset_height_m: band.datasetHeight, responsibility_factor: input.responsibility_factor })] };
   const base = columnNumber(block.start);
   const stepColumn = columnName(base + 2);
   const rowStep = number(valueAt(dataset.records, `${stepColumn}${block.row}`));
-  const requestedStep = input.frame_step_override_m ?? null;
   if (requestedStep !== null && requestedStep !== rowStep) {
     return { status: "unknown_domain", frame: null, diagnostics: [diagnostic("UNKNOWN_FRAME_DOMAIN", "unsupported", "Ручной шаг отсутствует в доказанной строке подбора рамы.", { requested_step_m: requestedStep, available_step_m: rowStep, branch })] };
   }
@@ -190,7 +214,7 @@ export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView
         selected_span_dataset: `frame_${input.span_m}m_cells`,
         selected_branch: `${block.start}${block.row}:${branch}/${band.datasetHeight}`,
         candidate_identifiers: [branch, `${band.datasetHeight}`, `${rowStep}`],
-        selection_reason: requestedStep === null ? "first_match" : "manual_step_match",
+        selection_reason: requestedStep === null ? (automaticStep === null ? "first_match" : "automatic_step_match") : "manual_step_match",
       },
     },
   };

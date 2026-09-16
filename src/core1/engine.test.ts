@@ -127,6 +127,26 @@ describe("Core 1 input validation and orchestration", () => {
     expect(result.context?.openings).toMatchObject({ opening_mass_kg: 0, opening_mass_kg_per_m2: 0, opening_mass_t: 0 });
   });
 
+  it("accepts the source-proven 24 m length and 5 m height geometry domain", async () => {
+    const input = { ...(await inputFor("baseline_12m") as Record<string, unknown>), span_m: 15, building_length_m: 24, building_height_m: 5 };
+    expect(validateCore1InputDomain(input).state).toBe("VALID");
+  });
+
+  it("keeps genuinely unsupported geometry in UNKNOWN_DOMAIN", async () => {
+    const input = { ...(await inputFor("baseline_12m") as Record<string, unknown>), building_height_m: 6.21 };
+    expect(validateCore1InputDomain(input).state).toBe("UNKNOWN_DOMAIN");
+    expect(validateCore1InputDomain(input).diagnostics.some((diagnostic) => diagnostic.code === "UNKNOWN_DOMAIN")).toBe(true);
+  });
+
+  it("propagates the C44-0.5 deck limit through purlin mass into D69", async () => {
+    const input = { ...(await inputFor("baseline_12m") as Record<string, unknown>), roof_deck_grade: "С44-1000-0,5" };
+    const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    expect(result.context?.purlin).toMatchObject({ purlin_profile: "2ПС 150х65х1,5", purlin_step_mm: 1000, purlin_weight_kg: 1756.44 });
+    expect(result.result.kg_per_m2).toBeCloseTo(31.25892361111111, 10);
+  });
+
   it("requires an explicit normative system for KZ", async () => {
     const input = await canonicalInput({ mode: "MANUAL", country: "KZ", normative_system: "SP_RK_EN", snow_region: "IV", snow_load: 1.85, wind_region: "III", wind_load: 0.38, seismicity: null });
     expect(validateCore1InputDomain(input).state).toBe("VALID");

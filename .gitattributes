@@ -1,0 +1,5 @@
+# Engineering datasets are byte-addressed by manifest SHA-256 checks.
+# Keep their repository bytes unchanged across Windows and Unix checkouts.
+/core1/data/*.csv -text
+/core1/fixtures/*.json -text
+/core1/schemas/*.json -text

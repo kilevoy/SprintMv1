@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { BrowserCore1DataRepository } from "./data";
 import type { Core1DataSource } from "./data";
-import { resolveClimate } from "./climate";
+import { previewClimate, resolveClimate } from "./climate";
 import type { ClimateInput } from "./types";
 
 class TestDataSource implements Core1DataSource {
@@ -45,6 +45,24 @@ describe("ClimateResolver", () => {
     const result = resolveClimate(input);
     expect(result.status).toBe("success");
     if (result.status === "success") expect(result.climate).toMatchObject({ source: "MANUAL", ...input, units: { snow_load: "kN/m²", wind_load: "kN/m²" } });
+  });
+
+  it("resolves the source-proven Surgut lookup used by real project 22318", async () => {
+    const result = resolveClimate({ mode: "CITY_LOOKUP", country: "RU", city: "Сургут", normative_system: "SP_20" }, await climateDataset());
+    expect(result.status).toBe("success");
+    if (result.status === "success") {
+      expect(result.climate).toMatchObject({ source: "CITY_LOOKUP", country: "RU", city: "Сургут", snow_region: "IV", snow_load: 2, wind_region: "I", wind_load: 0.23 });
+    }
+  });
+
+  it("previews an exact local city without widening the proven calculation gate", async () => {
+    const input = { mode: "CITY_LOOKUP" as const, country: "RU" as const, city: "Челябинск", normative_system: "SP_20" as const };
+    const dataset = await climateDataset();
+    const preview = previewClimate(input, dataset);
+    expect(preview.status).toBe("success");
+    if (preview.status === "success") expect(preview.climate).toMatchObject({ city: "Челябинск", source: "CITY_LOOKUP" });
+    const calculation = resolveClimate(input, dataset);
+    expect(calculation.status).toBe("unknown_climate_data");
   });
 
   it("preserves manual RU climate and does not consult lookup data", () => {
