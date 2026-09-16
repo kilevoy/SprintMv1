@@ -11,3 +11,6 @@ Thumbs.db
 
 # Node dependencies are installed locally, never committed
 node_modules/
+
+# Vite production output
+dist/
