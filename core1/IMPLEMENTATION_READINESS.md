@@ -12,7 +12,7 @@
 
 - 4 `READY`;
 - 2 `EXPECTED_LEGACY_ERROR`;
-- 1 `UNSUPPORTED_FOR_PARITY`;
+- 1 `REQUIRED_MODULE_NOT_IMPLEMENTED` (ненулевые окна до реализации обязательного модуля);
 - 10 `UNKNOWN`.
 
 ## Доказанные expected outputs
@@ -23,7 +23,7 @@
 
 - span 24 м → `SPAN_24_LEGACY_NA` / `#N/A`;
 - purlin step 500 → `PURLIN_STEP_500_REF` / `#REF!` при достижении кандидатом итогового выбора;
-- nonzero windows → `WINDOW_LEGACY_SOURCE_UNAVAILABLE`.
+- nonzero windows → `WINDOW_GIRT_MODULE_NOT_IMPLEMENTED` до реализации обязательного модуля.
 
 ## Оставшиеся UNKNOWN
 
@@ -50,4 +50,3 @@
 4. Legacy errors возвращаются без исправления.
 5. UNKNOWN fixtures не используются как доказательство корректности.
 6. Ненулевые окна не возвращают числовой инженерный результат.
-

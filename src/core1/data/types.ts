@@ -68,7 +68,7 @@ export interface FixtureManifestEntry {
   expected_file: string;
   excel_source_cells: string[];
   confidence: string;
-  status: "READY" | "EXPECTED_LEGACY_ERROR" | "UNSUPPORTED_FOR_PARITY" | "UNKNOWN";
+  status: "READY" | "EXPECTED_LEGACY_ERROR" | "REQUIRED_MODULE_NOT_IMPLEMENTED" | "UNSUPPORTED_FOR_PARITY" | "UNKNOWN";
 }
 
 export interface Core1FixtureManifest {

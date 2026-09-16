@@ -5,14 +5,46 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "city", "span_m", "building_length_m", "building_height_m",
+    "span_m", "building_length_m", "building_height_m",
     "responsibility_factor", "roof_covering", "roof_deck_grade",
     "snow_retention_purlin", "enclosure_purlin", "gates_le_6m_count",
-    "gates_gt_6m_count", "doors_count", "window_height_m",
-    "window_strip_length_m", "separate_windows_count", "window_construction"
+    "gates_gt_6m_count", "doors_count"
   ],
   "properties": {
     "city": {"type": "string", "minLength": 1},
+    "country": {"type": "string", "enum": ["RU", "KZ"]},
+    "normative_system": {"type": "string", "enum": ["SP_20", "SP_RK_EN"]},
+    "climate": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "country", "city", "normative_system"],
+          "properties": {
+            "mode": {"const": "CITY_LOOKUP"},
+            "country": {"type": "string", "enum": ["RU", "KZ"]},
+            "city": {"type": "string", "minLength": 1},
+            "normative_system": {"type": "string", "enum": ["SP_20", "SP_RK_EN"]}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "country", "normative_system", "snow_region", "snow_load", "wind_region", "wind_load", "seismicity"],
+          "properties": {
+            "mode": {"const": "MANUAL"},
+            "country": {"type": "string", "enum": ["RU", "KZ"]},
+            "normative_system": {"type": "string", "enum": ["SP_20", "SP_RK_EN"]},
+            "snow_region": {"type": ["string", "number"]},
+            "snow_load": {"type": "number", "description": "kN/m²; preserve as entered"},
+            "wind_region": {"type": ["string", "number"]},
+            "wind_load": {"type": "number", "description": "kN/m²; preserve as entered"},
+            "seismicity": {"type": ["string", "number", "null"], "description": "Retained data; influence on structural formulas is unknown"},
+            "source_note": {"type": "string"}
+          }
+        }
+      ]
+    },
     "span_m": {"type": "number", "enum": [9, 12, 15, 18, 21, 24]},
     "building_length_m": {"type": "number"},
     "building_height_m": {"type": "number"},
@@ -44,6 +76,19 @@
     "window_strip_length_m": {"type": "number", "minimum": 0},
     "separate_windows_count": {"type": "integer", "minimum": 0},
     "window_construction": {"type": "string", "minLength": 1},
+    "windows": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "window_type", "window_height_m", "window_strip_length_m", "separate_window_count", "glazing_construction"],
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "window_type": {"type": "integer", "enum": [1, 2, 3, 4, 5]},
+        "window_height_m": {"type": "number", "minimum": 0},
+        "window_strip_length_m": {"type": "number", "minimum": 0},
+        "separate_window_count": {"type": "integer", "minimum": 0},
+        "glazing_construction": {"type": "string", "minLength": 1}
+      }
+    },
     "selection_mode": {"type": "string", "enum": ["стандарт", "подбор"]},
     "building_roof_type": {"type": "string", "enum": ["двускатное", "односкатное"]},
     "purlin_max_step_override_mm": {"type": ["number", "null"]},
@@ -53,5 +98,9 @@
     "window_type": {"type": "integer", "enum": [1, 2, 3, 4, 5]},
     "window_utilization_limit": {"type": "number"},
     "normative_branch": {"type": "string", "enum": ["по СП РК EN", "по СП 20.13330.20ХХ"]}
-  }
+  },
+  "anyOf": [
+    {"required": ["city", "window_height_m", "window_strip_length_m", "separate_windows_count", "window_construction"]},
+    {"required": ["climate", "windows"]}
+  ]
 }

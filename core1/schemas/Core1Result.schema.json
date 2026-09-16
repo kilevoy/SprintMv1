@@ -7,6 +7,25 @@
   "required": ["scenario", "compatibility_diagnostics"],
   "properties": {
     "scenario": {"$ref": "Core1Input.schema.json"},
+    "climate": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["mode", "country", "normative_system", "climate_source"],
+      "properties": {
+        "mode": {"enum": ["CITY_LOOKUP", "MANUAL"]},
+        "country": {"enum": ["RU", "KZ"]},
+        "normative_system": {"enum": ["SP_20", "SP_RK_EN"]},
+        "climate_source": {"enum": ["CITY_LOOKUP", "MANUAL"]},
+        "city": {"type": ["string", "null"]},
+        "snow_region": {"type": ["string", "number", "null"]},
+        "snow_load": {"type": ["number", "null"], "description": "kN/m²"},
+        "wind_region": {"type": ["string", "number", "null"]},
+        "wind_load": {"type": ["number", "null"], "description": "kN/m²"},
+        "seismicity": {"type": ["string", "number", "null"]},
+        "source": {"type": ["string", "null"]},
+        "source_note": {"type": ["string", "null"]}
+      }
+    },
     "frame_step_m": {"type": ["number", "null"], "description": "m"},
     "beam_profile": {"type": ["string", "null"]},
     "beam_steel": {"type": ["string", "null"]},
@@ -34,6 +53,11 @@
     "M16_quantity": {"type": ["integer", "null"], "description": "pcs"},
     "fittings_weight_kg": {"type": ["number", "null"], "description": "kg"},
     "window_girts": {"type": ["array", "null"], "items": {"type": "object"}},
+    "window_lower_girt_profile": {"type": ["string", "null"]},
+    "window_upper_girt_profile": {"type": ["string", "null"]},
+    "window_lower_girt_utilization": {"type": ["number", "null"], "description": "%"},
+    "window_upper_girt_utilization": {"type": ["number", "null"], "description": "%"},
+    "window_girts_weight_kg": {"type": ["number", "null"], "description": "kg"},
     "openings_weight_kg_per_m2": {"type": ["number", "null"], "description": "kg/m²"},
     "openings_weight_t": {"type": ["number", "null"], "description": "t"},
     "openings_weight_kg": {"type": ["number", "null"], "description": "kg"},

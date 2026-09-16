@@ -19,7 +19,17 @@
         "NO_ELIGIBLE_PROFILE",
         "LEGACY_VALUE_ERROR",
         "LEGACY_DIV_ZERO",
-        "INPUT_DOMAIN_UNKNOWN"
+        "INPUT_DOMAIN_UNKNOWN",
+        "LEGACY_NA",
+        "LEGACY_REF",
+        "UNSUPPORTED_WINDOWS",
+        "UNKNOWN_CLIMATE_DATA",
+        "UNKNOWN_DOMAIN",
+        "INVALID_INPUT",
+        "NOT_IMPLEMENTED",
+        "CITY_NOT_FOUND",
+        "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED",
+        "UNSUPPORTED_FOR_PARITY"
       ]
     },
     "excel_error": {
@@ -31,6 +41,11 @@
     "trigger": {"type": ["string", "null"]},
     "affected_outputs": {"type": "array", "items": {"type": "string"}},
     "severity": {"type": "string", "enum": ["warning", "unsupported", "error"]},
-    "message_ru": {"type": "string", "minLength": 1}
+    "message_ru": {"type": "string", "minLength": 1},
+    "message": {"type": "string", "minLength": 1},
+    "source": {"type": "array", "items": {"type": "string"}},
+    "legacy_equivalent": {"type": ["string", "null"]},
+    "details": {"type": "object"},
+    "classification": {"type": "string", "enum": ["legacy_anomaly", "error", "warning", "unsupported", "required_module_not_implemented"]}
   }
 }

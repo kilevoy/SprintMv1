@@ -13,7 +13,8 @@ Expected status:
 
 - `PROVEN` — значение прочитано из сохранённого cache основной книги;
 - `LEGACY_ERROR` — доказан исходный Excel error;
-- `UNSUPPORTED` — строгий parity невозможен по утверждённому контракту;
+- `REQUIRED_MODULE_NOT_IMPLEMENTED` — сценарий поддерживаем продуктом, но обязательный расчётный модуль ещё не написан;
+- `UNSUPPORTED` — строгий parity действительно невозможен по утверждённому контракту;
 - `UNKNOWN` — expected values не доказаны и не вычислены самостоятельно.
 
 ## Состав
@@ -24,7 +25,7 @@ Expected status:
 |---|---:|---|
 | `READY` | 4 | baseline 12 м, zero openings, snow retention `нет`, enclosure purlin `нет` |
 | `EXPECTED_LEGACY_ERROR` | 2 | 24 м `#N/A`, purlin step 500 `#REF!` |
-| `UNSUPPORTED_FOR_PARITY` | 1 | ненулевые окна без доказанных ID 3/4 |
+| `REQUIRED_MODULE_NOT_IMPLEMENTED` | 1 | ненулевые окна; обязательный WindowGirtCalculator ещё не реализован |
 | `UNKNOWN` | 10 | нормальные 9/15/18/21 м, флаги `есть`, manual frame step, roof/deck variants, responsibility 1,0 |
 
 READY-сценарии используют один доказанный сохранённый Excel state и поэтому не считаются четырьмя независимыми пересчётами. Baseline содержит 31 конкретное поле результата; `engineering_loads` оставлено `null`, потому что единый утверждённый output object нагрузки не был зафиксирован.
@@ -57,5 +58,4 @@ UNKNOWN fixture — обязательная заготовка теста, но
 
 ## Windows
 
-Zero-window fixture подтверждает, что Core 1 может работать без ID 3/4/5, когда оконный расчёт не требуется. Ненулевой fixture ожидает `WINDOW_LEGACY_SOURCE_UNAVAILABLE`; числовой профиль или масса не подставляются.
-
+Zero-window fixture подтверждает, что Core 1 может работать без ID 3/4/5, когда оконный расчёт не требуется. Ненулевой fixture ожидает `WINDOW_GIRT_MODULE_NOT_IMPLEMENTED` до реализации обязательного модуля; числовой профиль или масса не подставляются.

@@ -40,3 +40,44 @@ Vitest проверяет путь GitHub Pages, lazy loading, кеширова�
 Типы `LEGACY_NA`, `LEGACY_REF`, `LEGACY_VALUE`, `LEGACY_DIV0` подготовлены для будущего движка. Excel functions пока не реализованы.
 
 `kg_per_m2` остаётся в кг/м². `structural_weight_kg` отсутствует. UNKNOWN fixtures никогда не считаются numeric oracle. Пролёт 24 м и шаг прогона 500 мм должны сохранять legacy diagnostics согласно существующим контрактам.
+
+## Input contract updates
+
+Новый контракт разделяет `windows.window_type` (доказанные схемы `1..5`) и
+`windows.glazing_construction`. Ненулевые окна являются обязательной частью
+Core 1: до реализации `WindowGirtCalculator` они возвращают
+`required_module_not_implemented` с диагностикой
+`WINDOW_GIRT_MODULE_NOT_IMPLEMENTED`, а не `UNSUPPORTED_FOR_PARITY`.
+
+Климат задаётся discriminated union `ClimateInput`:
+
+- `CITY_LOOKUP`: `country`, `city`, `normative_system`;
+- `MANUAL`: `country`, `normative_system`, `snow_region`, `snow_load`,
+  `wind_region`, `wind_load`, `seismicity` и необязательная `source_note`.
+
+Районы и нагрузки хранятся раздельно; ручные значения не заменяются lookup.
+Для Казахстана `normative_system` выбирается явно (`SP_20` = ветка «СП 20» или
+`SP_RK_EN` = ветка «СП РК EN»).
+Старые flat-поля принимаются только как compatibility input и нормализуются без
+изменения Excel-методики.
+
+`seismicity` сохраняется как входное климатическое поле, но его роль сейчас
+классифицирована как `UNKNOWN`: доказанного влияния на structural formulas нет,
+поэтому в инженерный расчёт оно не включается.
+
+## Execution lifecycle
+
+```text
+Core1Input
+  → Schema validation
+  → Domain validation
+  → Lazy dataset loading
+  → Early compatibility diagnostics
+  → Future calculation modules
+  → Core1Result
+```
+
+`calculateCore1` реализует только этот orchestration boundary. Ожидаемые
+legacy-сценарии возвращаются как `legacy_error`, неподдержанные ветви — как
+`unsupported`, а обычный supported input пока завершается внутренним
+`NOT_IMPLEMENTED`; инженерный результат не подставляется.

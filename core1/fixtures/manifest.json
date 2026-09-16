@@ -248,8 +248,8 @@
     },
     {
       "id": "nonzero_windows_unsupported",
-      "description": "Ненулевые окна требуют недоказанных ID 3/4",
-      "supported_domain": "UNSUPPORTED_FOR_PARITY",
+      "description": "Ненулевые окна требуют ещё не реализованный WindowGirtCalculator",
+      "supported_domain": "SUPPORTED",
       "legacy_scenario": false,
       "input_file": "nonzero_windows_unsupported.input.json",
       "expected_file": "nonzero_windows_unsupported.expected.json",
@@ -260,7 +260,7 @@
         "Расчет!F9"
       ],
       "confidence": "high",
-      "status": "UNSUPPORTED_FOR_PARITY"
+      "status": "REQUIRED_MODULE_NOT_IMPLEMENTED"
     }
   ]
 }

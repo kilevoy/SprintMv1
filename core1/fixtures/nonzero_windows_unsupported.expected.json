@@ -2,19 +2,19 @@
   "schema_version": "1.0.0",
   "id": "nonzero_windows_unsupported",
   "expected_output": {
-    "status": "UNSUPPORTED",
+    "status": "REQUIRED_MODULE_NOT_IMPLEMENTED",
     "values": {}
   },
   "expected_diagnostics": [
     {
-      "code": "WINDOW_LEGACY_SOURCE_UNAVAILABLE",
+      "code": "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED",
       "excel_error": null,
       "module": "WindowGirtCalculator",
       "source_cells": [
         "Расчет!D9",
         "Расчет!F9"
       ],
-      "trigger": "nonzero window inputs require recalculation outside saved cache fixture",
+      "trigger": "windows.enabled=true",
       "affected_outputs": [
         "window_girts",
         "openings_weight_kg_per_m2",
@@ -22,8 +22,8 @@
         "openings_weight_kg",
         "kg_per_m2"
       ],
-      "severity": "unsupported",
-      "message_ru": "Точная legacy-версия ветрового расчёта окон недоступна; строгий результат не может быть вычислен."
+      "severity": "warning",
+      "message_ru": "Подбор оконных ригелей обязателен, но модуль ещё не реализован."
     }
   ],
   "source_cells": [

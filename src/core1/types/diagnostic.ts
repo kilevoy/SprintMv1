@@ -1,8 +1,24 @@
 export type LegacyErrorKind = "LEGACY_NA" | "LEGACY_REF" | "LEGACY_VALUE" | "LEGACY_DIV0";
 export type ExcelError = "#N/A" | "#REF!" | "#VALUE!" | "#DIV/0!";
 export type DiagnosticSeverity = "warning" | "unsupported" | "error";
+export type DiagnosticClassification =
+  | "legacy_anomaly"
+  | "error"
+  | "warning"
+  | "unsupported"
+  | "required_module_not_implemented";
 
 export type Core1DiagnosticCode =
+  | "LEGACY_NA"
+  | "LEGACY_REF"
+  | "UNSUPPORTED_WINDOWS"
+  | "UNKNOWN_CLIMATE_DATA"
+  | "UNKNOWN_DOMAIN"
+  | "INVALID_INPUT"
+  | "NOT_IMPLEMENTED"
+  | "CITY_NOT_FOUND"
+  | "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED"
+  | "UNSUPPORTED_FOR_PARITY"
   | "PURLIN_STEP_500_REF"
   | "SPAN_24_LEGACY_NA"
   | "WINDOW_EN_SWITCH_UNREACHABLE"
@@ -24,6 +40,11 @@ export interface Core1Diagnostic {
   affected_outputs?: string[];
   severity: DiagnosticSeverity;
   message_ru: string;
+  message?: string;
+  source?: string[];
+  legacy_equivalent?: string | null;
+  details?: Record<string, unknown>;
+  classification?: DiagnosticClassification;
 }
 
 export const LEGACY_ERROR_TO_EXCEL: Readonly<Record<LegacyErrorKind, ExcelError>> = {

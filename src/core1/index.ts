@@ -1,5 +1,8 @@
 export * from "./types";
 export * from "./compatibility";
+export * from "./diagnostics";
+export * from "./validation";
+export * from "./engine";
 export {
   BrowserCore1DataRepository,
   BrowserDataSource,

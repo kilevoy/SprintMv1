@@ -12,8 +12,24 @@ export interface Core1Bolt {
   source_cell: string;
 }
 
+export interface Core1ClimateResult {
+  mode: import("./input").ClimateInput["mode"];
+  country: import("./input").CountryCode;
+  normative_system: import("./input").NormativeSystem;
+  climate_source: "CITY_LOOKUP" | "MANUAL";
+  city?: string | null;
+  snow_region?: string | number | null;
+  snow_load?: number | null;
+  wind_region?: string | number | null;
+  wind_load?: number | null;
+  seismicity?: string | number | null;
+  source?: string | null;
+  source_note?: string | null;
+}
+
 export interface Core1Result {
   scenario: import("./input").Core1Input;
+  climate?: Core1ClimateResult | null;
   frame_step_m?: number | null;
   beam_profile?: string | null;
   beam_steel?: string | null;
@@ -41,6 +57,11 @@ export interface Core1Result {
   M16_quantity?: number | null;
   fittings_weight_kg?: number | null;
   window_girts?: Array<Record<string, unknown>> | null;
+  window_lower_girt_profile?: string | null;
+  window_upper_girt_profile?: string | null;
+  window_lower_girt_utilization?: number | null;
+  window_upper_girt_utilization?: number | null;
+  window_girts_weight_kg?: number | null;
   openings_weight_kg_per_m2?: number | null;
   openings_weight_t?: number | null;
   openings_weight_kg?: number | null;
