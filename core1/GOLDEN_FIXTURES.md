@@ -24,7 +24,7 @@ Expected status:
 |---|---:|---|
 | `READY` | 4 | baseline 12 м, zero openings, snow retention `нет`, enclosure purlin `нет` |
 | `EXPECTED_LEGACY_ERROR` | 2 | 24 м `#N/A`, purlin step 500 `#REF!` |
-| `REQUIRED_MODULE_NOT_IMPLEMENTED` | 1 | ненулевые окна; локальная цепочка доказана, код модуля ещё не реализован |
+| `UNKNOWN` | 11 | включая ненулевые окна без независимого golden oracle |
 | `UNKNOWN` | 10 | нормальные 9/15/18/21 м, флаги `есть`, manual frame step, roof/deck variants, responsibility 1,0 |
 
 READY-сценарии используют один доказанный сохранённый Excel state и поэтому не считаются четырьмя независимыми пересчётами. Baseline содержит 31 конкретное поле результата; `engineering_loads` оставлено `null`, потому что единый утверждённый output object нагрузки не был зафиксирован.
@@ -59,6 +59,7 @@ UNKNOWN fixture — обязательная заготовка теста, но
 
 Zero-window fixture подтверждает, что Core 1 может работать без внешних ID,
 когда оконный расчёт не требуется. Ненулевой fixture сохраняет отсутствие
-числового oracle; runtime возвращает `WINDOW_GIRT_MODULE_NOT_IMPLEMENTED`, пока
-код модуля не написан. Отсутствие non-zero oracle блокирует PARITY_PROVEN, но
-не IMPLEMENTED. ID3/ID4/ID5 и J20 не являются blocker нового API.
+числового oracle; runtime рассчитывает локальный `WindowGirtResult`, но общий
+fixture остаётся `UNKNOWN` до независимого golden результата. Отсутствие
+non-zero oracle блокирует PARITY_PROVEN, но не IMPLEMENTED. ID3/ID4/ID5 и J20
+не являются blocker нового API.

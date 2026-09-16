@@ -58,6 +58,7 @@ export type PurlinDatasetId =
   | "purlin_steel_grades";
 
 export type ClimateDatasetId = "climate_cities_sparse" | "climate_lookup_sparse";
+export type WindowDatasetId = "window_profile_candidates" | "window_result_layout" | "window_presentation_layout";
 
 export interface FixtureManifestEntry {
   id: string;
@@ -99,6 +100,7 @@ export interface Core1DataRepository {
   loadSecondarySteelData(): Promise<LoadedDataset>;
   loadBoltsPlatesFittings(): Promise<LoadedDataset>;
   loadConstants(): Promise<LoadedDataset>;
+  loadWindowDataset(id: WindowDatasetId): Promise<LoadedDataset>;
   loadFixtureManifest(): Promise<Core1FixtureManifest>;
   loadFixture(id: string): Promise<Core1Fixture>;
 }

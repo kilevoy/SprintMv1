@@ -30,7 +30,7 @@
 | `bolts` | `D52:D55` | list | bolt patterns | основной подбор | high |
 | `M16_quantity` | `D56` | integer | pcs | legacy rule | high |
 | `fittings_weight_kg` | `D57` | number | kg | основной подбор | high |
-| `window_girts` | выбранные результаты `Расчет!B21:B23,B26:B28`; представление `Лист1!B24:D33,B37:D46` | object/list | profile/checks | window-girt selection | medium; exact scenario parity needs legacy `[3]/[4]` closure |
+| `window_girts` | выбранные результаты `Расчет!B21:B23,B26:B28`; представление `Лист1!B24:D33,B37:D46` | object/list | profile/checks | window-girt selection | high for local implementation; numeric parity still needs non-zero golden |
 | `openings_weight_kg_per_m2` | `вывод!D68` ← `Лист1!O28` | number | kg/m² | openings/window module | high |
 | `openings_weight_t` | `E68` ← `Лист1!O29` | number | t | openings/window module | high |
 | `openings_weight_kg` | derived API field `E68 × 1000` | number | kg | exact unit conversion from proved tonnes cell | high |

@@ -88,10 +88,10 @@ describe("Core 1 input validation and orchestration", () => {
     const input = await inputFor("nonzero_windows_unsupported");
     const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
     expect(result.status).toBe("required_module_not_implemented");
-    expect(resultCode(result)).toBe("WINDOW_GIRT_MODULE_NOT_IMPLEMENTED");
-    const diagnostic = result.diagnostics.find((item) => item.code === "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED");
-    expect(diagnostic?.details).toMatchObject({ implementation_boundary: "LOCAL_FORMULA_CHAIN_PROVEN", normative_system: "SP_20", window_type: 1 });
-    expect(diagnostic?.message).not.toContain("J20");
+    expect(resultCode(result)).toBe("NOT_IMPLEMENTED");
+    expect(result.context?.windows?.trace).toMatchObject({ normative_system: "SP_20", window_type: 1, wind_branch: "SP_20" });
+    expect(result.context?.windows?.lower_girt_profile).toBeTruthy();
+    expect(result.context?.windows?.upper_girt_profile).toBeTruthy();
   });
 
   it("routes KZ SP_RK_EN directly without the legacy J20 switch", async () => {
@@ -103,8 +103,8 @@ describe("Core 1 input validation and orchestration", () => {
     const second = await calculateCore1(input, new BrowserCore1DataRepository(source));
     expect(second).toEqual(first);
     expect(first.status).toBe("required_module_not_implemented");
-    expect(first.diagnostics.some((diagnostic) => diagnostic.code === "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED")).toBe(true);
-    expect(first.diagnostics.find((diagnostic) => diagnostic.code === "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED")?.details).toMatchObject({ normative_system: "SP_RK_EN", window_type: 3 });
+    expect(resultCode(first)).toBe("NOT_IMPLEMENTED");
+    expect(first.context?.windows?.trace).toMatchObject({ normative_system: "SP_RK_EN", window_type: 3, wind_branch: "SP_RK_EN" });
     expect(first.diagnostics.some((diagnostic) => (diagnostic.source ?? []).some((sourceCell) => sourceCell.includes("v2.0")))).toBe(false);
   });
 
@@ -179,7 +179,8 @@ describe("Core 1 input validation and orchestration", () => {
     expect(validateCore1InputDomain(input).state).toBe("VALID");
     const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
     expect(result.status).toBe("required_module_not_implemented");
-    expect(resultCode(result)).toBe("WINDOW_GIRT_MODULE_NOT_IMPLEMENTED");
+    expect(resultCode(result)).toBe("NOT_IMPLEMENTED");
+    expect(result.context?.windows?.trace.window_type).toBe(windowType);
   });
 
   it("rejects a window_type outside 1..5 at schema validation", async () => {
@@ -224,6 +225,7 @@ describe("Core 1 input validation and orchestration", () => {
     expect(calls).toContain("core1/data/deck_properties.csv");
     expect(calls).toContain("core1/data/secondary_steel_rules.csv");
     expect(calls).toContain("core1/data/bolts_plates_fittings.csv");
+    expect(calls.some((path) => path.includes("window_profile_candidates"))).toBe(false);
     expect(calls.some((path) => path.includes("external"))).toBe(false);
     expect(calls.some((path) => /frame_(9|12|15|21|24)m/.test(path))).toBe(false);
   });
@@ -239,7 +241,6 @@ describe("Core 1 input validation and orchestration", () => {
       const result = await calculateCore1(envelope.input, new BrowserCore1DataRepository(source));
       statuses.set(fixture.status, (statuses.get(fixture.status) ?? 0) + 1);
       if (fixture.status === "EXPECTED_LEGACY_ERROR") expect(result.status).toBe("legacy_error");
-      else if (fixture.status === "REQUIRED_MODULE_NOT_IMPLEMENTED") expect(result.status).toBe("required_module_not_implemented");
       else if (fixture.status === "READY") {
         expect(result.status).toBe("required_module_not_implemented");
         expect(internalStatus(result)).toBe("NOT_IMPLEMENTED");
@@ -247,6 +248,6 @@ describe("Core 1 input validation and orchestration", () => {
         expect(result.status).not.toBe("success");
       }
     }
-    expect(Object.fromEntries(statuses)).toEqual({ READY: 4, UNKNOWN: 10, EXPECTED_LEGACY_ERROR: 2, REQUIRED_MODULE_NOT_IMPLEMENTED: 1 });
+    expect(Object.fromEntries(statuses)).toEqual({ READY: 4, UNKNOWN: 11, EXPECTED_LEGACY_ERROR: 2 });
   }, 30000);
 });

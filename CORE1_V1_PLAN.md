@@ -35,7 +35,7 @@ Parity означает совпадение текста/ошибки точн�
 - отсутствие допустимого кандидата → исходный `#N/A` или sentinel behavior;
 - активные `#VALUE!` и `#DIV/0!` → одноимённые typed errors;
 - legacy-запрос штатно недостижимой EN-ветки окон → `WINDOW_EN_SWITCH_UNREACHABLE`; новый API не использует этот switch.
-- несуществующий/не реализованный оконный модуль → `WINDOW_GIRT_MODULE_NOT_IMPLEMENTED` без подстановки числового результата.
+- ошибочный/недоступный оконный dataset → typed diagnostic без подстановки числового результата; доказанный модуль возвращает `WindowGirtResult`.
 
 ## 4. Что временно unsupported
 
@@ -68,7 +68,7 @@ Parity означает совпадение текста/ошибки точн�
 4. `FrameSelector` для 9–21 м и legacy-error path 24 м.
 5. `PurlinCalculator`, включая candidate trace и шаг 500 error.
 6. `SecondarySteelCalculator`.
-7. `WindowGirtCalculator` по локальной формульной цепочке; до написания кода — typed `WINDOW_GIRT_MODULE_NOT_IMPLEMENTED`.
+7. `WindowGirtCalculator` по локальной формульной цепочке, с trace и branch-specific selection.
 8. `OpeningMassCalculator` для поддержанных сценариев.
 9. `StructuralSummary` и Core 1 → Core 2 payload.
 
@@ -99,7 +99,7 @@ Parity означает совпадение текста/ошибки точн�
 - first-match на дублирующемся ключе и tie-breaking равных кандидатов;
 - no intermediate rounding;
 - нулевые окна не вызывают window-source error;
-- ненулевые окна с `window_type=1..5` доходят до WindowGirtCalculator; отсутствие реализации возвращает `WINDOW_GIRT_MODULE_NOT_IMPLEMENTED`;
+- ненулевые окна с `window_type=1..5` доходят до реализованного WindowGirtCalculator;
 - KZ: явный выбор «нет» маршрутизирует `SP_20`, «да» — `SP_RK_EN`;
 - отсутствие ID3/ID4/ID5 не является runtime blocker: используются локальные листы основной книги;
 - conflicting 82,4% city dataset никогда не загружается как canonical.

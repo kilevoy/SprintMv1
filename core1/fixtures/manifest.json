@@ -248,7 +248,7 @@
     },
     {
       "id": "nonzero_windows_unsupported",
-      "description": "Ненулевые окна; локальная формульная цепочка доказана, модуль ещё не реализован",
+      "description": "Ненулевые окна; локальная формульная цепочка реализована, non-zero golden oracle отсутствует",
       "supported_domain": "SUPPORTED",
       "legacy_scenario": false,
       "input_file": "nonzero_windows_unsupported.input.json",
@@ -260,7 +260,7 @@
         "Расчет!F9"
       ],
       "confidence": "high",
-      "status": "REQUIRED_MODULE_NOT_IMPLEMENTED"
+      "status": "UNKNOWN"
     }
   ]
 }

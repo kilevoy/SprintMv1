@@ -14,8 +14,8 @@
 
 - 4 `READY`;
 - 2 `EXPECTED_LEGACY_ERROR`;
-- 1 `REQUIRED_MODULE_NOT_IMPLEMENTED` в сохранённом fixture manifest (формульная цепочка доказана, код оконного модуля ещё не написан);
-- 10 `UNKNOWN`.
+- 0 `REQUIRED_MODULE_NOT_IMPLEMENTED`;
+- 11 `UNKNOWN` (ненулевой оконный fixture теперь относится сюда: реализация есть, golden oracle отсутствует).
 
 ## Доказанные expected outputs
 
@@ -25,7 +25,7 @@
 
 - span 24 м → `SPAN_24_LEGACY_NA` / `#N/A`;
 - purlin step 500 → `PURLIN_STEP_500_REF` / `#REF!` при достижении кандидатом итогового выбора;
-- nonzero windows → `WINDOW_GIRT_MODULE_NOT_IMPLEMENTED` до реализации кода; отсутствие golden oracle блокирует только parity acceptance.
+- nonzero windows → deterministic `WindowGirtResult`; отсутствие golden oracle блокирует только parity acceptance.
 
 ## Оставшиеся UNKNOWN
 
@@ -36,14 +36,15 @@
 - responsibility `1,0`;
 - единый typed объект `engineering_loads`;
 - произвольные city inputs за пределами proven local successful lookup set;
-- все ненулевые оконные расчёты.
+- golden expected outputs всех ненулевых оконных сценариев.
 
 ## Можно ли начинать Calculation Engine
 
 **Да, с ограничением области.** Можно реализовывать data loaders, Excel-compatible value/error semantics и non-window модули для baseline и доказанных локальных datasets. Нельзя объявлять полный parity или закрывать acceptance для 9/15/18/21 и вариантов с `UNKNOWN`, пока не появятся независимые expected values.
 
-`WindowGirtCalculator` имеет доказанную локальную формульную границу и может
-реализовываться. До написания кода orchestration возвращает contract diagnostic.
+`WindowGirtCalculator` реализован по доказанной локальной формульной границе.
+До реализации downstream-модулей orchestration возвращает только общий
+`NOT_IMPLEMENTED` после сохранения результата в `context.windows`.
 Исправление 24 м и восстановление ссылки шага 500 мм не входят в разрешённую
 реализацию.
 
@@ -54,4 +55,4 @@
 3. Baseline 12 м воспроизводится по всем доказанным полям.
 4. Legacy errors возвращаются без исправления.
 5. UNKNOWN fixtures не используются как доказательство корректности.
-6. Ненулевые окна не возвращают числовой инженерный результат.
+6. Ненулевые окна возвращают `WindowGirtResult`; числовой parity oracle ещё не утверждён.

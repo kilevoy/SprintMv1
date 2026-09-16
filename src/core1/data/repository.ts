@@ -6,6 +6,7 @@ import type {
   Core1Fixture,
   Core1FixtureManifest,
   ClimateDatasetId,
+  WindowDatasetId,
   DatasetManifestEntry,
   LoadedDataset,
   PurlinDatasetId,
@@ -76,6 +77,10 @@ export class BrowserCore1DataRepository implements Core1DataRepository {
 
   public loadConstants(): Promise<LoadedDataset> {
     return this.loadDataset("purlin_calculation_constants");
+  }
+
+  public loadWindowDataset(id: WindowDatasetId): Promise<LoadedDataset> {
+    return this.loadDataset(id);
   }
 
   public loadFixtureManifest(): Promise<Core1FixtureManifest> {

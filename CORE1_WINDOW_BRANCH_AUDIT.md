@@ -3,6 +3,8 @@
 ## Итоговый статус
 
 `WINDOW_BRANCH_STATUS: FULLY_PROVEN_FOR_IMPLEMENTATION`.
+`WINDOW_CALCULATOR_IMPLEMENTED: true`.
+`WINDOW_PARITY_PROVEN: false`.
 
 `PARITY_PROVEN` пока не заявляется: независимого non-zero golden scenario нет.
 Это ограничивает acceptance и числовой oracle, но не блокирует реализацию
@@ -143,5 +145,6 @@ Cached `#N/A` внутри локальной ветки сохраняются 
 маркировку `PARITY_PROVEN` и acceptance-тест, но не сам модуль.
 
 До завершения кода текущий orchestration может возвращать typed
-`WINDOW_GIRT_MODULE_NOT_IMPLEMENTED`; это implementation boundary, а не
-блокер J20/ID3/ID4/ID5.
+`NOT_IMPLEMENTED` только для ещё не реализованных downstream-модулей. Для
+оконной ветки `WINDOW_CALCULATOR_IMPLEMENTED=true`; это не меняет отсутствие
+non-zero golden oracle для `PARITY_PROVEN`.

@@ -7,6 +7,7 @@ export * from "./climate";
 export * from "./frame";
 export * from "./purlin";
 export * from "./secondary";
+export * from "./window";
 export {
   BrowserCore1DataRepository,
   BrowserDataSource,
@@ -24,4 +25,5 @@ export type {
   DatasetRecord,
   LoadedDataset,
   PurlinDatasetId,
+  WindowDatasetId,
 } from "./data";

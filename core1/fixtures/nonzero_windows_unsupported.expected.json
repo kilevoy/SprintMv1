@@ -2,30 +2,10 @@
   "schema_version": "1.0.0",
   "id": "nonzero_windows_unsupported",
   "expected_output": {
-    "status": "REQUIRED_MODULE_NOT_IMPLEMENTED",
+    "status": "UNKNOWN",
     "values": {}
   },
-  "expected_diagnostics": [
-    {
-      "code": "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED",
-      "excel_error": null,
-      "module": "WindowGirtCalculator",
-      "source_cells": [
-        "Расчет!D9",
-        "Расчет!F9"
-      ],
-      "trigger": "windows.enabled=true",
-      "affected_outputs": [
-        "window_girts",
-        "openings_weight_kg_per_m2",
-        "openings_weight_t",
-        "openings_weight_kg",
-        "kg_per_m2"
-      ],
-      "severity": "warning",
-      "message_ru": "Локальная формульная цепочка окон доказана; WindowGirtCalculator ещё не реализован. Внешние книги не требуются."
-    }
-  ],
+  "expected_diagnostics": [],
   "source_cells": [
     "вывод!D64:D67",
     "Лист1!J18:J20",

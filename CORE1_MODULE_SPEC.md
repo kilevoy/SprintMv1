@@ -52,7 +52,7 @@
 - Static datasets: `window_profile_candidates`, `window_result_layout`, `Города п.К`, `снегветер`, `Ветер СП`, `Ветер по СП РК EN`.
 - Excel source: `Лист1`, `Расчет`, `Ветер СП`, `Ветер по СП РК EN`.
 - Known anomalies: `J20` has no producer and is legacy-only; historical IDs 3/4/5 are redundant references; sentinel `999999999`; v2.0 запрещён как fallback.
-- V1 boundary: local formula chain and per-type coefficients are proven for implementation. Until code is written, return `WINDOW_GIRT_MODULE_NOT_IMPLEMENTED`; missing non-zero golden blocks parity acceptance only.
+- V1 boundary: local formula chain and per-type coefficients are implemented in `WindowGirtCalculator`; missing non-zero golden blocks parity acceptance only.
 
 ## OpeningMassCalculator
 

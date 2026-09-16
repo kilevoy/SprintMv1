@@ -33,7 +33,7 @@ pytest core1/tests/test_static_data_integrity.py
 
 - Пролёт 24 м сохраняет legacy `#N/A`.
 - Выбранный шаг прогонов 500 мм сохраняет legacy `#REF!`.
-- Ненулевые окна маршрутизируются по явным `normative_system` и `window_type=1..5`; до реализации кода возвращают `WINDOW_GIRT_MODULE_NOT_IMPLEMENTED`. J20 и ID3/4/5 не являются runtime dependencies нового Core.
+- Ненулевые окна рассчитываются локальным `WindowGirtCalculator` по явным `normative_system` и `window_type=1..5`; J20 и ID3/4/5 не являются runtime dependencies нового Core.
 - Конфликтующая таблица городов с совпадением 82,4% не используется.
 - ID 1/2 не являются runtime dependencies.
 - `kg_per_m2` измеряется в кг/м².

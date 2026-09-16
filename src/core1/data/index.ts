@@ -12,4 +12,5 @@ export type {
   DatasetRecord,
   LoadedDataset,
   PurlinDatasetId,
+  WindowDatasetId,
 } from "./types";

@@ -1,6 +1,6 @@
 # Core 1 TypeScript data layer
 
-Это browser-ready foundation для будущего Calculation Engine. На текущем этапе здесь нет расчётных модулей, React UI, backend или Core 2.
+Это browser-ready foundation для Calculation Engine. Реализованы InputValidation, ClimateResolver, FrameSelector, PurlinCalculator, SecondarySteelCalculator и WindowGirtCalculator; React UI, backend, OpeningMassCalculator, StructuralSummary и Core 2 пока отсутствуют.
 
 ## Data flow
 
@@ -49,8 +49,11 @@ Vitest проверяет путь GitHub Pages, lazy loading, кеширова�
 Исторические ID3/ID4/ID5 не требуются runtime: снег и ветер берутся из
 локальных листов основной книги. Формульная цепочка окон доказана для
 реализации; до написания `WindowGirtCalculator` orchestration возвращает
-`WINDOW_GIRT_MODULE_NOT_IMPLEMENTED`, а отсутствие non-zero golden oracle
-блокирует только `PARITY_PROVEN`.
+`WindowGirtCalculator` реализован для доказанного локального domain; отсутствие
+non-zero golden oracle блокирует только `PARITY_PROVEN`.
+
+Статусы оконной ветки: `WINDOW_CALCULATOR_IMPLEMENTED=true`,
+`WINDOW_PARITY_PROVEN=false`.
 
 Климат задаётся discriminated union `ClimateInput`:
 
@@ -85,6 +88,21 @@ MANUAL:     manual values → ClimateResult
 
 После успешного разрешения `calculateCore1` помещает `ClimateResult` в typed
 `context.climate`; последующие модули получают его без повторного lookup.
+
+## Window girt calculation lifecycle
+
+```text
+windows.enabled + window_type + ClimateResult + FrameResult
+  → local window_profile_candidates dataset
+  → SP_20/SP_RK_EN branch selected by normative_system
+  → lower/upper candidate checks and first-order selection
+  → WindowGirtResult with utilization, profile, steel, mass and trace
+```
+
+`WindowGirtCalculator` не читает `Core1Input` целиком, не использует J20 или
+внешние ID3/ID4/ID5 и не вызывается при `windows.enabled=false`. Его результат
+уже доступен в `context.windows`; `OpeningMassCalculator` и
+`StructuralSummary` остаются следующими модулями.
 
 ## Frame selection lifecycle
 

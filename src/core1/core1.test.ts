@@ -90,7 +90,7 @@ describe("Core 1 TypeScript data layer", () => {
   it("never treats UNKNOWN fixture values as a numeric oracle", async () => {
     const manifest = await fixtureManifest();
     const unknown = manifest.fixtures.filter((fixture) => fixture.status === "UNKNOWN");
-    expect(unknown).toHaveLength(10);
+    expect(unknown).toHaveLength(11);
     for (const fixture of unknown) {
       const expected = await testSource.getJson<{ expected_output: { status: string; values: Record<string, unknown> } }>(`core1/fixtures/${fixture.expected_file}`);
       expect(expected.expected_output.status).toBe("UNKNOWN");

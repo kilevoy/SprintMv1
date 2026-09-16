@@ -2,6 +2,7 @@ import type { Core1ClimateResult, Core1Diagnostic, Core1Result } from "../types"
 import type { FrameResult } from "../frame";
 import type { PurlinResultValue } from "../purlin";
 import type { SecondarySteelResult } from "../secondary";
+import type { WindowGirtResult } from "../window";
 
 export type Core1EngineStatus =
   | "success"
@@ -21,13 +22,12 @@ export type Core1EngineCode =
   | "CITY_NOT_FOUND"
   | "INVALID_INPUT"
   | "NOT_IMPLEMENTED"
-  | "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED"
   | "UNSUPPORTED_FOR_PARITY";
 
 export interface Core1EngineBase {
   status: Core1EngineStatus;
   diagnostics: Core1Diagnostic[];
-  context?: { climate: Core1ClimateResult; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult };
+  context?: { climate: Core1ClimateResult; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult; windows?: WindowGirtResult | null };
 }
 
 export interface Core1EngineSuccess extends Core1EngineBase {
@@ -68,7 +68,7 @@ export interface Core1EngineCityNotFound extends Core1EngineBase {
 
 export interface Core1EngineRequiredModuleNotImplemented extends Core1EngineBase {
   status: "required_module_not_implemented";
-  code: "WINDOW_GIRT_MODULE_NOT_IMPLEMENTED" | "NOT_IMPLEMENTED";
+  code: "NOT_IMPLEMENTED";
   internal_status: "REQUIRED_MODULE_NOT_IMPLEMENTED" | "NOT_IMPLEMENTED";
   result: null;
 }
