@@ -8,3 +8,6 @@ testsprite_tests/tmp/
 # Local editor/system noise
 .DS_Store
 Thumbs.db
+
+# Node dependencies are installed locally, never committed
+node_modules/
