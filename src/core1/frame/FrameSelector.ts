@@ -6,10 +6,11 @@ import { resolveDesignSpanFamily } from "./designSpanFamily";
 
 const FRAME_STEEL = "М.п.350";
 const FRAME_TIE_UNIT_MASS_KG: Readonly<Record<9 | 12 | 15 | 18 | 21, number>> = { 9: 115, 12: 148, 15: 181, 18: 224, 21: 290 };
-// Proven from вывод!D8 -> подбор!AA14/AA15 -> подбор!I2:I7/I9:I14
-// in 22318_SOURCE_SELECTION.xlsx. This is the automatic branch only;
-// a non-zero frame_step_override_m remains an explicit legacy override.
-const AUTOMATIC_FRAME_STEP_M: Readonly<Record<9 | 12 | 15 | 18 | 21, number>> = { 9: 6, 12: 6, 15: 4, 18: 4, 21: 4 };
+// Proven from the вывод!D8 -> подбор!AA14/AA15 -> подбор!I2:I7/I9:I14
+// family lookup in the source-selection workbooks. This is the automatic
+// branch only; a non-zero frame_step_override_m remains an explicit legacy
+// override.
+const AUTOMATIC_FRAME_STEP_M: Readonly<Record<9 | 12 | 15 | 18 | 21, number>> = { 9: 6, 12: 6, 15: 4, 18: 4.5, 21: 4 };
 const HEIGHT_BANDS = [
   { max: 3.8, datasetHeight: 3.6 },
   { max: 5, datasetHeight: 4.8 },

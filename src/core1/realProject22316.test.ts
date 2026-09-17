@@ -1,0 +1,56 @@
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+import { BrowserCore1DataRepository } from "./data";
+import type { Core1DataSource } from "./data";
+import { calculateCore1 } from "./engine";
+import { projectInputToCore1Input } from "../project";
+import type { ProjectInput } from "../project";
+
+class TestDataSource implements Core1DataSource {
+  public constructor(private readonly rootDirectory: string) {}
+  public async getText(assetPath: string): Promise<string> { return readFile(resolve(this.rootDirectory, assetPath), "utf8"); }
+  public async getJson<T>(assetPath: string): Promise<T> { return JSON.parse(await this.getText(assetPath)) as T; }
+}
+
+const source = new TestDataSource(resolve(import.meta.dirname, "../.."));
+
+const project22316: ProjectInput = {
+  climate: { mode: "CITY_LOOKUP", country: "RU", city: "Березовский", normative_system: "SP_20" },
+  geometry: { span_m: 18, building_length_m: 30, building_height_m: 5, responsibility_factor: 1.0, frame_step_override_m: null },
+  envelope: { roof_covering: "С-П 150", roof_deck_grade: "С44-1000-0,7", wall_system: "Сэндвич-панель 200 мм" },
+  openings: [
+    { id: "gate-22316", kind: "gate", width_mm: 3000, height_mm: 3000, quantity: 1 },
+    { id: "door-22316", kind: "door", width_mm: 1000, height_mm: 2000, quantity: 1 },
+  ],
+  special_conditions: { snow_retention_purlin: "нет", enclosure_purlin: "нет", horizontal_bracing_override: null },
+  other: { selection_mode: "стандарт", building_roof_type: "двускатное", purlin_max_step_override_mm: null, purlin_min_step_mm: 0, terrain_type: "В", window_scheme_factor: 1.0, window_utilization_limit: 0.85 },
+};
+
+describe("real project 22316 first-divergence replay", () => {
+  it("reaches the next chain boundary after the generic family-18 step fix", async () => {
+    const adapted = projectInputToCore1Input(project22316, { gate_boundary_dimension: "width_mm" });
+    expect(adapted.status).toBe("success");
+    if (adapted.status !== "success") return;
+
+    const result = await calculateCore1(adapted.input, new BrowserCore1DataRepository(source));
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    expect(result.context?.frame).toMatchObject({
+      frame_step_m: 4.5,
+      frame_mass_kg: 985,
+      beam_profile: "ПГС300/20х80х3",
+      column_profile: "ПГС300/20х80х2,5",
+    });
+    expect(Math.ceil(project22316.geometry.building_length_m / result.context!.frame!.frame_step_m) + 1).toBe(8);
+    expect(result.context?.purlin).toMatchObject({
+      purlin_profile: "2ПС 200х65х1,5",
+      purlin_steel: "М.п.350",
+      purlin_step_mm: 1800,
+      purlin_weight_kg: 2930.4,
+    });
+    // The source agrees through profile/steel/step; purlin mass is the next
+    // divergence and must not be silently normalized here.
+    expect(result.context?.purlin?.purlin_weight_kg).not.toBe(3174.6);
+  });
+});

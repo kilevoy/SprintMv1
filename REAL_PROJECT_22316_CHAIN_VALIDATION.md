@@ -2,8 +2,9 @@
 
 ## Scope and evidence
 
-This is a parity audit after adding one explicitly proven climate tuple. No
-XLSX was modified. The requested source path
+This is a parity audit after adding one explicitly proven climate tuple and
+correcting the generic family-18 automatic frame-step lookup. No XLSX was
+modified. The requested source path
 `E:\\SprintMv1\\_reference\\22316\\22316\\_SOURCE\\_SELECTION.xlsx` does not
 exist in this checkout; the verified source is
 `E:\\SprintMv1_reference\\22316\\22316_SOURCE_SELECTION.xlsx`. The
@@ -34,27 +35,27 @@ The workbook stores gate/door counts, not a complete dimensional ProjectInput;
 the adapter replay therefore uses the already-proven width-boundary policy.
 That dimensional projection is not the first divergence.
 
-## Ordered chain comparison
+## Ordered chain comparison after the family-18 automatic-step fix
 
 | Chain field | SOURCE | CORE1 | Result |
 |---|---:|---:|---|
 | climate | `Березовский`, SP-20; snow IV / 1.5 kN/m², wind I / 0.23 kN/m² | exact `CITY_LOOKUP:RU:Березовский:SP_20`; snow IV / 1.5 kN/m², wind I / 0.23 kN/m² | MATCH |
 | literal span | 18 m | 18 m | MATCH |
 | design span family | 18 m (`подбор!AM9/BD9 = 18`) | 18 m | MATCH |
-| selected frame step | 4.5 m (`вывод!D8 = подбор!AA14`, `18м!IG19`) | 4 m (`FrameResult.frame_step_m`) | **FIRST DIVERGENCE** |
-| frame count | 8 (`ceil(30/4.5)+1`) | 9 (`ceil(30/4)+1`) | MISMATCH |
-| beam | `ПГС300/20х80х3` (`подбор!V14`) | `ПГС300/20х80х3` | MATCH (profile) |
-| column | `ПГС300/20х80х2,5` (`подбор!U14`) | `ПГС300/20х80х3` | MISMATCH |
-| displayed frame mass | 985 kg (`подбор!Y15`) | 1025 kg (`FrameResult.frame_mass_kg`) | MISMATCH |
-| structural aggregate frame mass | 985 kg (`подбор!G5`, `18м!IE19`) | 1025 kg (same Core1 frame result) | MISMATCH |
-| secondary / tube mass | 4.8689222222222224 kg/m² (`подбор!H5`, `18м!IF19`) | 4.68558888888889 kg/m² | MISMATCH |
-| purlin profile | `2ПС 200х65х1,5` (`Подбор прогонов!P28`) | `2ПС 145х45х1,5` | MISMATCH |
-| purlin steel | `М.п.350` (`Подбор прогонов!U28`) | `М.п.390` | MISMATCH |
-| purlin step | 1800 mm (`Подбор прогонов!S28`) | 1510 mm | MISMATCH |
-| purlin mass | 3174.6000000000004 kg (`Подбор прогонов!V28`) | 2478.0000000000005 kg | MISMATCH |
-| D68 | 0.79955555555555546 kg/m² (`вывод!D68 = Лист1!O28`) | 0.7925555555555556 kg/m² | MISMATCH |
-| structural base | 28.12323703703704 kg/m² (`вывод!E8`) | 29.4909592592593 kg/m² | MISMATCH |
-| D69 | 28.922792592592597 kg/m² | 30.28351481481482 kg/m² | MISMATCH |
+| selected frame step | 4.5 m (`вывод!D8 = подбор!AA14`, `18м!IG19`) | 4.5 m (`FrameResult.frame_step_m`) | MATCH |
+| frame count | 8 (`ceil(30/4.5)+1`) | 8 (`ceil(30/4.5)+1`) | MATCH |
+| beam | `ПГС300/20х80х3` (`подбор!V14`) | `ПГС300/20х80х3` | MATCH |
+| column | `ПГС300/20х80х2,5` (`подбор!U14`) | `ПГС300/20х80х2,5` | MATCH |
+| displayed frame mass | 985 kg (`подбор!Y15`) | 985 kg (`FrameResult.frame_mass_kg`) | MATCH |
+| secondary / tube mass | 4.8689222222222224 kg/m² (`подбор!H5`, `18м!IF19`) | 4.868922222222222 kg/m² | MATCH |
+| purlin profile | `2ПС 200х65х1,5` (`Подбор прогонов!P28`) | `2ПС 200х65х1,5` | MATCH |
+| purlin steel | `М.п.350` (`Подбор прогонов!U28`) | `М.п.350` | MATCH |
+| purlin step | 1800 mm (`Подбор прогонов!S28`) | 1800 mm | MATCH |
+| purlin mass | 3174.6000000000004 kg (`Подбор прогонов!V28`) | 2930.4 kg | **FIRST DIVERGENCE** |
+| purlin specific mass | 6.1728333333333341 kg/m² (`Подбор прогонов!T28`) | 5.698 kg/m² | DOWNSTREAM |
+| D68 | 0.79955555555555546 kg/m² (`вывод!D68 = Лист1!O28`) | downstream of purlin result | DOWNSTREAM |
+| structural base | 28.12323703703704 kg/m² (`вывод!E8`) | downstream of purlin result | DOWNSTREAM |
+| D69 | 28.922792592592597 kg/m² | downstream of purlin result | DOWNSTREAM |
 
 ## Exact source formula path
 
@@ -75,19 +76,18 @@ For 22316, `AM9=18`, `V11=30`, `G5=985`, `T5=8`, `H5=4.8689222222222224`,
 and `T28=6.1728333333333341`, yielding `E8=28.12323703703704` and then
 `D69=28.922792592592597`.
 
-## First-divergence decision
+## First-divergence decision after the family-18 fix
 
-- `LAST_MATCHING_VALUE`: exact climate tuple for `RU|Березовский|SP_20` and
-  the preceding ProjectInput/adapter fields.
-- `FIRST_DIVERGING_VALUE`: selected frame step, SOURCE 4.5 m versus Core1 4 m.
-- Classification: `FRAME_STEP_FORMULA_ERROR` (the detailed trace is in
-  `FRAME_STEP_22316_AUDIT.md`).
-- Core1 reaches StructuralSummary and produces D69, but 22316 is **not
-  promoted** to `REAL_PROJECT_REFERENCE` because the ordered chain diverges at
-  frame selection.
+- `LAST_MATCHING_VALUE`: purlin profile, steel and selected step after the
+  corrected family-18 frame lookup.
+- `FIRST_DIVERGING_VALUE`: purlin mass, SOURCE `3174.6000000000004 kg` versus
+  Core1 `2930.4 kg`.
+- Classification: `PURLIN_MASS_DIVERGENCE_UNRESOLVED`.
+- The frame-step divergence is closed. Core1 is not promoted to a complete
+  `REAL_PROJECT_REFERENCE` because the ordered chain now diverges in purlin
+  mass.
 
-This is a stale automatic-step map, not evidence for changing purlin or
-structural-summary logic. 22326 remains
+The purlin mass divergence is not corrected in this step. 22326 remains
 `SOURCE_SUSPICIOUS` and is not used here.
 
 ## 22318 regression check
@@ -98,6 +98,7 @@ continues to assert that value.
 
 ## Changes
 
-Production changes are limited to the exact climate key/tuple in
-`ClimateResolver.ts` and its regression test. No workbook was changed. The
-next frame-step divergence was not fixed; no commit or push was made.
+Production changes include the exact climate key/tuple and the generic
+family-18 automatic-step mapping, each with regression coverage. No workbook
+was changed. The chain was rerun and work stopped at the next purlin-mass
+divergence; no commit or push was made.

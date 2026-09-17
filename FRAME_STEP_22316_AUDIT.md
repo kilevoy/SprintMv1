@@ -130,12 +130,12 @@ For 22318 (span family 15), the same SOURCE lookup path resolves
 Thus 22318 matches by data coincidence of the family row; the difference for
 22316 is explained by family-18 data, not by project identity.
 
-## Smallest generic recommendation (not implemented)
+## Generic fix applied
 
-Derive the automatic step from the versioned family lookup (`подбор!I2:I7`
-or its exact exported equivalent) for the selected design family, then apply
-the existing factor/row selection. Preserve non-zero manual D9 overrides and
-regressions for 22318 and all already-proven spans. Do not add a 22316 or
-Березовский special case.
+The generic automatic-step map now uses the proven family-18 value `4.5 m`
+(`AUTOMATIC_FRAME_STEP_M[18]`). The change is family-based, not a 22316 or
+Березовский special case. Non-zero manual D9 overrides and the existing 22318
+regression remain unchanged.
 
-No production code or XLSX was changed. No commit or push was made.
+The targeted FrameSelector regression passes and selects the SOURCE row
+`DF11`, producing 4.5 m and eight frames for 22316.
