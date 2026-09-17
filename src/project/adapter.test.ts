@@ -25,6 +25,13 @@ describe("projectInputToCore1Input", () => {
     if (result.status === "success") expect(result.input).toMatchObject({ gates_le_6m_count: 2, gates_gt_6m_count: 1 });
   });
 
+  it("preserves a literal arbitrary span without family normalization", () => {
+    const value = project({ geometry: { span_m: 10.4, building_length_m: 25.7, building_height_m: 4, responsibility_factor: 1.0, frame_step_override_m: null } });
+    const result = projectInputToCore1Input(value);
+    expect(result.status).toBe("success");
+    if (result.status === "success") expect(result.input.span_m).toBe(10.4);
+  });
+
   it("refuses to guess whether width or height controls the workbook 6 m gate boundary", () => {
     const result = projectInputToCore1Input(project({ openings: [{ id: "gate-a", kind: "gate", width_mm: 4000, height_mm: 4200, quantity: 1 }] }));
     expect(result.status).toBe("unsupported");

@@ -5,6 +5,7 @@ export type {
   ClimateInput,
   CountryCode,
   Core1Input,
+  DesignSpanFamily,
   ManualClimateInput,
   NormativeBranch,
   NormativeSystem,

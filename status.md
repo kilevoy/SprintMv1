@@ -2,11 +2,11 @@
 
 ## Current phase
 
-Core 1 frame-length correction → real project 22318 parity validation
+Core 1 arbitrary-span contract → real project 22326 validation
 
 ## Status
 
-`UNKNOWN_DOMAIN_GEOMETRY_GAP = CLOSED`. `PURLIN_DECK_GAP = CLOSED`. `WRONG_SNOW_FIELD = CLOSED`. `CANDIDATE_ORDER_ERROR = CLOSED`. `FRAME_LENGTH_ERROR = CLOSED`. Project 22318 reaches the full Core 1 structural chain through `ProjectInput → Core1Input → calculateCore1`; frame aggregate and D69 now match the source. Changes remain uncommitted and unpushed.
+`UNKNOWN_DOMAIN_GEOMETRY_GAP = CLOSED`. `ARBITRARY_SPAN_DOMAIN_GAP = CLOSED` (generic literal-span validation and family mapping). `PURLIN_DECK_GAP = CLOSED`. `WRONG_SNOW_FIELD = CLOSED`. `CANDIDATE_ORDER_ERROR = CLOSED`. `FRAME_LENGTH_ERROR = CLOSED`. Project 22318 reaches the full Core 1 structural chain through `ProjectInput → Core1Input → calculateCore1`; frame aggregate and D69 remain `32.285826388888886 kg/m²`. Project 22326 reaches frame/purlin/opening calculation with literal span `10.4` and family `12`; its next divergence is the existing structural-summary mass path. Changes remain uncommitted and unpushed.
 
 ## Decisions
 
@@ -22,6 +22,7 @@ Core 1 frame-length correction → real project 22318 parity validation
 - The wall selector is UI/project state and is intentionally absent from `Core1Input`.
 - `ProjectInput` is the only editable project model; legacy opening counters are derived by `projectInputToCore1Input()`.
 - Gate classification remains blocked until the workbook proves whether width or height controls the 6 m boundary.
+- Literal `span_m` is validated as finite positive `<=24`; `resolveDesignSpanFamily` maps inclusive upper bands without rounding. Family 24 retains downstream legacy `#N/A`; spans `>24` return `UNKNOWN_DOMAIN`.
 
 ## Blockers
 
@@ -29,7 +30,7 @@ Geometry, climate, purlin step-selection and the proven frame-length path are no
 
 ## Verification
 
-- `npm test`: 122/122 passed across 12 test files, including the 18 m vs 24 m frame-length regression and 22318 parity assertions.
+- `npm test`: 144/144 passed across 13 test files, including family-boundary mapping, 22326 literal-span routing, 22318 regression and 24 m legacy error.
 - `npm run typecheck`: passed.
 - `npm run build`: passed.
 - `git diff --check`: passed (only normal Git line-ending warnings).

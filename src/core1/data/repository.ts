@@ -11,9 +11,9 @@ import type {
   LoadedDataset,
   PurlinDatasetId,
 } from "./types";
-import type { SpanM } from "../types";
+import type { DesignSpanFamily } from "../types";
 
-const FRAME_DATASET_BY_SPAN: Readonly<Record<SpanM, string>> = {
+const FRAME_DATASET_BY_SPAN: Readonly<Record<DesignSpanFamily, string>> = {
   9: "frame_9m_cells",
   12: "frame_12m_cells",
   15: "frame_15m_cells",
@@ -47,7 +47,7 @@ export class BrowserCore1DataRepository implements Core1DataRepository {
     return this.manifestPromise;
   }
 
-  public async loadFrameDataset(span: SpanM): Promise<LoadedDataset> {
+  public async loadFrameDataset(span: DesignSpanFamily): Promise<LoadedDataset> {
     return this.loadDataset(FRAME_DATASET_BY_SPAN[span]);
   }
 

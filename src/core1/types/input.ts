@@ -1,4 +1,6 @@
-export type SpanM = 9 | 12 | 15 | 18 | 21 | 24;
+/** Literal user-entered span in metres.  Frame lookup derives a separate family key. */
+export type SpanM = number;
+export type DesignSpanFamily = 9 | 12 | 15 | 18 | 21 | 24;
 export type ResponsibilityFactor = 0.8 | 1.0;
 export type BinaryPurlinFlag = "есть" | "нет";
 export type BuildingRoofType = "двускатное" | "односкатное";

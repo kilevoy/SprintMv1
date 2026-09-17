@@ -1,4 +1,4 @@
-import type { SpanM } from "../types";
+import type { DesignSpanFamily } from "../types";
 
 export type DatasetFormat = "csv" | "json";
 
@@ -92,7 +92,7 @@ export interface Core1DataSource {
 
 export interface Core1DataRepository {
   loadManifest(): Promise<Core1DataManifest>;
-  loadFrameDataset(span: SpanM): Promise<LoadedDataset>;
+  loadFrameDataset(span: DesignSpanFamily): Promise<LoadedDataset>;
   loadPurlinDataset(id: PurlinDatasetId): Promise<LoadedDataset>;
   loadRoofProperties(): Promise<LoadedDataset>;
   loadDeckProperties(): Promise<LoadedDataset>;

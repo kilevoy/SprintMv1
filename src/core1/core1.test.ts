@@ -72,7 +72,8 @@ describe("Core 1 TypeScript data layer", () => {
       message_ru: "Legacy #REF!",
     });
     expect(diagnosticResult.valid).toBe(true);
-    expect(validateCore1Input({ ...(inputEnvelope.input as Record<string, unknown>), span_m: 13 }).valid).toBe(false);
+    expect(validateCore1Input({ ...(inputEnvelope.input as Record<string, unknown>), span_m: 13 }).valid).toBe(true);
+    expect(validateCore1Input({ ...(inputEnvelope.input as Record<string, unknown>), span_m: 0 }).valid).toBe(false);
   });
 
   it("validates every READY fixture and the two expected legacy-error fixtures", async () => {

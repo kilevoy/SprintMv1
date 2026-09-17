@@ -5,7 +5,7 @@
 ## InputValidation
 
 - Inputs: raw поля из `CORE1_INPUT_CONTRACT.md`.
-- Outputs: normalized scenario, exact enum values, typed validation diagnostics.
+- Outputs: normalized scenario, literal-span value plus derived design-family key, typed validation diagnostics.
 - Static datasets: supported-domain manifest, roof/deck enums, expert-setting enums.
 - Excel source: `вывод` input cells, validation lists, `Подбор прогонов 2` validation metadata.
 - Known anomalies: общие числовые min/max не доказаны; строка `"0"`, число `0` и blank различаются.

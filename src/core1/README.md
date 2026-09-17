@@ -23,7 +23,7 @@ Python остаётся development/extraction/integrity tooling. В production 
 
 - загружает и кеширует `core1/data/manifest.json`;
 - загружает CSV через Papa Parse с typed JSON fields;
-- лениво загружает только запрошенный frame dataset, например `frame_18m_cells.csv`;
+  - лениво загружает только запрошенный design-family dataset, например `frame_18m_cells.csv`;
 - предоставляет отдельные методы для purlin, roof/deck, climate, secondary steel, constants и fixtures;
 - не выполняет расчёты, округление или исправление Excel errors.
 
@@ -54,6 +54,13 @@ non-zero golden oracle блокирует только `PARITY_PROVEN`.
 
 Статусы оконной ветки: `WINDOW_CALCULATOR_IMPLEMENTED=true`,
 `WINDOW_PARITY_PROVEN=false`.
+
+Для пролёта используется `STANDARD_FAMILY_WITH_LITERAL_GEOMETRY`: `span_m`
+остаётся конечным пользовательским числом в диапазоне `(0,24]`, а
+`resolveDesignSpanFamily(span_m)` выводит только lookup-ключ `9|12|15|18|21|24`
+по включительным верхним границам. Adapter не округляет и не меняет literal
+span. Для 24 m family downstream сохраняется legacy `#N/A`; `span_m>24`
+возвращает `UNKNOWN_DOMAIN`.
 
 Климат задаётся discriminated union `ClimateInput`:
 
@@ -128,7 +135,7 @@ FrameResult + PurlinResult + SecondarySteelResult + OpeningMassResult
 
 ```text
 ClimateResult
-  → span dataset (только выбранный frame_<span>m_cells)
+  → design span family → frame dataset (только выбранный frame_<family>m_cells)
   → candidate branches (снег/ветер, высотная группа, legacy reliability branch)
   → first-match / exact manual-step selection
   → FrameResult
@@ -138,12 +145,15 @@ ClimateResult
 балки, колонны, шага и коэффициентов — по cached values локального dataset.
 В сохранённом baseline подписи reliability-блоков листа инвертированы
 относительно входного `responsibility_factor`; это сохранено как legacy mapping.
-Пролёты 9/12/15/18/21 имеют реализованный deterministic path; высота проходит
+`FrameSelector` получает literal `span_m`, но выбирает dataset по
+`design_span_family`; trace содержит оба значения (`literal_span_m` и
+`design_span_family`). Пролёты в `(0,24]` проходят generic family mapping;
+семейство 24 m сохраняет downstream legacy `#N/A`. Высота проходит
 через доказанные legacy bands `3,6/4,8/6,0` при пользовательском диапазоне
 `(0,6,2]`; длина является положительным арифметическим входом без придуманного
 максимума. Доказанная
 Excel parity зафиксирована только для сохранённого 12‑м baseline. Пролёт 24 м
-возвращает legacy `#N/A`, а отсутствие строки или ручного шага — typed
+возвращает downstream legacy `#N/A`, а отсутствие строки или ручного шага — typed
 `FRAME_NO_MATCH`/`UNKNOWN_FRAME_DOMAIN` без исключения.
 
 После выбора рамы результат доступен как `context.frame`; затем оркестрация

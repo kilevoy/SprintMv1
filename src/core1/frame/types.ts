@@ -1,5 +1,5 @@
 import type { DatasetRecord } from "../data";
-import type { Core1ClimateResult, Core1Diagnostic, ResponsibilityFactor, SpanM } from "../types";
+import type { Core1ClimateResult, Core1Diagnostic, DesignSpanFamily, ResponsibilityFactor, SpanM } from "../types";
 
 export interface FrameDatasetView {
   records: DatasetRecord[];
@@ -17,6 +17,8 @@ export interface FrameSelectorInput {
 
 export interface FrameSelectionTrace {
   selected_span_dataset: string;
+  literal_span_m?: number;
+  design_span_family?: DesignSpanFamily;
   selected_branch: string;
   candidate_identifiers: string[];
   selection_reason: "first_match" | "automatic_step_match" | "manual_step_match";

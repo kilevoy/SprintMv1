@@ -6,7 +6,7 @@
 |---|---|---|---|---|---|---|---|
 | `city` | `вывод!D2` | string | точный ключ города | yes | `Роза` | снег, ветер, нормативная ветка, окна | no |
 | `normative_system` | новый Core API; legacy ветки `Ветер СП` / `Ветер по СП РК EN` | enum | `SP_20` / `SP_RK_EN`; для `country=KZ` обязателен явный выбор | yes | — | выбор локальной снеговой/ветровой ветки | no |
-| `span_m` | `D4` | number/enum | м; 9, 12, 15, 18, 21, 24 | yes | 12 | таблица пролёта, профили, масса | no |
+| `span_m` | `D4` | finite positive number | м; `0 < span_m <= 24`; frame lookup derives family `9/12/15/18/21/24` by inclusive upper bounds; literal value remains for geometry/mass | yes | 12 | таблица пролёта, профили, масса | no |
 | `building_length_m` | `D5` | number | м | yes | 18 | число рам, прогоны, массы | no |
 | `building_height_m` | `D6` | number | м | yes | 3 | таблица высоты, ветер, профили | no |
 | `responsibility_factor` | `D7` | number/enum | 0,8 / 1,0 (наблюдаемые) | yes | 0,8 | нагрузки и выбор веток | no |

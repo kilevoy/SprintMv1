@@ -2,6 +2,7 @@ import { validateCore1Input } from "../compatibility";
 import { BrowserCore1DataRepository, BrowserDataSource } from "../data";
 import { resolveClimate } from "../climate";
 import { selectFrame } from "../frame";
+import { resolveDesignSpanFamily } from "../frame/designSpanFamily";
 import { calculatePurlin } from "../purlin";
 import { calculateSecondarySteel } from "../secondary";
 import { calculateWindowGirts } from "../window";
@@ -77,6 +78,7 @@ export async function calculateCore1(
   if (!schemaResult.valid) return invalidInputResult(schemaResult.errors);
 
   const value = schemaResult.data as Core1Input;
+  const designSpanFamily = resolveDesignSpanFamily(value.span_m);
   const domain = validateCore1InputDomain(value);
   if (domain.state === "INVALID_INPUT") {
     return { status: "invalid_input", code: "INVALID_INPUT", result: null, diagnostics: domain.diagnostics };
@@ -101,6 +103,14 @@ export async function calculateCore1(
     return {
       status: "unknown_domain",
       code: unknownDomainCode(domain.diagnostics),
+      result: null,
+      diagnostics: domain.diagnostics,
+    };
+  }
+  if (designSpanFamily === null) {
+    return {
+      status: "unknown_domain",
+      code: "UNKNOWN_DOMAIN",
       result: null,
       diagnostics: domain.diagnostics,
     };
@@ -133,7 +143,7 @@ export async function calculateCore1(
       const legacyNa = domain.diagnostics.find((diagnostic) => diagnostic.code === "LEGACY_NA");
       if (legacyNa) {
         try {
-          await repository.loadFrameDataset(value.span_m);
+          await repository.loadFrameDataset(designSpanFamily);
         } catch (error) {
           return { status: "legacy_error", code: "LEGACY_NA", result: null, context, diagnostics: [...domain.diagnostics, datasetLoadFailureDiagnostic(error)] };
         }
@@ -150,7 +160,7 @@ export async function calculateCore1(
       }
     }
 
-    const frameDataset = await repository.loadFrameDataset(value.span_m);
+    const frameDataset = await repository.loadFrameDataset(designSpanFamily);
     const frameResolution = selectFrame(
       {
         span_m: value.span_m,

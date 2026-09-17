@@ -99,6 +99,23 @@ export function validateCore1InputDomain(input: unknown): Core1InputDomainResult
     );
   }
 
+  if (!Number.isFinite(value.span_m) || value.span_m <= 0 || value.span_m > 24) {
+    diagnostics.push(
+      createCore1Diagnostic({
+        code: "UNKNOWN_DOMAIN",
+        severity: "unsupported",
+        classification: "unsupported",
+        module: "InputValidation",
+        message: "Пролёт должен быть конечным положительным числом не более 24 м.",
+        source: ["CORE1_SPAN_DOMAIN_AUDIT.md", "CORE1_SUPPORTED_DOMAIN.md"],
+        legacy_equivalent: value.span_m > 24 ? "нужен расчет" : null,
+        trigger: value.span_m > 24 ? "span_m>24" : "span_m outside finite positive domain",
+        affected_outputs: ["frame_step_m", "beam_profile", "column_profile", "purlin_profile", "kg_per_m2"],
+        details: { span_m: value.span_m, maximum_span_m: 24 },
+      }),
+    );
+  }
+
   if (value.purlin_max_step_override_mm === 500) {
     diagnostics.push(
       createCore1Diagnostic({

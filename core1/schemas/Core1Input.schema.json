@@ -45,7 +45,7 @@
         }
       ]
     },
-    "span_m": {"type": "number", "enum": [9, 12, 15, 18, 21, 24]},
+    "span_m": {"type": "number", "exclusiveMinimum": 0},
     "building_length_m": {"type": "number"},
     "building_height_m": {"type": "number"},
     "responsibility_factor": {"type": "number", "enum": [0.8, 1.0]},

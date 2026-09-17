@@ -81,6 +81,41 @@ describe("Core 1 input validation and orchestration", () => {
     expect(result.diagnostics.some((diagnostic) => diagnostic.excel_error === "#N/A")).toBe(true);
   });
 
+  it("rejects spans above 24 m as UNKNOWN_DOMAIN without clamping", async () => {
+    const input = { ...(await inputFor("baseline_12m") as Record<string, unknown>), span_m: 24.01 };
+    expect(validateCore1InputDomain(input).state).toBe("UNKNOWN_DOMAIN");
+    const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
+    expect(result.status).toBe("unknown_domain");
+    expect(resultCode(result)).toBe("UNKNOWN_DOMAIN");
+  });
+
+  it("preserves a literal 10.4 m span while selecting the 12 m frame family", async () => {
+    const base = await inputFor("baseline_12m") as Record<string, unknown>;
+    const input = {
+      ...base,
+      span_m: 10.4,
+      building_length_m: 25.7,
+      building_height_m: 4,
+      responsibility_factor: 1.0,
+      roof_covering: "С-П 150",
+      climate: { mode: "MANUAL", country: "RU", normative_system: "SP_20", snow_region: "III", snow_load: 1.5, wind_region: "II", wind_load: 0.3, seismicity: null },
+      gates_le_6m_count: 1,
+      gates_gt_6m_count: 0,
+      doors_count: 2,
+      windows: { enabled: false, window_type: 1, window_height_m: 0, window_strip_length_m: 0, separate_window_count: 0, glazing_construction: "2ой стеклопакет" },
+    };
+    expect(validateCore1InputDomain(input).state).toBe("VALID");
+    const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    expect(result.result.scenario.span_m).toBe(10.4);
+    expect(result.context?.frame?.trace).toMatchObject({ literal_span_m: 10.4, design_span_family: 12, selected_span_dataset: "frame_12m_cells" });
+    expect(result.context?.frame).toMatchObject({ frame_step_m: 6, beam_profile: "ПГС245/20х80х2", column_profile: "ПГС300/20х80х2" });
+    expect(result.context?.purlin).toMatchObject({ purlin_profile: "2ПС 200х65х2", purlin_steel: "М.п.390", purlin_step_mm: 1745, purlin_weight_kg: 2214.312 });
+    expect(result.context?.openings).toMatchObject({ opening_mass_kg_per_m2: 1.9406614785992218 });
+    expect(result.result.kg_per_m2).toBeTypeOf("number");
+  });
+
   it("routes non-zero windows to the proven local module boundary without using J20", async () => {
     const input = await inputFor("nonzero_windows_unsupported");
     const result = await calculateCore1(input, new BrowserCore1DataRepository(source));

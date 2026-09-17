@@ -13,6 +13,8 @@
 - Real `22318` reaches `FrameSelector`, `PurlinCalculator`, `SecondarySteelCalculator`, `OpeningMassCalculator`, and `StructuralSummary` through `ProjectInput → adapter → calculateCore1`.
 - The real-project test asserts source-compatible frame aggregate (`tube_mass_kg_per_m2=6.5257152777777767`), purlin profile, steel, step `1900 mm`, mass `1699.2 kg` and D69 `32.285826388888886 kg/m²`.
 - Frame length regression evaluates the same 15 m frame row at 18 m and 24 m, proving the runtime length changes only the length-dependent tube mass while frame step/count/profiles remain stable.
+- Arbitrary-span mapping covers `8.5`, every proven upper boundary, `10.4→12`, `24→24`, and `24.01→null`; zero/negative/non-finite values are invalid and `>24` is `UNKNOWN_DOMAIN`.
+- Real 22326 regression preserves literal `10.4`, derives family `12`, reaches frame step `6 m`, beam/column and purlin outputs, and exposes both values in the frame trace.
 - Equal-mass candidates are regression-tested to select the larger step, while a materially lower mass remains primary over step ordering.
 - Trace contains deck/configured/manual/effective limits and evaluated/selected steps.
 
@@ -35,7 +37,7 @@
 
 ## Latest run
 
-- Vitest: 122 passed across 12 test files, including the new frame-length regression and 22318 source-parity assertions.
+- Vitest: 144 passed across 13 test files; includes family-boundary mapping, 22326 literal-span routing, frame-length regression and 22318 source-parity assertions.
 - Purlin tie-break regression: equal-mass `1875/1900` candidates select `1900`; lower mass remains primary.
 - TypeScript typecheck: passed.
 - Vite production build: passed.

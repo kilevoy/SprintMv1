@@ -2,10 +2,10 @@ import { createCore1Diagnostic } from "../diagnostics";
 import type { DatasetRecord } from "../data";
 import type { Core1Diagnostic, Core1ClimateResult } from "../types";
 import type { FrameDatasetView, FrameSelectionResult, FrameSelectorInput } from "./types";
+import { resolveDesignSpanFamily } from "./designSpanFamily";
 
 const FRAME_STEEL = "М.п.350";
 const FRAME_TIE_UNIT_MASS_KG: Readonly<Record<9 | 12 | 15 | 18 | 21, number>> = { 9: 115, 12: 148, 15: 181, 18: 224, 21: 290 };
-const SUPPORTED_SPANS = new Set([9, 12, 15, 18, 21]);
 // Proven from вывод!D8 -> подбор!AA14/AA15 -> подбор!I2:I7/I9:I14
 // in 22318_SOURCE_SELECTION.xlsx. This is the automatic branch only;
 // a non-zero frame_step_override_m remains an explicit legacy override.
@@ -250,15 +250,17 @@ function selectBlock(records: DatasetRecord[], input: FrameSelectorInput, branch
 
 export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView): FrameSelectionResult {
   if (!input || !dataset || !Array.isArray(dataset.records)) return invalid("FrameSelector получил некорректный dataset или input.", {});
-  if (!SUPPORTED_SPANS.has(input.span_m)) {
-    if (input.span_m === 24) {
-      return {
-        status: "legacy_na",
-        frame: null,
-        diagnostics: [diagnostic("FRAME_LEGACY_NA", "unsupported", "Пролёт 24 м сохраняет активную legacy-ошибку #N/A.", { span_m: 24, trigger: "span_m=24" }, "#N/A")],
-      };
-    }
-    return invalid("Пролёт отсутствует в типизированном домене FrameSelector.", { span_m: input.span_m });
+  const designSpanFamily = resolveDesignSpanFamily(input.span_m);
+  if (designSpanFamily === null) {
+    if (input.span_m > 24) return { status: "unknown_domain", frame: null, diagnostics: [diagnostic("UNKNOWN_FRAME_DOMAIN", "unsupported", "Пролёт превышает доказанную legacy-границу 24 м.", { span_m: input.span_m, trigger: "span_m>24" })] };
+    return invalid("Пролёт должен быть конечным положительным числом.", { span_m: input.span_m });
+  }
+  if (designSpanFamily === 24) {
+    return {
+      status: "legacy_na",
+      frame: null,
+      diagnostics: [diagnostic("FRAME_LEGACY_NA", "unsupported", "Ветка семейства 24 м сохраняет активную legacy-ошибку #N/A.", { span_m: input.span_m, design_span_family: 24, trigger: "design_span_family=24" }, "#N/A")],
+    };
   }
   if (!Number.isFinite(input.building_height_m) || input.building_height_m <= 0) return invalid("Высота здания должна быть положительным числом.", { building_height_m: input.building_height_m });
   if (!Number.isFinite(input.building_length_m) || input.building_length_m <= 0) return invalid("Длина здания должна быть положительным числом.", { building_length_m: input.building_length_m });
@@ -271,7 +273,7 @@ export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView
   if (!band) return { status: "unknown_domain", frame: null, diagnostics: [diagnostic("UNKNOWN_FRAME_DOMAIN", "unsupported", "Высота выходит за доказанные высотные таблицы FrameSelector.", { building_height_m: input.building_height_m })] };
 
   const requestedStep = input.frame_step_override_m ?? null;
-  const automaticStep = requestedStep === null ? AUTOMATIC_FRAME_STEP_M[input.span_m as 9 | 12 | 15 | 18 | 21] ?? null : null;
+  const automaticStep = requestedStep === null ? AUTOMATIC_FRAME_STEP_M[designSpanFamily as 9 | 12 | 15 | 18 | 21] ?? null : null;
   const block = selectBlock(dataset.records, input, branch, band.datasetHeight, automaticStep);
   if (!block) return { status: "no_match", frame: null, diagnostics: [diagnostic("FRAME_NO_MATCH", "unsupported", "Для сочетания ветки климата, высоты и ответственности нет строки подбора рамы.", { branch, dataset_height_m: band.datasetHeight, responsibility_factor: input.responsibility_factor })] };
   const base = columnNumber(block.start);
@@ -302,10 +304,12 @@ export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView
       column_steel: FRAME_STEEL,
       column_utilization: columnUtilization,
       frame_mass_kg: frameMass,
-      frame_tie_unit_mass_kg: FRAME_TIE_UNIT_MASS_KG[input.span_m as 9 | 12 | 15 | 18 | 21] ?? null,
+      frame_tie_unit_mass_kg: FRAME_TIE_UNIT_MASS_KG[designSpanFamily as 9 | 12 | 15 | 18 | 21] ?? null,
       tube_mass_kg_per_m2: tubeMass,
       trace: {
-        selected_span_dataset: `frame_${input.span_m}m_cells`,
+        selected_span_dataset: `frame_${designSpanFamily}m_cells`,
+        literal_span_m: input.span_m,
+        design_span_family: designSpanFamily,
         selected_branch: `${block.start}${block.row}:${branch}/${band.datasetHeight}`,
         candidate_identifiers: [branch, `${band.datasetHeight}`, `${rowStep}`],
         selection_reason: requestedStep === null ? (automaticStep === null ? "first_match" : "automatic_step_match") : "manual_step_match",

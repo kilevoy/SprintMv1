@@ -1,4 +1,5 @@
 export { selectFrame } from "./FrameSelector";
+export { resolveDesignSpanFamily } from "./designSpanFamily";
 export type {
   FrameDatasetView,
   FrameResult,
