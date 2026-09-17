@@ -80,13 +80,14 @@ and `T28=6.1728333333333341`, yielding `E8=28.12323703703704` and then
 - `LAST_MATCHING_VALUE`: exact climate tuple for `RU|Березовский|SP_20` and
   the preceding ProjectInput/adapter fields.
 - `FIRST_DIVERGING_VALUE`: selected frame step, SOURCE 4.5 m versus Core1 4 m.
-- Classification: `FRAME_STEP_SELECTION_MISMATCH`.
+- Classification: `FRAME_STEP_FORMULA_ERROR` (the detailed trace is in
+  `FRAME_STEP_22316_AUDIT.md`).
 - Core1 reaches StructuralSummary and produces D69, but 22316 is **not
   promoted** to `REAL_PROJECT_REFERENCE` because the ordered chain diverges at
   frame selection.
 
-This is a data-contract blocker for this project, not evidence for changing
-generic frame, purlin, or structural-summary logic. 22326 remains
+This is a stale automatic-step map, not evidence for changing purlin or
+structural-summary logic. 22326 remains
 `SOURCE_SUSPICIOUS` and is not used here.
 
 ## 22318 regression check
