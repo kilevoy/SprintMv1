@@ -86,7 +86,7 @@ and `T28=6.1728333333333341`, yielding `E8=28.12323703703704` and then
   within floating-point tolerance.
 - `D69` also matches: SOURCE `28.922792592592597` versus Core1
   `28.922792592592597`.
-- Classification: `REAL_PROJECT_INPUT_MAPPING_ERROR`, now **CLOSED**.
+- Classification: `INPUT_FIXTURE_MISMATCH`, now **CLOSED**.
 
 No purlin algorithm was changed. 22326 remains `SOURCE_SUSPICIOUS` and is not
 used here.
@@ -104,3 +104,12 @@ family-18 automatic-step mapping, each with regression coverage. The 22316
 replay now maps `D26=есть`; this closes the apparent purlin-mass divergence
 without changing `PurlinCalculator`. No workbook was changed. No further
 first divergence is observed through `D69`.
+
+## Current classification
+
+`22316 = REAL_PROJECT_REFERENCE`.
+
+The earlier purlin-mass discrepancy was an input-fixture mapping error: the source
+has `вывод!D26=есть`, while the intermediate fixture used `нет`. After correcting
+the fixture mapping, the source-compatible chain reaches exact D69 parity without
+changing the purlin algorithm.

@@ -106,4 +106,13 @@ The arbitrary-span contract is implemented generically.  The remaining 22326 mis
 
 The companion `CORE1_SPAN_DOMAIN_AUDIT.md` records the source proof and implementation trace: `10.4 m` maps to the 12 m frame family while purlin/area formulas retain literal 10.4 m. The contract is `STANDARD_FAMILY_WITH_LITERAL_GEOMETRY`; no silent rounding is used.
 
+## Current classification
+
+`22326 = SOURCE_SUSPICIOUS / COMPATIBILITY_CASE`.
+
+The purlin and opening branches are source-compatible, but the remaining structural
+aggregate mismatch begins in the legacy frame-mass branch. Therefore 22326 is not a
+normative real-project reference; it remains a compatibility case pending the
+corresponding source/methodology clarification.
+
 If the span contract is later widened, the next independent gate must be revisited: `Увильды` is present in the local climate cache with `III/1.5` and `II/0.3`, but it is not currently in the production `PROVEN_LOOKUP_KEYS` set. That is a separate climate-proof decision, not evidence for changing the current span result.

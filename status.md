@@ -2,11 +2,11 @@
 
 ## Current phase
 
-Core 1 arbitrary-span contract → real project 22326 validation
+Real-project reference classification and compatibility-case audit
 
 ## Status
 
-`UNKNOWN_DOMAIN_GEOMETRY_GAP = CLOSED`. `ARBITRARY_SPAN_DOMAIN_GAP = CLOSED` (generic literal-span validation and family mapping). `PURLIN_DECK_GAP = CLOSED`. `WRONG_SNOW_FIELD = CLOSED`. `CANDIDATE_ORDER_ERROR = CLOSED`. `FRAME_LENGTH_ERROR = CLOSED`. Project 22318 reaches the full Core 1 structural chain through `ProjectInput → Core1Input → calculateCore1`; frame aggregate and D69 remain `32.285826388888886 kg/m²`. Project 22326 reaches frame/purlin/opening calculation with literal span `10.4` and family `12`; its next divergence is the existing structural-summary mass path. Changes remain uncommitted and unpushed.
+`UNKNOWN_DOMAIN_GEOMETRY_GAP = CLOSED`. `ARBITRARY_SPAN_DOMAIN_GAP = CLOSED` (generic literal-span validation and family mapping). `PURLIN_DECK_GAP = CLOSED`. `WRONG_SNOW_FIELD = CLOSED`. `CANDIDATE_ORDER_ERROR = CLOSED`. `FRAME_LENGTH_ERROR = CLOSED`. `22318 = REAL_PROJECT_REFERENCE`. `22316 = REAL_PROJECT_REFERENCE`. `22326 = SOURCE_SUSPICIOUS / COMPATIBILITY_CASE`. The 22318 and 22316 chains reach exact source D69 parity; 22326 retains its documented structural-summary mismatch and is not a normative reference. The branch contains the two local commits that establish these results; push remains pending due the current execution environment restriction.
 
 ## Decisions
 
@@ -26,11 +26,11 @@ Core 1 arbitrary-span contract → real project 22326 validation
 
 ## Blockers
 
-Geometry, climate, purlin step-selection and the proven frame-length path are no longer implementation blockers. For 22318, frame aggregate, beam, column, climate, deck limit, purlin profile/steel/step/mass, D68 and D69 now match the source. Full parity for 22318 and the 2700/3000 mm N60 branches still needs a differential source audit/recalculated Excel golden source for remaining secondary presentation fields.
+Geometry, climate, purlin step-selection and the proven frame-length path are no longer implementation blockers. For 22318 and 22316, the audited structural chains reach source parity through D69. The 2700/3000 mm N60 branches and remaining secondary presentation fields still need a differential source audit/recalculated Excel golden source. 22326 remains a source-suspicious compatibility case because its structural-summary mass path diverges.
 
 ## Verification
 
-- `npm test`: 144/144 passed across 13 test files, including family-boundary mapping, 22326 literal-span routing, 22318 regression and 24 m legacy error.
+- `npm test`: 147/147 passed across 14 test files, including family-boundary mapping, 22316 and 22318 real-project parity, 22326 literal-span routing and 24 m legacy error.
 - `npm run typecheck`: passed.
 - `npm run build`: passed.
 - `git diff --check`: passed (only normal Git line-ending warnings).

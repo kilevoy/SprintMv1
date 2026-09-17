@@ -92,7 +92,7 @@ covered by `src/core1/realProject22316.test.ts`.
 ## Classification
 
 - Previous purlin-mass divergence: **CLOSED**.
-- Root cause: **REAL_PROJECT_INPUT_MAPPING_ERROR**.
+- Root cause: **INPUT_FIXTURE_MISMATCH**.
 - The purlin formula was not changed.
 - No further first divergence is observed through the tested 22316 `D69`
   chain after the source input is mapped correctly.

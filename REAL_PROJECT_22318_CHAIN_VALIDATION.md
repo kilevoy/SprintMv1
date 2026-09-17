@@ -222,9 +222,9 @@ StructuralSummary            REACHED; Core1 D69-equivalent=34.92426481481481
 
 `LAST_MATCHING_VALUE` — the corrected frame branch and opening-mass result. `FIRST_DIVERGING_VALUE` — the purlin step-selection result. The FrameSelector fix is limited to the proven automatic step path; no purlin value was forced from the source, and no XLSX was modified.
 
-## G. Fixture suitability (pre snow-load correction snapshot)
+## G. Historical fixture suitability snapshot (superseded)
 
-`real_project_22318` **не создан как `REAL_PROJECT_REFERENCE`**: the frame branch is now source-compatible and deterministic, but purlin step/mass and D69 still diverge. The case remains a differential-validation reference, not a parity fixture. `PARITY_PROVEN` не выставлялся.
+This section records the pre snow-load-correction state and is retained for audit history only. At that point `real_project_22318` was not suitable as a parity fixture because purlin step/mass and D69 still diverged. That snapshot is superseded by the closure recorded below.
 
 ## Executive summary
 
@@ -255,7 +255,7 @@ Rerun result after the correction:
 | candidate availability | 1900 present | 1900 present | MATCH |
 | selected purlin step | 1900 mm | 1900 mm | MATCH after tie-break fix |
 
-The equal-mass 1875/1900 selection issue is closed by the generic larger-step tie-break in `PurlinCalculator`. Full parity is still not claimed because D69 remains divergent.
+The equal-mass 1875/1900 selection issue is closed by the generic larger-step tie-break in `PurlinCalculator`. At this historical audit snapshot, full parity was still not claimed because D69 remained divergent; the later D69 closure is recorded below.
 11. Source/Core1 purlin mass after the snow correction: `1699.2 kg` / `1699.2 kg` (MATCH).
 12. Source/Core1 D69 after the frame-length correction: `32.285826388888886` / `32.285826388888886 kg/m²` (MATCH).
 13. `CANDIDATE_ORDER_ERROR = CLOSED` and `FRAME_LENGTH_ERROR = CLOSED`: Core1 selects `1900 mm` with the proven equal-mass larger-step tie-break and evaluates the frame secondary aggregate with live `building_length_m=24`.
@@ -284,3 +284,11 @@ Source decomposition: `E4=905 kg` (`181×5`), `G4×T4=827×7=5789 kg`, area `15�
 The former first divergence was upstream of `StructuralSummary`: source `15м!CQ11=6.5257152777777767 kg/m²` uses `CU11=24`, while the extracted local cached row had `CU11=18`. `FrameSelector` now evaluates the proven `CM11=CU11*3*7.2*1.1+712` formula with runtime `building_length_m`, combines it with `CP11`, and divides by `15×length`. The 22318 frame aggregate, D69, frame step/count, profiles, purlin result and D68 now match.
 
 `LAST_MATCHING_VALUE` before the fix was the D68 result (`2.2096666666666667 kg/m²`); `FIRST_DIVERGING_VALUE` was `FrameSelector.selectFrame → FrameResult.tube_mass_kg_per_m2`. Classification: `FRAME_LENGTH_ERROR`, now closed by the generic runtime-length implementation. `StructuralSummary` remains unchanged.
+
+## Current classification
+
+`22318 = REAL_PROJECT_REFERENCE`.
+
+The current chain reaches source parity through frame aggregate, frame step/count,
+profiles, purlin result, D68 and D69. The historical pre-correction section above
+must not be used as the current fixture status.
