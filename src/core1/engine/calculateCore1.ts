@@ -154,6 +154,7 @@ export async function calculateCore1(
     const frameResolution = selectFrame(
       {
         span_m: value.span_m,
+        building_length_m: value.building_length_m,
         building_height_m: value.building_height_m,
         responsibility_factor: value.responsibility_factor,
         frame_step_override_m: value.frame_step_override_m ?? null,

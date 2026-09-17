@@ -44,6 +44,21 @@ const input: PurlinInput = {
   snow_retention_purlin: "нет", enclosure_purlin: "нет", purlin_min_step_mm: 0, purlin_max_step_override_mm: null,
 };
 
+const project22318Input: PurlinInput = {
+  span_m: 15, building_length_m: 24, responsibility_factor: 1,
+  roof_covering: "С-П 150", roof_deck_grade: "С44-1000-0,7",
+  snow_retention_purlin: "нет", enclosure_purlin: "нет", purlin_min_step_mm: 0, purlin_max_step_override_mm: null,
+};
+const project22318Climate: Core1ClimateResult = {
+  mode: "CITY_LOOKUP", country: "RU", normative_system: "SP_20", climate_source: "CITY_LOOKUP", city: "Сургут",
+  snow_region: "IV", snow_load: 1.8, wind_region: "I", wind_load: 0.23, units: { snow_load: "kN/m²", wind_load: "kN/m²" },
+};
+const project22318Frame: FrameResult = {
+  frame_step_m: 4, beam_profile: "ПГС300/20х80х3", beam_steel: "М.п.350", beam_utilization: 85,
+  column_profile: "ПГС300/20х80х2", column_steel: "М.п.350", column_utilization: 79,
+  trace: { selected_span_dataset: "frame_15m_cells", selected_branch: "automatic", candidate_identifiers: [], selection_reason: "automatic_step_match" },
+};
+
 describe("PurlinCalculator", () => {
   it("matches all proven 12 m P28:V28 values", async () => {
     const result = calculatePurlin(input, climate, frame, await datasets());
@@ -61,7 +76,7 @@ describe("PurlinCalculator", () => {
     expect(result.purlin).toMatchObject({
       purlin_profile: "2ПС 150х65х1,5",
       purlin_steel: "М.п.390",
-      purlin_step_mm: 1000,
+      purlin_step_mm: 1015,
       purlin_weight_kg: 1756.44,
     });
     expect(result.purlin.purlin_kg_per_m2).toBeCloseTo(8.53825, 12);
@@ -71,7 +86,7 @@ describe("PurlinCalculator", () => {
       configured_step_limit_mm: 2150,
       manual_step_limit_mm: null,
       effective_step_limit_mm: 1150,
-      selected_step_mm: 1000,
+      selected_step_mm: 1015,
     });
   });
 
@@ -132,5 +147,33 @@ describe("PurlinCalculator", () => {
     const result = calculatePurlin({ ...input, roof_deck_grade: "unknown-deck" as PurlinInput["roof_deck_grade"] }, climate, frame, await datasets());
     expect(result.status).toBe("no_match");
     expect(result.diagnostics[0]?.excel_error).toBe("#N/A");
+  });
+
+  it("uses the larger step for equal-mass accepted 22318 candidates", async () => {
+    const bundle = await datasets();
+    const at1875 = calculatePurlin({ ...project22318Input, purlin_max_step_override_mm: 1875 }, project22318Climate, project22318Frame, bundle);
+    const at1900 = calculatePurlin({ ...project22318Input, purlin_max_step_override_mm: 1900 }, project22318Climate, project22318Frame, bundle);
+    const automatic = calculatePurlin(project22318Input, project22318Climate, project22318Frame, bundle);
+    expect(at1875.status).toBe("success");
+    expect(at1900.status).toBe("success");
+    expect(automatic.status).toBe("success");
+    if (at1875.status !== "success" || at1900.status !== "success" || automatic.status !== "success") return;
+    expect(at1875.purlin.purlin_step_mm).toBe(1875);
+    expect(at1900.purlin.purlin_step_mm).toBe(1900);
+    expect(at1875.purlin.purlin_weight_kg).toBe(at1900.purlin.purlin_weight_kg);
+    expect(automatic.purlin.purlin_step_mm).toBe(1900);
+    expect(automatic.purlin).toMatchObject({ purlin_profile: "2ПС 195х45х1,5", purlin_steel: "М.п.390" });
+    expect(automatic.purlin.purlin_weight_kg).toBeCloseTo(1699.2, 12);
+  });
+
+  it("keeps lower mass primary over a smaller-step candidate", async () => {
+    const bundle = await datasets();
+    const at1500 = calculatePurlin({ ...project22318Input, purlin_max_step_override_mm: 1500 }, project22318Climate, project22318Frame, bundle);
+    const at1900 = calculatePurlin({ ...project22318Input, purlin_max_step_override_mm: 1900 }, project22318Climate, project22318Frame, bundle);
+    expect(at1500.status).toBe("success");
+    expect(at1900.status).toBe("success");
+    if (at1500.status !== "success" || at1900.status !== "success") return;
+    expect(at1900.purlin.purlin_weight_kg).toBeLessThan(at1500.purlin.purlin_weight_kg);
+    expect(at1900.purlin.purlin_step_mm).toBe(1900);
   });
 });

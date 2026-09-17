@@ -79,6 +79,11 @@ function numericSteps(bundle: PurlinDatasetBundle): number[] {
   return [...new Set(values)];
 }
 
+// Workbook parity: when two accepted candidates have the same calculated
+// total mass, the legacy branch keeps the larger step. The tolerance only
+// absorbs floating-point noise in otherwise identical mass calculations.
+const PURLIN_WEIGHT_TIE_TOLERANCE_KG = 1e-9;
+
 function roofWeight(bundle: PurlinDatasetBundle, covering: string): number | null {
   const wanted = covering.trim().toLowerCase();
   const rows = bundle.roofProperties.records;
@@ -277,7 +282,14 @@ export const calculatePurlin: PurlinCalculatorFn = (
           continue;
         }
         const current = { profile: candidate.profile, mass: candidate.mass, step, utilization, weight, kgPerM2 };
-        if (best === null || current.weight < best.weight) best = current;
+        if (best === null) {
+          best = current;
+          continue;
+        }
+        const weightDelta = current.weight - best.weight;
+        const lowerMass = weightDelta < -PURLIN_WEIGHT_TIE_TOLERANCE_KG;
+        const equalMass = Math.abs(weightDelta) <= PURLIN_WEIGHT_TIE_TOLERANCE_KG;
+        if (lowerMass || (equalMass && current.step > best.step)) best = current;
       }
     }
     return best;

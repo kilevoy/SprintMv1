@@ -117,6 +117,13 @@ FrameResult + PurlinResult + SecondarySteelResult + OpeningMassResult
 только `OpeningMassResult.opening_mass_kg_per_m2` (эквивалент `D68`); `E68`
 в тоннах и отдельная масса оконных ригелей повторно не суммируются.
 
+`FrameSelector` получает live `building_length_m`. Для length-dependent строки
+рамы он воспроизводит локальную legacy-связь `CM/CP → CQ`: формула `CM`
+оценивается с текущей длиной проекта, `CP` берётся из локального dataset, а
+итог нормируется на `span × building_length`. Это устраняет доказанный
+`FRAME_LENGTH_ERROR` проекта 22318 без изменения выбора профиля, шага или
+арифметики `StructuralSummary`.
+
 ## Frame selection lifecycle
 
 ```text

@@ -148,7 +148,7 @@ The previous Core 1 result selected `DF11` by the first-match approximation: ste
 
 No `2ПС → ПС` normalization is accepted without this quantity/mass evidence.
 
-## D. Core 1 result after geometry-domain closure
+## D. Core 1 result after geometry-domain closure (pre snow-load correction snapshot)
 
 The required chain was executed using only the adapter output:
 
@@ -173,7 +173,7 @@ Core 1 result after the FrameSelector-only fix: frame step `4 m`; beam `ПГС30
 
 The frame branch now matches the source. Purlin profile and steel also match, but purlin step, purlin mass and the final structural specific mass remain divergent. `PurlinCalculator` was not changed in this audit.
 
-## E. Three-way comparison
+## E. Three-way comparison (pre snow-load correction snapshot)
 
 | Parameter | SOURCE | 22318 | NEW CORE 1 | Status / note |
 |---|---|---|---|---|
@@ -203,7 +203,7 @@ The frame branch now matches the source. Purlin profile and steel also match, bu
 
 Source → downstream count remains **11 MATCH**, **3 PROFILE_MATCH_NORMALIZED**, **0 MISMATCH**, **8 NOT_COMPARABLE**. New Core1 comparison: geometry, climate, frame step/count, beam, column, purlin profile/steel and D68 match; purlin step/mass and D69 remain divergent.
 
-## F. First divergence analysis
+## F. First divergence analysis (pre snow-load correction snapshot)
 
 ```text
 ProjectInput                 LAST_MATCHING_VALUE: all active source inputs
@@ -222,7 +222,7 @@ StructuralSummary            REACHED; Core1 D69-equivalent=34.92426481481481
 
 `LAST_MATCHING_VALUE` — the corrected frame branch and opening-mass result. `FIRST_DIVERGING_VALUE` — the purlin step-selection result. The FrameSelector fix is limited to the proven automatic step path; no purlin value was forced from the source, and no XLSX was modified.
 
-## G. Fixture suitability
+## G. Fixture suitability (pre snow-load correction snapshot)
 
 `real_project_22318` **не создан как `REAL_PROJECT_REFERENCE`**: the frame branch is now source-compatible and deterministic, but purlin step/mass and D69 still diverge. The case remains a differential-validation reference, not a parity fixture. `PARITY_PROVEN` не выставлялся.
 
@@ -237,13 +237,50 @@ StructuralSummary            REACHED; Core1 D69-equivalent=34.92426481481481
 7. Source/Core1 beam: `ПГС300/20х80х3` / `ПГС300/20х80х3`, utilization `85` / `85`.
 8. Source/Core1 column: `ПГС300/20х80х2` / `ПГС300/20х80х2`, utilization `79` / `79`.
 9. Source/Core1 purlin: `2ПС 195х45х1,5` / `2ПС 195х45х1,5`, steel `М.п.390` / `М.п.390`.
-10. Source/Core1 purlin step: `1900 mm` / `1500 mm`.
-11. Source/Core1 purlin mass: `1699.2 kg` / `2039.04 kg`; source downstream transfer is verified.
-12. Source/Core1 D69: `32.285826388888886` / `34.92426481481481 kg/m²`.
-13. Remaining first divergence: `PurlinCalculator` step-selection algorithm; `D68` now matches, so it is no longer an open first divergence.
-14. Tests: targeted audit `14/14`; full Vitest `119/119`; static integrity `25/25`; typecheck, build and diff check passed.
+10. Source/Core1 purlin step in the pre-correction snapshot: `1900 mm` / `1500 mm`.
+
+## Update 2026-09-17 — snow-load first divergence closed
+
+The dedicated snow-load audit proved that the source `Расчеты!C8` rule is `E/AU when populated, otherwise G/AW`. The local climate dataset already contained both fields. `ClimateResolver` now applies this general rule.
+
+For `Сургут` row 138, `E138/AU138=1.8` and `G138/AW138=2.0`; the authoritative source branch uses `1.8`. For the `Роза` baseline, `E500` is blank and `G500=1.5`, so the fallback preserves the previously passing result.
+
+Rerun result after the correction:
+
+| Value | SOURCE | Core1 | Status |
+|---|---:|---:|---|
+| snow load | 1.8 kN/m² | 1.8 kN/m² | MATCH |
+| E23-equivalent deck demand | 3.309178349044292 | 3.309178349044292 | MATCH |
+| deck maximum | 1900 mm | 1900 mm | MATCH |
+| candidate availability | 1900 present | 1900 present | MATCH |
+| selected purlin step | 1900 mm | 1900 mm | MATCH after tie-break fix |
+
+The equal-mass 1875/1900 selection issue is closed by the generic larger-step tie-break in `PurlinCalculator`. Full parity is still not claimed because D69 remains divergent.
+11. Source/Core1 purlin mass after the snow correction: `1699.2 kg` / `1699.2 kg` (MATCH).
+12. Source/Core1 D69 after the frame-length correction: `32.285826388888886` / `32.285826388888886 kg/m²` (MATCH).
+13. `CANDIDATE_ORDER_ERROR = CLOSED` and `FRAME_LENGTH_ERROR = CLOSED`: Core1 selects `1900 mm` with the proven equal-mass larger-step tie-break and evaluates the frame secondary aggregate with live `building_length_m=24`.
+14. Tests: purlin/real-project targeted audit `20/20`; full Vitest `121/121`; static integrity `25/25`; typecheck, build and diff check passed.
 15. Ready to commit: **NO** — user explicitly requested no commit/push for this audit; purlin parity remains open.
 
 ## Validation commands
 
-The FrameSelector and real-project regression tests passed after the minimal fix. Full Vitest `119/119`, typecheck, build, static integrity `25/25` and `git diff --check` passed. The bundled Python runtime did not include `pytest`; the available system Python ran the same static suite successfully. No commit or push was performed.
+The FrameSelector and real-project regression tests pass after the minimal length correction. No commit or push was performed.
+
+## Update 2026-09-17 — D69 structural-summary first-divergence audit
+
+The exact automatic legacy formula is:
+
+```text
+вывод!D69 = IF(вывод!D9=0,вывод!E8,вывод!E9)+вывод!D68
+вывод!E8  = подбор!Z14+'Подбор прогонов'!T28
+подбор!Z14 = INDEX($O$2:$O$7,MATCH(AM9,$A$2:$A$7,0))
+подбор!O4  = (E4+G4*T4)/(15*$V$11)+H4
+```
+
+For 22318, the cached source value is `подбор!Z14=25.120159722222223 kg/m²`, not `25.35615972222222`. The latter incorrectly subtracts `V28/360=4.72`; the active `E8` term is `T28=4.956 kg/m²` (`4.72×1.05`).
+
+Source decomposition: `E4=905 kg` (`181×5`), `G4×T4=827×7=5789 kg`, area `15×24=360 m²`, and `H4=15м!CQ11=6.5257152777777767 kg/m²`. Thus `Z14=25.120159722222223`, and `E8=30.076159722222222` exactly.
+
+The former first divergence was upstream of `StructuralSummary`: source `15м!CQ11=6.5257152777777767 kg/m²` uses `CU11=24`, while the extracted local cached row had `CU11=18`. `FrameSelector` now evaluates the proven `CM11=CU11*3*7.2*1.1+712` formula with runtime `building_length_m`, combines it with `CP11`, and divides by `15×length`. The 22318 frame aggregate, D69, frame step/count, profiles, purlin result and D68 now match.
+
+`LAST_MATCHING_VALUE` before the fix was the D68 result (`2.2096666666666667 kg/m²`); `FIRST_DIVERGING_VALUE` was `FrameSelector.selectFrame → FrameResult.tube_mass_kg_per_m2`. Classification: `FRAME_LENGTH_ERROR`, now closed by the generic runtime-length implementation. `StructuralSummary` remains unchanged.

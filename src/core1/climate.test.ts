@@ -51,7 +51,7 @@ describe("ClimateResolver", () => {
     const result = resolveClimate({ mode: "CITY_LOOKUP", country: "RU", city: "Сургут", normative_system: "SP_20" }, await climateDataset());
     expect(result.status).toBe("success");
     if (result.status === "success") {
-      expect(result.climate).toMatchObject({ source: "CITY_LOOKUP", country: "RU", city: "Сургут", snow_region: "IV", snow_load: 2, wind_region: "I", wind_load: 0.23 });
+      expect(result.climate).toMatchObject({ source: "CITY_LOOKUP", country: "RU", city: "Сургут", snow_region: "IV", snow_load: 1.8, wind_region: "I", wind_load: 0.23 });
     }
   });
 

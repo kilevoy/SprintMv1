@@ -143,7 +143,7 @@ describe("Core 1 input validation and orchestration", () => {
     const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
     expect(result.status).toBe("success");
     if (result.status !== "success") return;
-    expect(result.context?.purlin).toMatchObject({ purlin_profile: "2ПС 150х65х1,5", purlin_step_mm: 1000, purlin_weight_kg: 1756.44 });
+    expect(result.context?.purlin).toMatchObject({ purlin_profile: "2ПС 150х65х1,5", purlin_step_mm: 1015, purlin_weight_kg: 1756.44 });
     expect(result.result.kg_per_m2).toBeCloseTo(31.25892361111111, 10);
   });
 

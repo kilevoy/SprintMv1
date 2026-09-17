@@ -86,7 +86,20 @@ function cityNotFound(input: Extract<ClimateInput, { mode: "CITY_LOOKUP" }>): Cl
 function climateFromRow(input: Extract<ClimateInput, { mode: "CITY_LOOKUP" }>, values: Map<string, DatasetRecord>): Core1ClimateResult | null {
   const city = textValue(values.get("B")) ?? textValue(values.get("AR"));
   const snowRegion = textValue(values.get("F")) ?? textValue(values.get("AV"));
-  const snowLoad = numericValue(values.get("G")) ?? numericValue(values.get("AW"));
+  // The legacy SP 20 "new" branch uses the 2016 normative snow-load
+  // column (E/AU) when it is populated, and falls back to the older
+  // characteristic-load column (G/AW) only for rows where E/AU is blank.
+  // This is the same rule as Расчеты!C8 and keeps the workbook snow fields
+  // distinct (e.g. Сургут: 1.8 vs 2.0).
+  const snowLoad = input.normative_system === "SP_20"
+    ? numericValue(values.get("E"))
+      ?? numericValue(values.get("AU"))
+      ?? numericValue(values.get("G"))
+      ?? numericValue(values.get("AW"))
+    : numericValue(values.get("G"))
+      ?? numericValue(values.get("AW"))
+      ?? numericValue(values.get("E"))
+      ?? numericValue(values.get("AU"));
   const windRegion = textValue(values.get("H")) ?? textValue(values.get("AX"));
   const windLoad = numericValue(values.get("I")) ?? numericValue(values.get("AY"));
   if (city !== input.city || snowRegion === null || snowLoad === null || windRegion === null || windLoad === null) return null;

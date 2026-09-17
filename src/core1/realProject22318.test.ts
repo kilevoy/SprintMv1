@@ -42,6 +42,8 @@ describe("real project 22318 geometry-domain regression", () => {
     expect(result.context?.openings).toBeTruthy();
     expect(result.context?.frame).toMatchObject({
       frame_step_m: 4,
+      frame_mass_kg: 827,
+      tube_mass_kg_per_m2: 6.5257152777777767,
       beam_profile: "ПГС300/20х80х3",
       beam_utilization: 85,
       column_profile: "ПГС300/20х80х2",
@@ -51,10 +53,9 @@ describe("real project 22318 geometry-domain regression", () => {
     expect(result.context?.purlin).toMatchObject({
       purlin_profile: "2ПС 195х45х1,5",
       purlin_steel: "М.п.390",
-      purlin_step_mm: 1500,
+      purlin_step_mm: 1900,
     });
-    // The frame branch now matches 22318. The next proven divergence remains
-    // in the not-yet-reconciled purlin algorithm; do not force source values.
-    expect(result.result.kg_per_m2).toBeCloseTo(34.92426481481481, 12);
+    // The length-dependent frame/secondary mass now reproduces the source D69.
+    expect(result.result.kg_per_m2).toBeCloseTo(32.285826388888886, 12);
   });
 });

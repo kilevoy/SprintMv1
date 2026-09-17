@@ -3,7 +3,7 @@
 ## Automated checks
 
 - Scenario A: `С-П 200` + `С44-1000-0,7` selects `2ПС 200х65х2`, 2140 mm, 1550.88 kg, and the audited baseline summary.
-- Scenario B: `С-П 200` + `С44-1000-0,5` selects `2ПС 150х65х1,5`, 1000 mm, 1756.44 kg, and `D69 ≈ 31.25892361111111`.
+- Scenario B: `С-П 200` + `С44-1000-0,5` selects `2ПС 150х65х1,5`, 1015 mm, 1756.44 kg, and `D69 ≈ 31.25892361111111` (larger-step tie-break).
 - Existing 12 m baseline remains 32/32 and parity-proven.
 - Known deck grades expose audited limits and remain deterministic.
 - Unknown deck returns typed `LOOKUP_NO_MATCH` / `#N/A`.
@@ -11,7 +11,9 @@
 - Length 24 m and height 5 m are accepted by general proven geometry validation.
 - Height 6.21 m remains `UNKNOWN_DOMAIN`; no unsupported geometry is silently extrapolated.
 - Real `22318` reaches `FrameSelector`, `PurlinCalculator`, `SecondarySteelCalculator`, `OpeningMassCalculator`, and `StructuralSummary` through `ProjectInput → adapter → calculateCore1`.
-- The real-project test records deterministic Core 1 output but does not assert Excel parity where source values diverge.
+- The real-project test asserts source-compatible frame aggregate (`tube_mass_kg_per_m2=6.5257152777777767`), purlin profile, steel, step `1900 mm`, mass `1699.2 kg` and D69 `32.285826388888886 kg/m²`.
+- Frame length regression evaluates the same 15 m frame row at 18 m and 24 m, proving the runtime length changes only the length-dependent tube mass while frame step/count/profiles remain stable.
+- Equal-mass candidates are regression-tested to select the larger step, while a materially lower mass remains primary over step ordering.
 - Trace contains deck/configured/manual/effective limits and evaluated/selected steps.
 
 ## Quality gates
@@ -33,11 +35,14 @@
 
 ## Latest run
 
-- Vitest: 119 passed across 12 test files, including the new geometry and 22318 regression tests.
+- Vitest: 122 passed across 12 test files, including the new frame-length regression and 22318 source-parity assertions.
+- Purlin tie-break regression: equal-mass `1875/1900` candidates select `1900`; lower mass remains primary.
 - TypeScript typecheck: passed.
 - Vite production build: passed.
 - Static dataset integrity: 25 passed, 0 manifest SHA mismatches.
 - `git diff --check`: passed.
+- FrameSelector + 22318 targeted tests: 15 passed.
+- Static data integrity: `py -m pytest core1/tests/test_static_data_integrity.py` — 25 passed (system Python launcher).
 - TypeScript typecheck: passed.
 - Vite production build: passed.
 - Static dataset integrity: 25 passed, 0 manifest SHA mismatches.

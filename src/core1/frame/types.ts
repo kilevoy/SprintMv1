@@ -7,6 +7,8 @@ export interface FrameDatasetView {
 
 export interface FrameSelectorInput {
   span_m: SpanM;
+  /** Live project length used by the legacy CM/CP → CQ mass relationship. */
+  building_length_m: number;
   building_height_m: number;
   responsibility_factor: ResponsibilityFactor;
   frame_step_override_m?: number | null;

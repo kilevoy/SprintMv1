@@ -25,6 +25,25 @@ function valueAt(records: DatasetRecord[], cell: string): unknown {
   return records.find((record) => record.cell === cell)?.cached_value_json;
 }
 
+function formulaAt(records: DatasetRecord[], cell: string): string | null {
+  const record = records.find((candidate) => candidate.cell === cell);
+  if (!record) return null;
+  const formula = record.formula_json;
+  if (!formula || typeof formula !== "object") return null;
+  const textValue = (formula as { text?: unknown }).text;
+  if (typeof textValue === "string" && textValue.length > 0) return textValue;
+  const sharedIndex = (formula as { shared_index?: unknown }).shared_index;
+  if (typeof sharedIndex !== "string") return null;
+  const shared = records.find((candidate) => {
+    if (!candidate.formula_json || typeof candidate.formula_json !== "object") return false;
+    const candidateFormula = candidate.formula_json as { shared_index?: unknown; text?: unknown };
+    return candidateFormula.shared_index === sharedIndex && typeof candidateFormula.text === "string" && candidateFormula.text.length > 0;
+  });
+  if (!shared || !shared.formula_json || typeof shared.formula_json !== "object") return null;
+  const sharedText = (shared.formula_json as { text?: unknown }).text;
+  return typeof sharedText === "string" ? sharedText : null;
+}
+
 function text(value: unknown): string | null {
   return typeof value === "string" && !value.startsWith("#") ? value : null;
 }
@@ -48,6 +67,79 @@ function columnName(value: number): string {
     current = Math.floor((current - 1) / 26);
   }
   return result;
+}
+
+function evaluateSimpleArithmetic(expression: string): number | null {
+  const matchedTokens = expression.match(/\d+(?:\.\d+)?|[()+\-*/]/g);
+  if (!matchedTokens || matchedTokens.join("") !== expression.replace(/\s+/g, "")) return null;
+  const tokens = matchedTokens;
+  let position = 0;
+  const primary = (): number | null => {
+    const token = tokens[position];
+    if (token === "(") {
+      position += 1;
+      const value = additive();
+      if (tokens[position] !== ")") return null;
+      position += 1;
+      return value;
+    }
+    if (token === "+" || token === "-") {
+      position += 1;
+      const value = primary();
+      return value === null ? null : token === "-" ? -value : value;
+    }
+    if (!token || !/^\d/.test(token)) return null;
+    position += 1;
+    return Number(token);
+  };
+  const multiplicative = (): number | null => {
+    let value = primary();
+    while (value !== null && (tokens[position] === "*" || tokens[position] === "/")) {
+      const operator = tokens[position++];
+      const right = primary();
+      if (right === null || (operator === "/" && right === 0)) return null;
+      value = operator === "*" ? value * right : value / right;
+    }
+    return value;
+  };
+  function additive(): number | null {
+    let value = multiplicative();
+    while (value !== null && (tokens[position] === "+" || tokens[position] === "-")) {
+      const operator = tokens[position++];
+      const right = multiplicative();
+      if (right === null) return null;
+      value = operator === "+" ? value + right : value - right;
+    }
+    return value;
+  }
+  const result = additive();
+  return result !== null && position === tokens.length && Number.isFinite(result) ? result : null;
+}
+
+function evaluateLengthFormula(formula: string, lengthCell: string, lengthM: number): number | null {
+  const parts = cellParts(lengthCell);
+  if (!parts) return null;
+  const reference = new RegExp(`\\$?${parts.column}\\$?\\d+`, "g");
+  const expression = formula.replace(reference, String(lengthM)).replace(/,/g, ".");
+  return evaluateSimpleArithmetic(expression);
+}
+
+function lengthAdjustedTubeMass(records: DatasetRecord[], base: number, row: number, spanM: number, lengthM: number): number | null {
+  // In each frame block the aggregate cells are CM/CP and the live length
+  // controller is CU (for the BV-based 15 m block: offsets +17/+20/+25).
+  const lengthCell = `${columnName(base + 25)}${row}`;
+  const horizontalCell = `${columnName(base + 17)}${row}`;
+  const verticalCell = `${columnName(base + 20)}${row}`;
+  const horizontalCached = number(valueAt(records, horizontalCell));
+  const verticalCached = number(valueAt(records, verticalCell));
+  if (horizontalCached === null || verticalCached === null) return null;
+  const formula = formulaAt(records, horizontalCell);
+  const staticLength = number(valueAt(records, lengthCell));
+  const horizontalMass = formula
+    ? evaluateLengthFormula(formula, lengthCell, lengthM)
+    : staticLength === lengthM ? horizontalCached : null;
+  if (horizontalMass === null || !Number.isFinite(lengthM) || lengthM <= 0 || !Number.isFinite(spanM) || spanM <= 0) return null;
+  return (horizontalMass + verticalCached) / (spanM * lengthM);
 }
 
 function romanToNumber(value: string): number | null {
@@ -169,6 +261,7 @@ export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView
     return invalid("Пролёт отсутствует в типизированном домене FrameSelector.", { span_m: input.span_m });
   }
   if (!Number.isFinite(input.building_height_m) || input.building_height_m <= 0) return invalid("Высота здания должна быть положительным числом.", { building_height_m: input.building_height_m });
+  if (!Number.isFinite(input.building_length_m) || input.building_length_m <= 0) return invalid("Длина здания должна быть положительным числом.", { building_length_m: input.building_length_m });
   if (input.frame_step_override_m !== null && input.frame_step_override_m !== undefined && (!Number.isFinite(input.frame_step_override_m) || input.frame_step_override_m <= 0)) {
     return invalid("Ручной шаг рам должен быть положительным числом или blank.", { frame_step_override_m: input.frame_step_override_m });
   }
@@ -195,7 +288,8 @@ export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView
     return { status: "no_match", frame: null, diagnostics: [diagnostic("FRAME_NO_MATCH", "unsupported", "Строка рамы содержит неполные cached values.", { branch, row: block.row, start: block.start })] };
   }
   const frameMass = number(valueAt(dataset.records, `${columnName(base + 16)}${block.row}`));
-  const tubeMass = number(valueAt(dataset.records, `${columnName(base + 21)}${block.row}`));
+  const tubeMass = lengthAdjustedTubeMass(dataset.records, base, block.row, input.span_m, input.building_length_m);
+  if (tubeMass === null) return { status: "no_match", frame: null, diagnostics: [diagnostic("FRAME_NO_MATCH", "unsupported", "Не удалось воспроизвести length-dependent массу трубной/вторичной составляющей по локальной формуле строки.", { span_m: input.span_m, building_length_m: input.building_length_m, block: `${block.start}${block.row}` })] };
   return {
     status: "success",
     diagnostics: [],
