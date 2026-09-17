@@ -63,6 +63,14 @@ describe("ClimateResolver", () => {
     }
   });
 
+  it("resolves the source-proven Uvildy tuple used by real project 22329", async () => {
+    const result = resolveClimate({ mode: "CITY_LOOKUP", country: "RU", city: "Увильды", normative_system: "SP_20" }, await climateDataset());
+    expect(result.status).toBe("success");
+    if (result.status === "success") {
+      expect(result.climate).toMatchObject({ source: "CITY_LOOKUP", country: "RU", city: "Увильды", snow_region: "III", snow_load: 1.5, wind_region: "II", wind_load: 0.3 });
+    }
+  });
+
   it("previews an exact local city without widening the proven calculation gate", async () => {
     const input = { mode: "CITY_LOOKUP" as const, country: "RU" as const, city: "Челябинск", normative_system: "SP_20" as const };
     const dataset = await climateDataset();

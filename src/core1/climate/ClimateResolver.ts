@@ -4,7 +4,7 @@ import type { DatasetRecord } from "../data";
 import type { ClimateDatasetView, ClimateResolveResult } from "./types";
 
 const LOAD_UNITS = "kN/m²";
-const PROVEN_LOOKUP_KEYS = new Set(["RU|Роза|SP_20", "RU|Сургут|SP_20", "RU|Березовский|SP_20"]);
+const PROVEN_LOOKUP_KEYS = new Set(["RU|Роза|SP_20", "RU|Сургут|SP_20", "RU|Березовский|SP_20", "RU|Увильды|SP_20"]);
 
 /** Exact workbook-proven tuples whose normative branch is not represented by
  * the generic sparse-row columns. Keep this map explicit: no fuzzy city
