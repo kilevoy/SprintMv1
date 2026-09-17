@@ -26,6 +26,8 @@ diagnostic confirmation and are not used to justify an automatic fix.
 | building height | `вывод!D6 = 5` m | `building_height_m = 5` | MATCH |
 | responsibility | `вывод!D7 = 1` | `responsibility_factor = 1.0` | MATCH |
 | frame-step mode | `вывод!D9` blank (automatic) | `frame_step_override_m = null` | MATCH |
+| snow-retention purlin | `вывод!D26 = есть` | `snow_retention_purlin = есть` | MATCH |
+| enclosure purlin | `вывод!D27 = нет` | `enclosure_purlin = нет` | MATCH |
 | roof covering | `вывод!D20 = С-П 150` | `С-П 150` | MATCH |
 | deck grade | `вывод!D21 = С44-1000-0,7` | `С44-1000-0,7` | MATCH |
 | gates / doors | `вывод!D60 = 1`, `D61 = 0`, `D62 = 1` | one ≤6 m gate, zero >6 m gates, one door | MATCH at proven count level |
@@ -51,11 +53,11 @@ That dimensional projection is not the first divergence.
 | purlin profile | `2ПС 200х65х1,5` (`Подбор прогонов!P28`) | `2ПС 200х65х1,5` | MATCH |
 | purlin steel | `М.п.350` (`Подбор прогонов!U28`) | `М.п.350` | MATCH |
 | purlin step | 1800 mm (`Подбор прогонов!S28`) | 1800 mm | MATCH |
-| purlin mass | 3174.6000000000004 kg (`Подбор прогонов!V28`) | 2930.4 kg | **FIRST DIVERGENCE** |
-| purlin specific mass | 6.1728333333333341 kg/m² (`Подбор прогонов!T28`) | 5.698 kg/m² | DOWNSTREAM |
-| D68 | 0.79955555555555546 kg/m² (`вывод!D68 = Лист1!O28`) | downstream of purlin result | DOWNSTREAM |
-| structural base | 28.12323703703704 kg/m² (`вывод!E8`) | downstream of purlin result | DOWNSTREAM |
-| D69 | 28.922792592592597 kg/m² | downstream of purlin result | DOWNSTREAM |
+| purlin mass | 3174.6000000000004 kg (`Подбор прогонов!V28`) | 3174.6000000000004 kg | MATCH |
+| purlin specific mass | 6.1728333333333341 kg/m² (`Подбор прогонов!T28`) | 6.172833333333334 kg/m² | MATCH |
+| D68 | 0.79955555555555546 kg/m² (`вывод!D68 = Лист1!O28`) | included in final summary chain | VERIFIED THROUGH D69 |
+| structural base | 28.12323703703704 kg/m² (`вывод!E8`) | included in final summary chain | VERIFIED THROUGH D69 |
+| D69 | 28.922792592592597 kg/m² | 28.922792592592597 kg/m² | MATCH |
 
 ## Exact source formula path
 
@@ -76,19 +78,18 @@ For 22316, `AM9=18`, `V11=30`, `G5=985`, `T5=8`, `H5=4.8689222222222224`,
 and `T28=6.1728333333333341`, yielding `E8=28.12323703703704` and then
 `D69=28.922792592592597`.
 
-## First-divergence decision after the family-18 fix
+## First-divergence decision after the family-18 fix and input remapping
 
-- `LAST_MATCHING_VALUE`: purlin profile, steel and selected step after the
-  corrected family-18 frame lookup.
-- `FIRST_DIVERGING_VALUE`: purlin mass, SOURCE `3174.6000000000004 kg` versus
-  Core1 `2930.4 kg`.
-- Classification: `PURLIN_MASS_DIVERGENCE_UNRESOLVED`.
-- The frame-step divergence is closed. Core1 is not promoted to a complete
-  `REAL_PROJECT_REFERENCE` because the ordered chain now diverges in purlin
-  mass.
+- The intermediate replay with `snow_retention_purlin = "нет"` was invalid
+  because the source has `вывод!D26 = "есть"`.
+- After mapping the source flag, purlin mass and specific mass match exactly
+  within floating-point tolerance.
+- `D69` also matches: SOURCE `28.922792592592597` versus Core1
+  `28.922792592592597`.
+- Classification: `REAL_PROJECT_INPUT_MAPPING_ERROR`, now **CLOSED**.
 
-The purlin mass divergence is not corrected in this step. 22326 remains
-`SOURCE_SUSPICIOUS` and is not used here.
+No purlin algorithm was changed. 22326 remains `SOURCE_SUSPICIOUS` and is not
+used here.
 
 ## 22318 regression check
 
@@ -99,6 +100,7 @@ continues to assert that value.
 ## Changes
 
 Production changes include the exact climate key/tuple and the generic
-family-18 automatic-step mapping, each with regression coverage. No workbook
-was changed. The chain was rerun and work stopped at the next purlin-mass
-divergence; no commit or push was made.
+family-18 automatic-step mapping, each with regression coverage. The 22316
+replay now maps `D26=есть`; this closes the apparent purlin-mass divergence
+without changing `PurlinCalculator`. No workbook was changed. No further
+first divergence is observed through `D69`.

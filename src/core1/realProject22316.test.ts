@@ -23,12 +23,12 @@ const project22316: ProjectInput = {
     { id: "gate-22316", kind: "gate", width_mm: 3000, height_mm: 3000, quantity: 1 },
     { id: "door-22316", kind: "door", width_mm: 1000, height_mm: 2000, quantity: 1 },
   ],
-  special_conditions: { snow_retention_purlin: "нет", enclosure_purlin: "нет", horizontal_bracing_override: null },
+  special_conditions: { snow_retention_purlin: "есть", enclosure_purlin: "нет", horizontal_bracing_override: null },
   other: { selection_mode: "стандарт", building_roof_type: "двускатное", purlin_max_step_override_mm: null, purlin_min_step_mm: 0, terrain_type: "В", window_scheme_factor: 1.0, window_utilization_limit: 0.85 },
 };
 
-describe("real project 22316 first-divergence replay", () => {
-  it("reaches the next chain boundary after the generic family-18 step fix", async () => {
+describe("real project 22316 source-mapped replay", () => {
+  it("closes the purlin mass difference after mapping the source input", async () => {
     const adapted = projectInputToCore1Input(project22316, { gate_boundary_dimension: "width_mm" });
     expect(adapted.status).toBe("success");
     if (adapted.status !== "success") return;
@@ -47,10 +47,11 @@ describe("real project 22316 first-divergence replay", () => {
       purlin_profile: "2ПС 200х65х1,5",
       purlin_steel: "М.п.350",
       purlin_step_mm: 1800,
-      purlin_weight_kg: 2930.4,
+      purlin_kg_per_m2: 6.172833333333334,
     });
-    // The source agrees through profile/steel/step; purlin mass is the next
-    // divergence and must not be silently normalized here.
-    expect(result.context?.purlin?.purlin_weight_kg).not.toBe(3174.6);
+    expect(result.context?.purlin?.purlin_weight_kg).toBeCloseTo(3174.6000000000004, 12);
+    // The source flag D26=есть adds one purlin line; this is an input mapping
+    // boundary, not a reason to alter the generic purlin formula.
+    expect(result.result.kg_per_m2).toBeCloseTo(28.922792592592597, 12);
   });
 });

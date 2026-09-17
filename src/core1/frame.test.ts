@@ -125,4 +125,23 @@ describe("FrameSelector", () => {
     expect(length24.frame.tube_mass_kg_per_m2).toBeCloseTo(6.5257152777777767, 12);
     expect(length18.frame.tube_mass_kg_per_m2).not.toBe(length24.frame.tube_mass_kg_per_m2);
   });
+
+  it("uses the proven generic family-18 automatic step", async () => {
+    const result = selectFrame({
+      span_m: 18,
+      building_length_m: 30,
+      building_height_m: 5,
+      responsibility_factor: 1.0,
+      frame_step_override_m: null,
+      climate: { ...climate, snow_region: "IV", wind_region: "I" },
+    }, await frame(18));
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    expect(result.frame).toMatchObject({
+      frame_step_m: 4.5,
+      beam_profile: "ПГС300/20х80х3",
+      column_profile: "ПГС300/20х80х2,5",
+    });
+    expect(Math.ceil(30 / result.frame.frame_step_m) + 1).toBe(8);
+  });
 });
