@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Real-project reference classification and compatibility-case audit
+Legacy climate derivation and frame-branch implementation; 22329 post-branch parity audit
 
 ## Status
 
@@ -23,6 +23,9 @@ Real-project reference classification and compatibility-case audit
 - `ProjectInput` is the only editable project model; legacy opening counters are derived by `projectInputToCore1Input()`.
 - Gate classification remains blocked until the workbook proves whether width or height controls the 6 m boundary.
 - Literal `span_m` is validated as finite positive `<=24`; `resolveDesignSpanFamily` maps inclusive upper bands without rounding. Family 24 retains downstream legacy `#N/A`; spans `>24` return `UNKNOWN_DOMAIN`.
+- `ClimateResolver` remains canonical. City lookup now derives the proven legacy `E + AM26 → J/K/L/M` result separately and passes the mapped `AJ11 → V7` branch into `FrameSelector`.
+- Excel approximate `MATCH` on the ordered non-monotonic `AB5:AB58` range is characterized by Excel COM; the compatibility matcher preserves binary-search behavior and does not sort or deduplicate the tail.
+- 22329 branch parity is closed through beam/column/frame outputs; the next audit boundary is the first bolt pattern divergence (`вывод!D52`: source `8х2`, Core1 current `7х2`). No downstream repair was made.
 
 ## Blockers
 
@@ -41,4 +44,5 @@ Geometry, climate, purlin step-selection and the proven frame-length path are no
 - `pytest core1/tests/test_static_data_integrity.py`: 25/25 passed after exact-byte restoration; final rerun remains part of the quality gate.
 - Project adapter/UI tests: 17/17 focused tests passed in the latest targeted run.
 - FrameSelector + 22318 targeted tests: 15/15 passed.
+- Legacy pipeline targeted tests: 6/6 passed; full Vitest run: 152/152 passed after the branch integration.
 - `py -m pytest core1/tests/test_static_data_integrity.py`: 25/25 passed. The bundled `python` runtime has no pytest; the system Python launcher was used.

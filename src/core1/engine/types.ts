@@ -4,6 +4,7 @@ import type { PurlinResultValue } from "../purlin";
 import type { SecondarySteelResult } from "../secondary";
 import type { WindowGirtResult } from "../window";
 import type { OpeningMassResult } from "../opening";
+import type { LegacyClimateResult, LegacyFrameBranchResult } from "../legacy";
 
 export type Core1EngineStatus =
   | "success"
@@ -28,7 +29,7 @@ export type Core1EngineCode =
 export interface Core1EngineBase {
   status: Core1EngineStatus;
   diagnostics: Core1Diagnostic[];
-  context?: { climate: Core1ClimateResult; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult; windows?: WindowGirtResult | null; openings?: OpeningMassResult | null };
+  context?: { climate: Core1ClimateResult; legacyClimate?: LegacyClimateResult | null; legacyFrameBranch?: LegacyFrameBranchResult | null; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult; windows?: WindowGirtResult | null; openings?: OpeningMassResult | null };
 }
 
 export interface Core1EngineSuccess extends Core1EngineBase {

@@ -1,5 +1,17 @@
 # Test Plan — Core 1 geometry closure and real project 22318
 
+## Legacy climate/frame branch overlay
+
+- `AB5:AB58` approximate `MATCH` characterization covers exact keys and between-boundary values, including the non-monotonic rows 54–58 and text/error rows 50–53.
+- Roof correction rows preserve source order and `С-П 150 → 0.1`.
+- `E + AM26` reproduces Uvildy `1.5 + 0.1 = 1.6 → IV/0.8 and III/0.8`.
+- `V9=1.0` selects J/K; `V9=0.8` selects L/M; wind is taken from H independently.
+- Duplicate `3/3` in the exact `AJ11 → V7` table returns the first occurrence.
+- 22318 and 22316 retain their proven frame and D69 parity.
+- 22329 canonical climate remains `III/1.5, II/0.30`, while the legacy branch is `4/2 → 4/3` and the beam is `ПГС300/20х80х2,5`.
+- 22326 remains a compatibility case and is not promoted to a real-project oracle.
+- The first post-branch divergence is recorded at the source bolt pattern `вывод!D52`; downstream parity is not used to justify an automatic fix.
+
 ## Automated checks
 
 - Scenario A: `С-П 200` + `С44-1000-0,7` selects `2ПС 200х65х2`, 2140 mm, 1550.88 kg, and the audited baseline summary.

@@ -1,6 +1,7 @@
 import { validateCore1Input } from "../compatibility";
 import { BrowserCore1DataRepository, BrowserDataSource } from "../data";
 import { resolveClimate } from "../climate";
+import { deriveLegacyClimate, legacyFrameBranchDiagnostic, resolveLegacyFrameBranch } from "../legacy";
 import { selectFrame } from "../frame";
 import { resolveDesignSpanFamily } from "../frame/designSpanFamily";
 import { calculatePurlin } from "../purlin";
@@ -11,8 +12,10 @@ import { calculateStructuralSummary } from "../summary";
 import { createCore1Diagnostic } from "../diagnostics";
 import { resolveClimateInput, resolveWindowsInput, validateCore1InputDomain } from "../validation";
 import type { Core1DataRepository } from "../data";
+import type { ClimateDatasetView } from "../climate";
 import type { Core1ClimateResult, Core1Input } from "../types";
 import type { FrameResult } from "../frame";
+import type { LegacyClimateResult, LegacyFrameBranchResult } from "../legacy";
 import type { PurlinDatasetBundle, PurlinResultValue } from "../purlin";
 import type { SecondarySteelResult } from "../secondary";
 import type { WindowGirtResult } from "../window";
@@ -117,10 +120,12 @@ export async function calculateCore1(
   }
 
   const climateInput = resolveClimateInput(value);
+  let climateDataset: ClimateDatasetView | undefined;
   const climateResolution = await (async () => {
     if (climateInput.mode === "MANUAL") return resolveClimate(climateInput);
     try {
       const dataset = await repository.loadClimateDataset("climate_lookup_sparse");
+      climateDataset = dataset;
       return resolveClimate(climateInput, dataset);
     } catch {
       return resolveClimate(climateInput);
@@ -136,7 +141,27 @@ export async function calculateCore1(
     return { status: "unknown_domain", code: "UNKNOWN_CLIMATE_DATA", result: null, diagnostics: climateResolution.diagnostics };
   }
   const context = { climate: climateResolution.climate };
-  let finalContext: { climate: Core1ClimateResult; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult; windows?: WindowGirtResult | null; openings?: import("../opening").OpeningMassResult | null } = context;
+  let legacyClimate: LegacyClimateResult | null = null;
+  let legacyFrameBranch: LegacyFrameBranchResult | null = null;
+  if (climateInput.mode === "CITY_LOOKUP" && climateDataset) {
+    legacyClimate = deriveLegacyClimate({
+      city: climateInput.city,
+      responsibility_factor: value.responsibility_factor,
+      roof_covering: value.roof_covering,
+      climate: climateResolution.climate,
+      dataset: climateDataset,
+    });
+    if (!legacyClimate) {
+      const diagnostic = legacyFrameBranchDiagnostic("Не удалось воспроизвести proven legacy climate branch для выбранного города.", { city: climateInput.city, roof_covering: value.roof_covering });
+      return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context, diagnostics: [...domain.diagnostics, diagnostic] };
+    }
+    legacyFrameBranch = resolveLegacyFrameBranch({ activeSnowRegion: legacyClimate.activeSnowRegion, windRegion: legacyClimate.windRegion });
+    if (!legacyFrameBranch) {
+      const diagnostic = legacyFrameBranchDiagnostic("Не удалось сопоставить legacy AJ11 с таблицей веток рамы.", { city: climateInput.city, active_snow_region: legacyClimate.activeSnowRegion, wind_region: legacyClimate.windRegion });
+      return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context: { ...context, legacyClimate }, diagnostics: [...domain.diagnostics, ...legacyClimate.diagnostics, diagnostic] };
+    }
+  }
+  let finalContext: { climate: Core1ClimateResult; legacyClimate?: LegacyClimateResult | null; legacyFrameBranch?: LegacyFrameBranchResult | null; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult; windows?: WindowGirtResult | null; openings?: import("../opening").OpeningMassResult | null } = { ...context, legacyClimate, legacyFrameBranch };
 
   try {
     if (domain.state === "SUPPORTED_WITH_LEGACY_ANOMALY") {
@@ -169,6 +194,7 @@ export async function calculateCore1(
         responsibility_factor: value.responsibility_factor,
         frame_step_override_m: value.frame_step_override_m ?? null,
         climate: context.climate,
+        legacy_frame_branch: legacyFrameBranch?.mappedBranchKey ?? null,
       },
       frameDataset,
     );
@@ -187,7 +213,7 @@ export async function calculateCore1(
     if (frameResolution.status !== "success" || !frameResolution.frame) {
       return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context, diagnostics: [...domain.diagnostics, ...frameResolution.diagnostics] };
     }
-    const frameContext = { ...context, frame: frameResolution.frame };
+    const frameContext = { ...finalContext, frame: frameResolution.frame };
     let purlinBundle: PurlinDatasetBundle;
     try {
       const [selectionRules, profileCatalogue, calculationAxis, calculationConstants, literals, steelGrades, roofProperties, deckProperties] = await Promise.all([

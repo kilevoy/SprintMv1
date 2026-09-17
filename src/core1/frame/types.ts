@@ -13,6 +13,8 @@ export interface FrameSelectorInput {
   responsibility_factor: ResponsibilityFactor;
   frame_step_override_m?: number | null;
   climate: Core1ClimateResult;
+  /** Proven legacy AJ11/V7 branch. Canonical climate remains authoritative for climate outputs. */
+  legacy_frame_branch?: string | null;
 }
 
 export interface FrameSelectionTrace {

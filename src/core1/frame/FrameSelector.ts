@@ -268,7 +268,7 @@ export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView
   if (input.frame_step_override_m !== null && input.frame_step_override_m !== undefined && (!Number.isFinite(input.frame_step_override_m) || input.frame_step_override_m <= 0)) {
     return invalid("Ручной шаг рам должен быть положительным числом или blank.", { frame_step_override_m: input.frame_step_override_m });
   }
-  const branch = climateBranch(input.climate);
+  const branch = input.legacy_frame_branch ?? climateBranch(input.climate);
   if (!branch) return { status: "unknown_domain", frame: null, diagnostics: [diagnostic("UNKNOWN_FRAME_DOMAIN", "unsupported", "Районы снега/ветра не позволяют доказанно сформировать ветку рамы.", { climate: input.climate })] };
   const band = HEIGHT_BANDS.find((candidate) => input.building_height_m <= candidate.max);
   if (!band) return { status: "unknown_domain", frame: null, diagnostics: [diagnostic("UNKNOWN_FRAME_DOMAIN", "unsupported", "Высота выходит за доказанные высотные таблицы FrameSelector.", { building_height_m: input.building_height_m })] };

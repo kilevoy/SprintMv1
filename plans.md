@@ -1,5 +1,22 @@
 # Sprint M — CORE 1 PURLIN_DECK_GAP
 
+## Current execution overlay — proven legacy climate/frame pipeline
+
+Objective: connect the proven canonical-climate → legacy-derived-climate → legacy-frame-branch chain without changing canonical climate semantics or source XLSX files.
+
+Milestones:
+
+1. **L1 — Static legacy datasets** `[x]`
+   - Preserve roof correction rows, ordered `AB5:AH58`, and `AJ11 → V7` rows including duplicate keys and text/error rows.
+2. **L2 — Excel MATCH compatibility** `[x]`
+   - Characterize the exact approximate binary lookup behavior against Excel COM and encode regression cases.
+3. **L3 — Runtime pipeline** `[x]`
+   - Add `LegacyClimateDeriver` and `LegacyFrameBranchResolver`; keep canonical `ClimateResolver` unchanged; pass mapped branch to `FrameSelector`.
+4. **L4 — Real-project verification** `[~]`
+   - Protect 22318 and 22316, rerun 22329, and stop at the next first divergence rather than repairing downstream logic.
+
+Definition of done for this overlay: legacy branch datasets and matcher are characterized, 22318/22316 remain exact, 22329 beam parity is restored, and the next unresolved divergence is reported.
+
 ## Objective
 
 Close the proven legacy chain `roof_deck_grade -> deck lookup -> maximum purlin step -> purlin selection` without changing source XLSX files or beginning Core 2.
