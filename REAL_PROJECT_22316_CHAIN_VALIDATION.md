@@ -2,16 +2,17 @@
 
 ## Scope and evidence
 
-This is a read-only parity audit. No production TypeScript and no XLSX were
-modified. The requested source path
+This is a parity audit after adding one explicitly proven climate tuple. No
+XLSX was modified. The requested source path
 `E:\\SprintMv1\\_reference\\22316\\22316\\_SOURCE\\_SELECTION.xlsx` does not
 exist in this checkout; the verified source is
 `E:\\SprintMv1_reference\\22316\\22316_SOURCE_SELECTION.xlsx`. The
 downstream workbook is
 `E:\\SprintMv1_reference\\22316\\22316.xlsx`.
 
-The comparison stops at the first real divergence, as required. A field after
-that point is `NOT_REACHED`, not an inferred Core1 result.
+The source and Core1 chains are compared in the requested order. Once a real
+divergence is reached it is reported, but downstream values are shown only for
+diagnostic confirmation and are not used to justify an automatic fix.
 
 ## ProjectInput and adapter
 
@@ -37,23 +38,23 @@ That dimensional projection is not the first divergence.
 
 | Chain field | SOURCE | CORE1 | Result |
 |---|---:|---:|---|
-| climate | `Березовский`, SP-20; local branch resolves snow region IV, snow load 1.5 kN/m², wind region I, wind load 0.23 kN/m² | `UNKNOWN_CLIMATE_DATA` for `CITY_LOOKUP:RU:Березовский:SP_20` | **FIRST DIVERGENCE** |
-| literal span | 18 m | not reached | NOT_REACHED |
-| design span family | 18 m (`подбор!AM9/BD9 = 18`) | not reached | NOT_REACHED |
-| selected frame step | 4.5 m (`вывод!D8 = подбор!AA14`) | not reached | NOT_REACHED |
-| frame count | 8 (`ceil(30/4.5)+1`) | not reached | NOT_REACHED |
-| beam | `ПГС300/20х80х3` (`подбор!V14`) | not reached | NOT_REACHED |
-| column | `ПГС300/20х80х2,5` (`подбор!U14`) | not reached | NOT_REACHED |
-| displayed frame mass | 985 kg (`подбор!Y15`) | not reached | NOT_REACHED |
-| structural aggregate frame mass | 985 kg (`подбор!G5`, `18м!IE19`) | not reached | NOT_REACHED |
-| secondary / tube mass | 4.8689222222222224 kg/m² (`подбор!H5`, `18м!IF19`) | not reached | NOT_REACHED |
-| purlin profile | `2ПС 200х65х1,5` (`Подбор прогонов!P28`) | not reached | NOT_REACHED |
-| purlin steel | `М.п.350` (`Подбор прогонов!U28`) | not reached | NOT_REACHED |
-| purlin step | 1800 mm (`Подбор прогонов!S28`) | not reached | NOT_REACHED |
-| purlin mass | 3174.6000000000004 kg (`Подбор прогонов!V28`) | not reached | NOT_REACHED |
-| D68 | 0.79955555555555546 kg/m² (`вывод!D68 = Лист1!O28`) | not reached | NOT_REACHED |
-| structural base | 28.12323703703704 kg/m² (`вывод!E8`) | not reached | NOT_REACHED |
-| D69 | 28.922792592592597 kg/m² | not reached | NOT_REACHED |
+| climate | `Березовский`, SP-20; snow IV / 1.5 kN/m², wind I / 0.23 kN/m² | exact `CITY_LOOKUP:RU:Березовский:SP_20`; snow IV / 1.5 kN/m², wind I / 0.23 kN/m² | MATCH |
+| literal span | 18 m | 18 m | MATCH |
+| design span family | 18 m (`подбор!AM9/BD9 = 18`) | 18 m | MATCH |
+| selected frame step | 4.5 m (`вывод!D8 = подбор!AA14`, `18м!IG19`) | 4 m (`FrameResult.frame_step_m`) | **FIRST DIVERGENCE** |
+| frame count | 8 (`ceil(30/4.5)+1`) | 9 (`ceil(30/4)+1`) | MISMATCH |
+| beam | `ПГС300/20х80х3` (`подбор!V14`) | `ПГС300/20х80х3` | MATCH (profile) |
+| column | `ПГС300/20х80х2,5` (`подбор!U14`) | `ПГС300/20х80х3` | MISMATCH |
+| displayed frame mass | 985 kg (`подбор!Y15`) | 1025 kg (`FrameResult.frame_mass_kg`) | MISMATCH |
+| structural aggregate frame mass | 985 kg (`подбор!G5`, `18м!IE19`) | 1025 kg (same Core1 frame result) | MISMATCH |
+| secondary / tube mass | 4.8689222222222224 kg/m² (`подбор!H5`, `18м!IF19`) | 4.68558888888889 kg/m² | MISMATCH |
+| purlin profile | `2ПС 200х65х1,5` (`Подбор прогонов!P28`) | `2ПС 145х45х1,5` | MISMATCH |
+| purlin steel | `М.п.350` (`Подбор прогонов!U28`) | `М.п.390` | MISMATCH |
+| purlin step | 1800 mm (`Подбор прогонов!S28`) | 1510 mm | MISMATCH |
+| purlin mass | 3174.6000000000004 kg (`Подбор прогонов!V28`) | 2478.0000000000005 kg | MISMATCH |
+| D68 | 0.79955555555555546 kg/m² (`вывод!D68 = Лист1!O28`) | 0.7925555555555556 kg/m² | MISMATCH |
+| structural base | 28.12323703703704 kg/m² (`вывод!E8`) | 29.4909592592593 kg/m² | MISMATCH |
+| D69 | 28.922792592592597 kg/m² | 30.28351481481482 kg/m² | MISMATCH |
 
 ## Exact source formula path
 
@@ -76,17 +77,13 @@ and `T28=6.1728333333333341`, yielding `E8=28.12323703703704` and then
 
 ## First-divergence decision
 
-- `LAST_MATCHING_VALUE`: adapter-projected project inputs through the explicit
-  city/normative selection (`Березовский`, RU, `SP_20`), including span 18,
-  length 30, height 5, responsibility 1, automatic frame mode, envelope, and
-  opening counts.
-- `FIRST_DIVERGING_VALUE`: climate resolution. Core1's proven sparse lookup
-  contract currently guarantees only the audited RU city keys (including
-  `Роза` and `Сургут`); it deliberately returns `UNKNOWN_CLIMATE_DATA` for
-  `Березовский` rather than treating the unproven row as parity evidence.
-- Classification: `UNSUPPORTED_FOR_PARITY / UNKNOWN_CLIMATE_DATA`.
-- 22316 is **not promoted** to `REAL_PROJECT_REFERENCE` in this pass because
-  the ordered chain does not reach calculation.
+- `LAST_MATCHING_VALUE`: exact climate tuple for `RU|Березовский|SP_20` and
+  the preceding ProjectInput/adapter fields.
+- `FIRST_DIVERGING_VALUE`: selected frame step, SOURCE 4.5 m versus Core1 4 m.
+- Classification: `FRAME_STEP_SELECTION_MISMATCH`.
+- Core1 reaches StructuralSummary and produces D69, but 22316 is **not
+  promoted** to `REAL_PROJECT_REFERENCE` because the ordered chain diverges at
+  frame selection.
 
 This is a data-contract blocker for this project, not evidence for changing
 generic frame, purlin, or structural-summary logic. 22326 remains
@@ -100,5 +97,6 @@ continues to assert that value.
 
 ## Changes
 
-Only this audit document was added. No production code, fixture, or workbook
-was changed; no commit or push was made.
+Production changes are limited to the exact climate key/tuple in
+`ClimateResolver.ts` and its regression test. No workbook was changed. The
+next frame-step divergence was not fixed; no commit or push was made.

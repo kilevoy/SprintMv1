@@ -6,7 +6,7 @@
 
 | Dataset | Доказанный источник | Что доказано | Применение v1 |
 |---|---|---|---|
-| `main_frame_climate_lookup` | локальные листы основной книги `снегветер` и `Города п.К`; активная цепочка `подбор`, включая lookup `снегветер!P11:X11`; source-proven rows `Роза` и `Сургут` | данные находятся внутри основной книги и используются каркасом; для `Сургут` подтверждены `IV/2` и `I/0,23` | экспортировать из основной книги как versioned static data; поддерживать только exact city keys, проходящие все обязательные lookup |
+| `main_frame_climate_lookup` | локальные листы основной книги `снегветер` и `Города п.К`; активная цепочка `подбор`, включая lookup `снегветер!P11:X11`; source-proven rows `Роза`, `Сургут` и `Березовский` | данные находятся внутри основной книги и используются каркасом; для `Березовский` подтверждены `IV/1,5` и `I/0,23` | экспортировать из основной книги как versioned static data; поддерживать только exact city keys, проходящие все обязательные lookup |
 | `roof_load_mapping` | `подбор!V5 → W5`, lookup по `снегветер!AM:AN` | покрытие влияет на нагрузку каркаса | экспортировать вместе с climate/load data; exact key |
 | `window_city_local` | локальные `Города п.К`, `снегветер`, `Лист1!J18:K18:J19` | city/zone/load lookup и сохранённый `Роза → #N/A → нет` | canonical для runtime; exact-match, без fuzzy |
 | `window_wind_local` | локальные `Ветер СП!G25:G26` и `Ветер по СП РК EN!D28:D29` | SP_20/SP_RK_EN формулы и cached anchors основной книги | canonical data/trace; `#N/A` переносится как legacy error |
@@ -46,7 +46,7 @@ Lookup выполняется exact-match, без fuzzy search, исправле
 
 На входе: `city`, `responsibility_factor`, явный `normative_system` (`SP_20` или `SP_RK_EN`), контекст потребителя (`frame` или `window`) и при необходимости `terrain_type`.
 
-На выходе для каркаса: доказанные климатические коды/нагрузки плюс provenance. В production calculation gate сейчас входят exact tuples `RU|Роза|SP_20` и `RU|Сургут|SP_20`; остальные города по-прежнему остаются `UNKNOWN_CLIMATE_DATA`, даже если preview-строка найдена.
+На выходе для каркаса: доказанные климатические коды/нагрузки плюс provenance. В production calculation gate сейчас входят exact tuples `RU|Роза|SP_20`, `RU|Сургут|SP_20` и `RU|Березовский|SP_20`; остальные города по-прежнему остаются `UNKNOWN_CLIMATE_DATA`, даже если preview-строка найдена.
 
 На выходе для окна:
 

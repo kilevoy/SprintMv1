@@ -4,7 +4,14 @@ import type { DatasetRecord } from "../data";
 import type { ClimateDatasetView, ClimateResolveResult } from "./types";
 
 const LOAD_UNITS = "kN/m²";
-const PROVEN_LOOKUP_KEYS = new Set(["RU|Роза|SP_20", "RU|Сургут|SP_20"]);
+const PROVEN_LOOKUP_KEYS = new Set(["RU|Роза|SP_20", "RU|Сургут|SP_20", "RU|Березовский|SP_20"]);
+
+/** Exact workbook-proven tuples whose normative branch is not represented by
+ * the generic sparse-row columns. Keep this map explicit: no fuzzy city
+ * matching or nearest-city fallback is permitted. */
+const PROVEN_CLIMATE_TUPLES: Record<string, Pick<Core1ClimateResult, "snow_region" | "snow_load" | "wind_region" | "wind_load">> = {
+  "RU|Березовский|SP_20": { snow_region: "IV", snow_load: 1.5, wind_region: "I", wind_load: 0.23 },
+};
 
 function cellParts(cell: string): { column: string; row: number } | null {
   const match = /^([A-Z]+)(\d+)$/.exec(cell);
@@ -120,6 +127,11 @@ function climateFromRow(input: Extract<ClimateInput, { mode: "CITY_LOOKUP" }>, v
   } as Core1ClimateResult;
 }
 
+function applyProvenTuple(input: Extract<ClimateInput, { mode: "CITY_LOOKUP" }>, climate: Core1ClimateResult): Core1ClimateResult {
+  const provenTuple = PROVEN_CLIMATE_TUPLES[`${input.country}|${input.city}|${input.normative_system}`];
+  return provenTuple ? { ...climate, ...provenTuple } : climate;
+}
+
 /**
  * Exact local lookup for presentation only. This intentionally does not widen
  * the proven Core 1 calculation contract below the PROVEN_LOOKUP_KEYS gate.
@@ -130,7 +142,7 @@ export function previewClimate(input: Extract<ClimateInput, { mode: "CITY_LOOKUP
   if (rows.length === 0) return cityNotFound(input);
   for (const row of rows) {
     const climate = climateFromRow(input, rowMap(dataset.records, row));
-    if (climate) return { status: "success", diagnostics: [], climate };
+    if (climate) return { status: "success", diagnostics: [], climate: applyProvenTuple(input, climate) };
   }
   return unknownData(input, "Для найденного города отсутствуют все обязательные климатические поля.", { city: input.city, rows });
 }

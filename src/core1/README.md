@@ -86,8 +86,8 @@ MANUAL:     manual values → ClimateResult
 ```
 
 В runtime используется только `climate_lookup_sparse`; для production calculation
-доказаны exact tuples `RU|Роза|SP_20` и `RU|Сургут|SP_20` (для Сургута
-источник `22318_SOURCE_SELECTION.xlsx` подтверждает `IV/2` и `I/0,23`). Неизвестный город даёт
+доказаны exact tuples `RU|Роза|SP_20`, `RU|Сургут|SP_20` и
+`RU|Березовский|SP_20` (для Березовского подтверждены `IV/1,5` и `I/0,23`). Неизвестный город даёт
 `CITY_NOT_FOUND`, а найденная строка без доказанной ветки страны/норматива —
 `UNKNOWN_CLIMATE_DATA`. Fuzzy/nearest-city fallback отсутствует.
 
