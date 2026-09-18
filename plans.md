@@ -113,8 +113,8 @@ Progress is tracked by evidence-backed milestones, not by a percentage.
 1. Synchronize the current checkpoint branch without committing `outputs/` or XLSX/PDF artifacts.
 2. Build the complete connection-selector dependency graph:
    `project inputs → selector state → HZ18/RP18/KL18/WN18 → selected row → D52/E52/D53/D54/D55/D57`.
-3. Prove the minimal selector contract. Do not implement `LegacyConnectionResolver` before `LEGACY_CONNECTION_MODEL_COMPLETE`.
-4. Implement and regression-test `LegacyConnectionResolver` for 22318, 22316, and 22329. Keep 22326 as a compatibility control, not a normative oracle.
+3. Prove the minimal selector contract. Keep generic `LegacyConnectionResolver` blocked while project-scoped state is required.
+4. Implement and regression-test `LegacyConnectionReplayResolver` for 22318, 22316, 22329, and the 22326 compatibility control. Do not infer a generic resolver from replay snapshots.
 5. Classify the 24 m `#N/A` semantics before adding 24 m to the supported regression matrix.
 6. Expand validation using two evidence levels:
    - `FULL PARITY`: source-selection workbook available; inputs, formulas, branches, and outputs can be replayed.
@@ -127,5 +127,5 @@ Progress is tracked by evidence-backed milestones, not by a percentage.
 ### Cached connection data disposition
 
 - `D48:E49` and `D56:E56` in `bolts_plates_fittings.csv`: `PROVEN_STATIC`.
-- `D52:E52`, `D53:D55`, and `D57`: `DEPRECATED_PROJECT_CACHE` after the resolver is proven.
+- `D52:E52`, `D53:D55`, and `D57`: `DEPRECATED_PROJECT_CACHE` for canonical calculation; retained as source values for explicit historical replay snapshots.
 - Do not delete or replace cached rows until the resolver passes the reference regression matrix.

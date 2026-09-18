@@ -230,3 +230,26 @@ Core1Input
 `StructuralSummary`. Ожидаемые legacy-сценарии возвращаются как
 `legacy_error`, неподдержанные ветви — как `unsupported`, а supported input
 возвращает типизированный `success` с `Core1Result`. Следующий этап — UI/Core 2.
+
+## Legacy connection replay
+
+Исторические connection/BOM outputs отделены от generic расчёта:
+
+```text
+CANONICAL
+  ProjectInput → canonical Core1 datasets → current calculation
+
+LEGACY_REPLAY
+  ProjectInput → literal span/design family
+  + project-scoped LegacyConnectionSnapshot
+  → LegacyConnectionReplayResolver
+  → D52/E52/D53/D54/D55/D57 semantic result
+```
+
+`LegacyConnectionReplayResolver` принимает только доказанный snapshot,
+проверяет provenance, design family и source range, а затем отображает
+`F/J/K/L/M/N` в семантические outputs. При отсутствии snapshot он возвращает
+`LEGACY_CONNECTION_SNAPSHOT_REQUIRED`; fallback на MASTER запрещён. `24 м`
+сохраняет typed `#N/A` как `LEGACY_NA`. Этот resolver не является заменой
+generic `LegacyConnectionResolver` и не вызывается каноническим
+`calculateCore1` без явного replay snapshot.

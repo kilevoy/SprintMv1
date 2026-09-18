@@ -5,6 +5,7 @@ export * from "./validation";
 export * from "./engine";
 export * from "./climate";
 export * from "./legacy";
+export * from "./legacyConnection";
 export * from "./frame";
 export * from "./purlin";
 export * from "./secondary";

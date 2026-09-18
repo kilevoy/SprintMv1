@@ -106,15 +106,15 @@ Validation notes:
 
 - `M1_FRAME_SELECTION_PARITY = PROVEN_FOR_REFERENCES`.
 - `M2_STRUCTURAL_D69_PARITY = PROVEN` for 22318, 22316, and 22329.
-- `M3_CONNECTION_BOM_PARITY = INCOMPLETE`.
+- `M3_CONNECTION_BOM_PARITY = REPLAY_PROVEN / GENERIC_INCOMPLETE`.
 - `M4_SUPPORTED_DOMAIN_MATRIX = PARTIAL`.
 - `M5_CORE1_FROZEN = NO`.
 - `M6_CORE2_SOURCE_PARITY = PARTIAL`.
 - `M7_FULL_PROPOSAL_PARITY = NOT_READY`.
 
-Current first missing dependency: project-specific selector state and lookup vectors behind `HZ18`, `RP18`, `KL18`, and `WN18`. The extracted master-workbook connection cache cannot reproduce all reference projects from design family and `ROW14/ROW15` alone.
+The generic connection resolver remains blocked because project-scoped selector state and lookup values sit behind `HZ18`, `RP18`, `KL18`, and `WN18`. The minimal historical replay contract is now proven: `activeBranch` plus the selected span source row `F/J/K/L/M/N` reproduces the six connection outputs exactly for 22318, 22316, 22329, and 22326.
 
-Next work starts with the connection-selector dependency audit. `LegacyConnectionResolver` remains blocked until the minimal selector contract is proven and the model is classified `LEGACY_CONNECTION_MODEL_COMPLETE`.
+`LegacyConnectionReplayResolver` is implemented as an explicit snapshot-only path. It does not replace the generic resolver, does not use `projectId` as a calculation selector, and preserves 24 m `#N/A`.
 
 Validation terminology is now split:
 

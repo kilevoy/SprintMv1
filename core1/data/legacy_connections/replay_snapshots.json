@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "snapshots": [
+    {
+      "schema_version": 1,
+      "provenance": {
+        "projectId": "22318",
+        "sourceWorkbook": "22318_SOURCE_SELECTION.xlsx",
+        "sourceWorkbookSha256": "dbf29d01db4fe81e8e0a997a69f045330f715b64df3c828bc9d3cc4601116ac3",
+        "formulaFingerprint": "b8e858a0baec8915d4075f4c29e9959de5adf4c872605ba0fe74365ec49bcdc3"
+      },
+      "designFamily": 15,
+      "activeBranch": "ROW14",
+      "selectedRow": {
+        "sourceSheet": "15м",
+        "sourceAddresses": ["ID19", "IH19", "II19", "IJ19", "IK19", "IL19"],
+        "F": 276,
+        "J": 238,
+        "K": "8х2",
+        "L": "9х2",
+        "M": "7х2",
+        "N": "10х2"
+      }
+    },
+    {
+      "schema_version": 1,
+      "provenance": {
+        "projectId": "22316",
+        "sourceWorkbook": "22316_SOURCE_SELECTION.xlsx",
+        "sourceWorkbookSha256": "e27b6b083e8b25f6f78522ec41febf0910531dc5f9dcbfc8865d2a23b8c11cdd",
+        "formulaFingerprint": "b8e858a0baec8915d4075f4c29e9959de5adf4c872605ba0fe74365ec49bcdc3"
+      },
+      "designFamily": 18,
+      "activeBranch": "ROW14",
+      "selectedRow": {
+        "sourceSheet": "18м",
+        "sourceAddresses": ["ID19", "IH19", "II19", "IJ19", "IK19", "IL19"],
+        "F": 308,
+        "J": 264,
+        "K": "10х2",
+        "L": "10х2",
+        "M": "7х2",
+        "N": "10х2"
+      }
+    },
+    {
+      "schema_version": 1,
+      "provenance": {
+        "projectId": "22329",
+        "sourceWorkbook": "22329_SOURCE_SELECTION.xlsx",
+        "sourceWorkbookSha256": "2376b06809cf10136abd688bd13a1c13c1213fa12f341cb98fde1b44ec5cd4aa",
+        "formulaFingerprint": "b8e858a0baec8915d4075f4c29e9959de5adf4c872605ba0fe74365ec49bcdc3"
+      },
+      "designFamily": 12,
+      "activeBranch": "ROW14",
+      "selectedRow": {
+        "sourceSheet": "12м",
+        "sourceAddresses": ["ID19", "IH19", "II19", "IJ19", "IK19", "IL19"],
+        "F": 276,
+        "J": 233,
+        "K": "8х2",
+        "L": "9х2",
+        "M": "7х2",
+        "N": "9х2"
+      }
+    },
+    {
+      "schema_version": 1,
+      "provenance": {
+        "projectId": "22326",
+        "sourceWorkbook": "22326_SOURCE_SELECTION.xlsx",
+        "sourceWorkbookSha256": "852f6f5df470a728f7aac5ef5a88c95e2ebc7a8fe0cb91082257801d38ee6f88",
+        "formulaFingerprint": "b8e858a0baec8915d4075f4c29e9959de5adf4c872605ba0fe74365ec49bcdc3"
+      },
+      "designFamily": 12,
+      "activeBranch": "ROW15",
+      "selectedRow": {
+        "sourceSheet": "12м",
+        "sourceAddresses": ["RT19", "RX19", "RY19", "RZ19", "SA19", "SB19"],
+        "F": 260,
+        "J": 223,
+        "K": "8х2",
+        "L": "9х2",
+        "M": "6х2",
+        "N": "8х2"
+      }
+    }
+  ]
+}
