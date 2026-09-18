@@ -54,3 +54,78 @@ Close the proven legacy chain `roof_deck_grade -> deck lookup -> maximum purlin 
 - Do not invent a structural formula or silently replace legacy values.
 - Do not implement Core 2, UI redesign, commit, or push.
 - For this phase, UI changes are limited to presentation/state; do not alter proven Core 1 engineering formulas.
+
+## Sprint archive validation pilot
+
+1. **P1 — Master and archive schema** `[x]`
+   - Fix the input/output cell map and provenance rules in `tools/sprint_archive_validation/config.py`.
+   - Document the master template and archive extraction schemas.
+2. **P2 — Extract and classify a bounded pilot** `[x]`
+   - Recursively scan only unique `*_SOURCE_SELECTION.xlsx` candidates under the local reference archive.
+   - Extract typed inputs and archive outputs without guessing missing fields.
+3. **P3 — Excel COM replay** `[x]`
+   - Replay each pilot input in a temporary copy of the master template with `CalculateFullRebuild()`.
+   - Stop before mass processing if 22318 or 22316 fails the known D69 references.
+4. **P4 — Database/report package** `[x]`
+   - Produce CSV, JSON, HTML, and `SPRINT_VALIDATION_DATABASE.xlsx` outputs.
+   - Keep 22326 visible as a compatibility case and report missing/unproven fields.
+5. **P5 — Mass archive pass** `[ ]`
+   - Requires successful pilot review and a separate explicit user command.
+
+### Pilot constraints
+
+- Expanded pilot scope is limited to 13 unique workbooks: the four known references plus nine unseen Sprint candidates selected from Drive/local staging.
+- Do not modify source XLSX, master template, Core 1, commit, or push.
+- `frame_count`, absolute `frame_total_kg`, and absolute `secondary_mass_kg` remain NULL until a canonical source cell is proven.
+
+### Expanded pilot result (2026-09-17)
+
+- 13 unique projects scanned: 4 known references and 9 new unseen candidates.
+- The four standard source-selection books parsed and replayed; 22318, 22316, and 22329 remain `FULL_MATCH`; 22326 remains the documented compatibility case.
+- All nine new Drive result workbooks are recognized Sprint layouts but lack the standard `вывод` input/output sheet. They are retained as `NOT_COMPARABLE / UNSUPPORTED_ARCHIVE_LAYOUT` with NULL inputs, outputs, and replay values.
+- The archive pipeline now records `reference_class`, Drive title/geometry metadata, layout flags, and the requested project comparison columns.
+- `READY_FOR_MASS_RUN = NO`: no new unseen workbook reached automatic input extraction and replay, so the mass-run readiness criteria are not met.
+
+### SOURCE ↔ RESULT pair search (2026-09-17)
+
+- Added `pair_search.py` with a workbook fingerprint for `вывод`, `подбор`, `снегветер`, and the span-family sheets. Result workbooks are never used as input sources.
+- Inspected all nine new project folders and ran a global Drive search for the exact master-template filename.
+- Found and verified a source-selection candidate for `22285`; its result sheet matches project ID `22285`, city `Коркино`, and geometry `18x48x6`.
+- Replayed the verified `22285` source against the master template: `FULL_MATCH`, `D69 = 27.53232638888889`.
+- Eight new projects remain `RESULT_WORKBOOK_ONLY`; their result files are retained for downstream BOM/result validation.
+
+## Accepted parity roadmap (2026-09-18)
+
+Progress is tracked by evidence-backed milestones, not by a percentage.
+
+### Milestone status
+
+- **M1 — Frame selection parity:** `PROVEN FOR REFERENCES`.
+- **M2 — Structural D69 parity:** `PROVEN` for 22318, 22316, and 22329.
+- **M3 — Connection/BOM parity:** `INCOMPLETE`.
+- **M4 — Supported-domain regression matrix:** `PARTIAL`.
+- **M5 — Core1 frozen:** `NOT READY`.
+- **M6 — Core2 source parity:** `PARTIAL`.
+- **M7 — Full proposal parity:** `NOT READY`.
+
+### Critical path
+
+1. Synchronize the current checkpoint branch without committing `outputs/` or XLSX/PDF artifacts.
+2. Build the complete connection-selector dependency graph:
+   `project inputs → selector state → HZ18/RP18/KL18/WN18 → selected row → D52/E52/D53/D54/D55/D57`.
+3. Prove the minimal selector contract. Do not implement `LegacyConnectionResolver` before `LEGACY_CONNECTION_MODEL_COMPLETE`.
+4. Implement and regression-test `LegacyConnectionResolver` for 22318, 22316, and 22329. Keep 22326 as a compatibility control, not a normative oracle.
+5. Classify the 24 m `#N/A` semantics before adding 24 m to the supported regression matrix.
+6. Expand validation using two evidence levels:
+   - `FULL PARITY`: source-selection workbook available; inputs, formulas, branches, and outputs can be replayed.
+   - `EXPRESS VALIDATION`: result workbook only; observable profiles, masses, BOM, and totals can be checked, but the internal formula path is not proven.
+7. Audit only registry entries marked `PARTIAL` or `UNVERIFIED`; retain `PROVEN`, `LEGACY_ERROR`, and `OUT_OF_SCOPE` classifications.
+8. Freeze the Core1 → Core2 contract with `provenance`, `diagnostic_behavior`, `supported_domain`, `nullable`, and `fallback_allowed` metadata.
+9. Close Core2 external sources, preserve `*0` branches, then implement Core2.
+10. Track final validation independently as `STRUCTURAL_PARITY`, `CONNECTION_BOM_PARITY`, `CORE2_BOM_PARITY`, and `COMMERCIAL_PARITY`.
+
+### Cached connection data disposition
+
+- `D48:E49` and `D56:E56` in `bolts_plates_fittings.csv`: `PROVEN_STATIC`.
+- `D52:E52`, `D53:D55`, and `D57`: `DEPRECATED_PROJECT_CACHE` after the resolver is proven.
+- Do not delete or replace cached rows until the resolver passes the reference regression matrix.

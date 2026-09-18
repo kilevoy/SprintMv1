@@ -46,3 +46,79 @@ Geometry, climate, purlin step-selection and the proven frame-length path are no
 - FrameSelector + 22318 targeted tests: 15/15 passed.
 - Legacy pipeline targeted tests: 6/6 passed; full Vitest run: 152/152 passed after the branch integration.
 - `py -m pytest core1/tests/test_static_data_integrity.py`: 25/25 passed. The bundled `python` runtime has no pytest; the system Python launcher was used.
+
+## Sprint archive validation pilot
+
+Current phase: bounded pilot implementation and Excel COM replay.
+
+Done:
+
+- Created `tools/sprint_archive_validation` with scanner, classifier, extractor, conservative profile parser, COM replay harness, comparator, report writer, and artifact-tool workbook builder.
+- Created `MASTER_TEMPLATE_SCHEMA.md` and `ARCHIVE_EXTRACTION_SCHEMA.md`.
+- Confirmed four unique local source-selection candidates after SHA-256 deduplication: 22318, 22316, 22326, and 22329.
+
+Next:
+
+- Run the four-project pilot and verify 22318/22316 against known D69 values before considering any archive-wide run.
+
+Stop rules:
+
+- Any failure to reproduce the known 22318 or 22316 D69 reference stops the pilot review and blocks mass processing.
+- Any missing or ambiguous field is retained as NULL/typed status; no formula or source workbook is changed.
+
+Pilot result (2026-09-17):
+
+- 4 unique Sprint candidates scanned, 4 parsed, 4 replayed through Microsoft Excel COM.
+- 3 comparable projects are `FULL_MATCH`: 22318, 22316, and 22329.
+- 22318: Archive/Replay `D69 = 32.285826388888886 kg/m²`.
+- 22316: Archive/Replay `D69 = 28.922792592592597 kg/m²`.
+- 22329: Archive/Replay `D69 = 32.652530448717954 kg/m²`.
+- 22326: `NOT_COMPARABLE`, preserved as `SOURCE_SUSPICIOUS / COMPATIBILITY_CASE`; Archive/Replay `D69 = 33.342651277062764 kg/m²` is shown only diagnostically.
+- 0 mismatches and 0 replay errors in the pilot. No source/master checksum changed during the run.
+- Outputs: `outputs/sprint_pilot/SPRINT_VALIDATION_DATABASE.xlsx`, CSV/JSON extracts, `report.html`, and the rendered `summary.png`.
+
+Validation notes:
+
+- `npm test -- --run`: 149/149 passed.
+- `python -m compileall -q tools/sprint_archive_validation`: passed.
+- `npm run typecheck`: fails on pre-existing legacy TypeScript errors in `src/core1/legacy`; no fixes were made because they are outside this request.
+- Mass archive processing remains blocked pending pilot review and a separate explicit command.
+
+### Expanded Sprint archive pilot (2026-09-17)
+
+- Scope: 13 unique workbooks, comprising 4 known references and 9 new unseen Drive candidates (`21799`, `21800`, `21818`, `21843`, `21857`, `21865`, `21897`, `21906`, `22285`).
+- Known controls remain stable: 22318, 22316, and 22329 are `FULL_MATCH`; 22326 is `NOT_COMPARABLE / SOURCE_SUSPICIOUS / COMPATIBILITY_CASE`.
+- New workbooks were verified as Sprint result books by Drive titles/geometry metadata and workbook inspection. They contain geometry result sheets, but no standard `вывод` sheet, so the extractor records `UNSUPPORTED_ARCHIVE_LAYOUT` and `INPUTS_NOT_EXTRACTED` rather than inferring inputs.
+- Expanded totals: Parsed 4; Replay completed 4; Comparable 3; `FULL_MATCH` 3; MISMATCH 0; `NOT_COMPARABLE` 10; ERROR 0.
+- The database/report now expose known-vs-new counts, geometry, archive/replay D69, beam/column/purlin profiles, and quality flags.
+- `READY_FOR_MASS_RUN = NO`. Reasons: zero new unseen projects were replayable/comparable; city/climate/input provenance is unavailable in the new result layout; the correct standard source-selection workbook for those projects has not yet been located.
+- No Core 1 changes, source/master edits, commit, or push were made.
+
+### SOURCE ↔ RESULT pair search (2026-09-17)
+
+- Added a conservative pair-search stage that distinguishes source-selection books from result books by workbook fingerprint and never infers source inputs from result layouts.
+- Pair inventory: 13 result projects; 5 source-selection books found (4 known references plus 22285); 8 new projects remain `RESULT_WORKBOOK_ONLY`.
+- `22285` source/result identity matched on project ID, city, and `18x48x6` geometry. Its source replay is `FULL_MATCH`; archive D69 and replay D69 both equal `27.53232638888889 kg/m²`.
+- Pair records include source/result filenames, paths, SHA-256 hashes, match method, source fingerprint, identity status, replay status, and archive-result status. They are included in the `SourceResultPairs` sheet of the validation database.
+- `READY_FOR_MASS_RUN = NO`: source-selection books have not yet been located for the other eight new result projects.
+
+## Parity milestone status (2026-09-18)
+
+- `M1_FRAME_SELECTION_PARITY = PROVEN_FOR_REFERENCES`.
+- `M2_STRUCTURAL_D69_PARITY = PROVEN` for 22318, 22316, and 22329.
+- `M3_CONNECTION_BOM_PARITY = INCOMPLETE`.
+- `M4_SUPPORTED_DOMAIN_MATRIX = PARTIAL`.
+- `M5_CORE1_FROZEN = NO`.
+- `M6_CORE2_SOURCE_PARITY = PARTIAL`.
+- `M7_FULL_PROPOSAL_PARITY = NOT_READY`.
+
+Current first missing dependency: project-specific selector state and lookup vectors behind `HZ18`, `RP18`, `KL18`, and `WN18`. The extracted master-workbook connection cache cannot reproduce all reference projects from design family and `ROW14/ROW15` alone.
+
+Next work starts with the connection-selector dependency audit. `LegacyConnectionResolver` remains blocked until the minimal selector contract is proven and the model is classified `LEGACY_CONNECTION_MODEL_COMPLETE`.
+
+Validation terminology is now split:
+
+- `FULL PARITY`: input-bearing source-selection workbook available and replayable.
+- `EXPRESS VALIDATION`: result-only workbook suitable for observable output checks, not for proving the internal formula path.
+
+Final parity is reported independently as structural, connection/BOM, Core2 BOM, and commercial parity. A connection mismatch does not invalidate already proven structural D69 parity.

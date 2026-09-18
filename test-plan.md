@@ -70,3 +70,66 @@
 - Stable-ID gates, doors, windows, and strip windows support add/edit/delete.
 - Incompatible window groups return `CORE1_OPENINGS_NOT_REPRESENTABLE`.
 - Unproven gate width/height boundary returns `CORE1_GATE_CLASSIFICATION_UNVERIFIED` instead of guessing.
+
+## Sprint archive validation pilot
+
+### Critical fixtures
+
+- `22318`: city Сургут, 15 × 24 × 5 m, known archive `D69 = 32.285826388888886`.
+- `22316`: city Березовский, 18 × 30 × 5 m, known archive `D69 = 28.922792592592597`.
+- `22326`: Увильды, 10.4 × 25.7 × 4 m, source-suspicious compatibility case, not a normative oracle.
+- `22329`: Увильды, 12 × 26 × 4 m, exact legacy-behavior case.
+
+### Pilot gates
+
+1. Scanner returns four unique source-selection books and no duplicate hashes.
+2. Inputs and archive outputs retain `sheet!cell` provenance.
+3. Excel COM replay uses a temporary copy and `CalculateFullRebuild()`; source and master hashes remain unchanged.
+4. 22318 and 22316 replay `D69` within `1e-9` of the known references.
+5. Missing `frame_count`, `frame_total_kg`, and absolute `secondary_mass_kg` remain explicit NULLs.
+6. XLSX, CSV, JSON, and HTML outputs are written to the pilot output directory.
+7. Mass archive processing remains blocked until the pilot gates pass and the user explicitly requests it.
+
+### Pilot execution result
+
+- Scanner: 4 unique candidates.
+- Extraction: 4/4.
+- Excel COM replay: 4/4.
+- Comparable: 3.
+- `FULL_MATCH`: 3.
+- `NOT_COMPARABLE`: 1 (`22326`).
+- Mismatches: 0.
+- Replay errors: 0.
+- Known `D69` references for 22318 and 22316 reproduced exactly within `1e-9`.
+- Source/master checksums unchanged.
+- `npm test -- --run`: 149/149 passed.
+- `npm run typecheck`: pre-existing failures under `src/core1/legacy`; this task did not modify those files.
+
+### Expanded pilot gates
+
+- 13 unique records are present after SHA-256 deduplication: 4 known and 9 new unseen.
+- Known D69 controls remain exact; no archive/replay mismatches or replay errors were introduced.
+- New result workbooks are not silently treated as source-selection books: missing `вывод` is a typed `UNSUPPORTED_ARCHIVE_LAYOUT` / `NOT_COMPARABLE` outcome with NULL inputs and outputs.
+- Requested HTML/database fields and known/new summary counts are present.
+- Expanded pilot outcome: `READY_FOR_MASS_RUN = NO` until a standard input-bearing XLSX is found for new projects and at least one unseen project completes automatic extraction and replay.
+
+### SOURCE ↔ RESULT pair-search gates
+
+- Source candidates must contain the standard `вывод`, `подбор`, `снегветер`, and span-family sheet fingerprint.
+- Result-only workbooks must remain retained and classified as `RESULT_WORKBOOK_ONLY`; no inputs are guessed from them.
+- A found source candidate must be checked against the result workbook using project ID, city, and available geometry before replay.
+- A verified pair must record both SHA-256 hashes, match method, identity status, replay status, and archive-result status.
+- `22285` is the current unseen pair fixture: identity match and `FULL_MATCH` replay at D69 `27.53232638888889`.
+
+## Next regression gates: connection selector model
+
+1. Trace `project inputs → selector state → selected span row → D52/E52/D53/D54/D55/D57` for 22318, 22316, 22329, and compatibility control 22326.
+2. Preserve exact formula and cached-value provenance for `HZ18`, `RP18`, `KL18`, `WN18` and their lookup vectors.
+3. Demonstrate that the minimal selector contract reproduces all six connection outputs before production implementation.
+4. After implementation, assert connection parity independently from structural D69 parity.
+5. Keep `D48:E49` and `D56:E56` as proven static constants; reject universal-cache use of `D52:E52`, `D53:D55`, and `D57`.
+6. Classify 24 m before including it in the supported matrix. Preserve typed `#N/A` unless evidence proves another behavior.
+7. Mark each archive fixture as `FULL PARITY` or `EXPRESS VALIDATION`; result-only fixtures must not be promoted to formula-path oracles.
+8. Protect exact structural D69 references for 22318, 22316, and 22329 throughout connection work.
+
+Implementation gate: `LEGACY_CONNECTION_MODEL_COMPLETE`. Until that status is reached, no `LegacyConnectionResolver` production change is allowed.
