@@ -5,9 +5,18 @@ import { FileBlob, SpreadsheetFile, Workbook } from "@oai/artifact-tool";
 const outputDir = path.resolve(process.argv[2]);
 const payload = JSON.parse(await fs.readFile(path.join(outputDir, "pilot_records.json"), "utf8"));
 const summary = JSON.parse(await fs.readFile(path.join(outputDir, "summary.json"), "utf8"));
+let pairRowsPayload = [];
+let pairSummary = {};
+try {
+  pairRowsPayload = JSON.parse(await fs.readFile(path.join(outputDir, "source_result_pairs.json"), "utf8"));
+  pairSummary = JSON.parse(await fs.readFile(path.join(outputDir, "pair_summary.json"), "utf8"));
+} catch {
+  pairRowsPayload = [];
+  pairSummary = {};
+}
 
 const workbook = Workbook.create();
-const names = ["README", "Projects", "Inputs", "ArchiveResults", "ReplayResults", "Comparison", "Mismatches", "Errors", "Summary"];
+const names = ["README", "Projects", "Inputs", "ArchiveResults", "ReplayResults", "Comparison", "Mismatches", "Errors", "SourceResultPairs", "Summary"];
 const sheets = Object.fromEntries(names.map((name) => [name, workbook.worksheets.add(name)]));
 for (const sheet of Object.values(sheets)) sheet.showGridLines = false;
 
@@ -49,6 +58,20 @@ const projectRows = payload.map((record) => {
 });
 const keys = (rows) => Array.from(new Set(rows.flatMap((row) => Object.keys(row))));
 writeTable(sheets.Projects, "Sprint pilot projects", projectRows, keys(projectRows));
+
+const pairColumns = [
+  "project_id", "result_workbook", "source_selection_workbook", "source_status", "match_method",
+  "source_sha256", "result_sha256", "source_folder_display", "identity_status", "replay_status",
+  "archive_result_status", "pair_status", "search_evidence", "source_selection_path", "result_path",
+  "source_inputs_json", "result_identity_json", "identity_mismatches_json",
+];
+const pairRows = pairRowsPayload.map((pair) => ({
+  ...pair,
+  source_inputs_json: JSON.stringify(pair.source_inputs ?? {}),
+  result_identity_json: JSON.stringify(pair.result_identity ?? {}),
+  identity_mismatches_json: JSON.stringify(pair.identity_mismatches ?? []),
+}));
+if (pairRows.length) writeTable(sheets.SourceResultPairs, "SOURCE ↔ RESULT pairs", pairRows, pairColumns);
 
 function prefixedRows(prefix) {
   return payload.map((record) => ({ project_id: record.project_id, status: record.status, ...(record[prefix] ?? {}) }));
@@ -110,6 +133,21 @@ const clusterEndRow = 3 + Object.keys(summary.mismatch_clusters ?? {}).length;
 if (clusterEndRow >= 4) sheets.Summary.getRange(`D4:E${clusterEndRow}`).values = Object.entries(summary.mismatch_clusters ?? {});
 sheets.Summary.getRange("D3:E3").format = { fill: "#1F4E78", font: { name: font, size: 10, bold: true, color: "#FFFFFF" } };
 sheets.Summary.getRange("A3:E20").format.autofitColumns();
+if (Object.keys(pairSummary).length) {
+  sheets.Summary.getRange("G3:H3").values = [["Pair metric", "Value"]];
+  sheets.Summary.getRange("G4:H9").values = [
+    ["Source-selection found", pairSummary.source_selection_found ?? null],
+    ["Source-selection not found", pairSummary.source_selection_not_found ?? null],
+    ["Identity match", pairSummary.identity_match ?? null],
+    ["Identity mismatch", pairSummary.identity_mismatch ?? null],
+    ["Identity unverified", pairSummary.identity_unverified ?? null],
+    ["Replay FULL_MATCH", pairSummary.replay_full_match ?? null],
+  ];
+  sheets.Summary.getRange("G3:H3").format = { fill: "#1F4E78", font: { name: font, size: 10, bold: true, color: "#FFFFFF" } };
+  sheets.Summary.getRange("G4:H9").format = { font: { name: font, size: 10 }, verticalAlignment: "center" };
+  sheets.Summary.getRange("G3:H9").format.borders = { preset: "outside", style: "thin", color: "#CBD5E1" };
+  sheets.Summary.getRange("G3:H9").format.autofitColumns();
+}
 
 workbook.recalculate();
 const preview = await workbook.render({ sheetName: "Summary", autoCrop: "all", scale: 1, format: "png" });
