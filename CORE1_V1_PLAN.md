@@ -18,7 +18,7 @@
 ## 2. Что работает с Excel parity
 
 - точные enum/string semantics и lookup order;
-- frame tables 9–21 м после прохождения golden tests;
+- frame tables 9–21 м and the proven automatic low-height 24 м local row;
 - активная ветка `Подбор прогонов 2!P28:V28` без старых книг ID 1/2;
 - правила вторичной стали и крепежа из основной книги;
 - saved workbook scenario;
@@ -30,7 +30,7 @@ Parity означает совпадение текста/ошибки точн�
 ## 3. Что возвращает legacy error
 
 - шаг прогона 500 мм → `PURLIN_STEP_500_REF` / `#REF!`;
-- пролёт 24 м → `SPAN_24_LEGACY_NA` / `#N/A`;
+- active 24 м lookup errors only when a recalculated selected cell is erroneous; stale saved-cache `#N/A` is not emitted from `span_m===24`;
 - не найденный lookup → `LOOKUP_NO_MATCH` / `#N/A`;
 - отсутствие допустимого кандидата → исходный `#N/A` или sentinel behavior;
 - активные `#VALUE!` и `#DIV/0!` → одноимённые typed errors;
@@ -43,7 +43,7 @@ Parity означает совпадение текста/ошибки точн�
 - произвольный city membership вне подтверждённого локального snapshot;
 - новый API не блокируется J20: EN выбирается `normative_system=SP_RK_EN`;
 - числовые значения длины, высоты и ручного шага вне утверждённого domain; ненулевые проёмы допускаются схемой и реализованными branches, но не объявляются parity-proven без golden oracle;
-- нормальный конструктивный результат для пролёта 24 м;
+- 24 м manual-step, upper-height and unproven ROW15 parity;
 - отдельный материал стены: такого legacy-входа нет;
 - абсолютный `structural_weight_kg`: legacy source не доказан.
 
@@ -52,7 +52,7 @@ Parity означает совпадение текста/ошибки точн�
 1. Зафиксировать checksum исходной основной книги и export manifest.
 2. Экспортировать `roof_properties` и `deck_step_limits`.
 3. Экспортировать purlin profile/axis/calculation blocks и validation metadata.
-4. Экспортировать frame tables 9–21 м и selection rules; 24 м — отдельно с raw errors.
+4. Экспортировать frame tables 9–21 м и the local 24 м lookup row with raw formulas/errors retained.
 5. Экспортировать локальные climate lookup и сформировать exact supported-city manifest.
 6. Экспортировать secondary steel, bolts, plates and fittings.
 7. Экспортировать window profile candidates, коэффициенты `I34:L38`, glazing
@@ -65,7 +65,7 @@ Parity означает совпадение текста/ошибки точн�
 1. `InputValidation` и общие Excel-compatible value/error types.
 2. Static dataset loaders и provenance validation.
 3. `ClimateResolver` для frame context.
-4. `FrameSelector` для 9–21 м и legacy-error path 24 м.
+4. `FrameSelector` для 9–21 м и proven automatic low-height 24 м path.
 5. `PurlinCalculator`, включая candidate trace и шаг 500 error.
 6. `SecondarySteelCalculator`.
 7. `WindowGirtCalculator` по локальной формульной цепочке, с trace и branch-specific selection.
@@ -83,7 +83,7 @@ Parity означает совпадение текста/ошибки точн�
 ### Domain matrix
 
 - каждый поддержанный пролёт 9/12/15/18/21 минимум в одном валидном сценарии;
-- 24 м должен вернуть `SPAN_24_LEGACY_NA`, а не результат;
+- 24 м automatic low-height fixture reaches numeric summary; manual/upper-height cases remain typed UNKNOWN until independently proven;
 - оба responsibility values;
 - auto frame step и минимум один утверждённый manual fixture;
 - все 20 roof keys и четыре deck keys;

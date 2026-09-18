@@ -72,13 +72,19 @@ describe("Core 1 input validation and orchestration", () => {
     expect(Number.isFinite(result.result.kg_per_m2)).toBe(true);
   });
 
-  it("preserves the span 24 m legacy #N/A contract", async () => {
-    const input = await inputFor("legacy_24m_na");
-    expect(validateCore1InputDomain(input).state).toBe("SUPPORTED_WITH_LEGACY_ANOMALY");
+  it("reaches the proven 24 m automatic structural summary", async () => {
+    const input = await inputFor("active_24m_auto");
+    const expected = await source.getJson<{ expected_output: { values: Record<string, unknown> } }>("core1/fixtures/active_24m_auto.expected.json");
+    expect(validateCore1InputDomain(input).state).toBe("VALID");
     const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
-    expect(result.status).toBe("legacy_error");
-    expect(resultCode(result)).toBe("LEGACY_NA");
-    expect(result.diagnostics.some((diagnostic) => diagnostic.excel_error === "#N/A")).toBe(true);
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    for (const [key, value] of Object.entries(expected.expected_output.values)) {
+      const received = (result.result as unknown as Record<string, unknown>)[key];
+      if (typeof value === "number") expect(received).toBeCloseTo(value, 12);
+      else expect(received).toEqual(value);
+    }
+    expect(result.context?.frame?.structural_base_kg_per_m2).toBeCloseTo(31.396287367283954, 12);
   });
 
   it("rejects spans above 24 m as UNKNOWN_DOMAIN without clamping", async () => {
@@ -315,11 +321,11 @@ describe("Core 1 input validation and orchestration", () => {
     expect(Object.keys(expected.expected_output.values)).toHaveLength(32);
   });
 
-  it("classifies all 17 golden fixtures without treating UNKNOWN as PASS oracle", async () => {
+  it("classifies all golden fixtures without treating UNKNOWN as PASS oracle", async () => {
     const manifest = await source.getJson<{
       fixtures: Array<{ id: string; status: string; input_file: string }>;
     }>("core1/fixtures/manifest.json");
-    expect(manifest.fixtures).toHaveLength(17);
+    expect(manifest.fixtures).toHaveLength(18);
     const statuses = new Map<string, number>();
     for (const fixture of manifest.fixtures) {
       const envelope = await source.getJson<{ input: unknown }>(`core1/fixtures/${fixture.input_file}`);
@@ -334,6 +340,6 @@ describe("Core 1 input validation and orchestration", () => {
         expect(["success", "unsupported", "unknown_domain", "city_not_found"]).toContain(result.status);
       }
     }
-    expect(Object.fromEntries(statuses)).toEqual({ READY: 4, UNKNOWN: 11, EXPECTED_LEGACY_ERROR: 2 });
+    expect(Object.fromEntries(statuses)).toEqual({ READY: 5, UNKNOWN: 12, EXPECTED_LEGACY_ERROR: 1 });
   }, 30000);
 });

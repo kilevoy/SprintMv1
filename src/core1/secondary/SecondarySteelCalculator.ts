@@ -89,9 +89,6 @@ export const calculateSecondarySteel: SecondarySteelCalculatorFn = (
   if (!input || !climate || !frame || !purlin || !datasets?.rules || !datasets?.boltsPlatesFittings) {
     return invalid("SecondarySteelCalculator получил неполные входы.", {});
   }
-  if (input.span_m === 24) {
-    return unsupported("Для пролёта 24 м upstream FrameSelector сохраняет legacy #N/A; вторичный расчёт не продолжается.", { span_m: 24, legacy_equivalent: "#N/A" });
-  }
   if (!Number.isFinite(input.building_length_m) || input.building_length_m <= 0 || !Number.isFinite(input.building_height_m) || input.building_height_m <= 0 || !Number.isFinite(input.frame_step_m) || input.frame_step_m <= 0) {
     return invalid("Геометрия вторичных элементов должна содержать положительные значения.", { input });
   }

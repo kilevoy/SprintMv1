@@ -8,9 +8,10 @@ const FRAME_STEEL = "М.п.350";
 const FRAME_TIE_UNIT_MASS_KG: Readonly<Record<9 | 12 | 15 | 18 | 21, number>> = { 9: 115, 12: 148, 15: 181, 18: 224, 21: 290 };
 // Proven from the вывод!D8 -> подбор!AA14/AA15 -> подбор!I2:I7/I9:I14
 // family lookup in the source-selection workbooks. This is the automatic
-// branch only; a non-zero frame_step_override_m remains an explicit legacy
-// override.
-const AUTOMATIC_FRAME_STEP_M: Readonly<Record<9 | 12 | 15 | 18 | 21, number>> = { 9: 6, 12: 6, 15: 4, 18: 4.5, 21: 4 };
+// branch for 9–21 m; 24 m is selected from its local span sheet because the
+// recalculated legacy workbook has no common automatic-step scalar. A non-zero
+// frame_step_override_m remains an explicit legacy override.
+const AUTOMATIC_FRAME_STEP_M: Readonly<Record<9 | 12 | 15 | 18 | 21 | 24, number | null>> = { 9: 6, 12: 6, 15: 4, 18: 4.5, 21: 4, 24: null };
 const HEIGHT_BANDS = [
   { max: 3.8, datasetHeight: 3.6 },
   { max: 5, datasetHeight: 4.8 },
@@ -117,11 +118,19 @@ function evaluateSimpleArithmetic(expression: string): number | null {
   return result !== null && position === tokens.length && Number.isFinite(result) ? result : null;
 }
 
-function evaluateLengthFormula(formula: string, lengthCell: string, lengthM: number): number | null {
-  const parts = cellParts(lengthCell);
-  if (!parts) return null;
-  const reference = new RegExp(`\\$?${parts.column}\\$?\\d+`, "g");
-  const expression = formula.replace(reference, String(lengthM)).replace(/,/g, ".");
+function evaluateLengthFormula(formula: string, lengthCell: string, lengthM: number, records: DatasetRecord[]): number | null {
+  const normalizedLengthCell = lengthCell.replace(/\$/g, "");
+  // Substitute the live length controller and numeric same-row references
+  // before evaluating the small arithmetic expression. The 24 m sheet uses
+  // AB26 for the common length input and C[row] for the selected frame step.
+  const expression = formula
+    .replace(/\$?([A-Z]{1,3})\$?(\d+)/g, (_match, column: string, row: string) => {
+      const cell = `${column}${row}`;
+      if (cell === normalizedLengthCell || cell === "AB26") return String(lengthM);
+      const cached = number(valueAt(records, cell));
+      return cached === null ? _match : String(cached);
+    })
+    .replace(/,/g, ".");
   return evaluateSimpleArithmetic(expression);
 }
 
@@ -137,7 +146,7 @@ function lengthAdjustedTubeMass(records: DatasetRecord[], base: number, row: num
   const formula = formulaAt(records, horizontalCell);
   const staticLength = number(valueAt(records, lengthCell));
   const horizontalMass = formula
-    ? evaluateLengthFormula(formula, lengthCell, lengthM)
+    ? evaluateLengthFormula(formula, lengthCell, lengthM, records)
     : staticLength === lengthM ? horizontalCached : null;
   if (horizontalMass === null || !Number.isFinite(lengthM) || lengthM <= 0 || !Number.isFinite(spanM) || spanM <= 0) return null;
   return (horizontalMass + verticalCached) / (spanM * lengthM);
@@ -256,13 +265,6 @@ export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView
     if (input.span_m > 24) return { status: "unknown_domain", frame: null, diagnostics: [diagnostic("UNKNOWN_FRAME_DOMAIN", "unsupported", "Пролёт превышает доказанную legacy-границу 24 м.", { span_m: input.span_m, trigger: "span_m>24" })] };
     return invalid("Пролёт должен быть конечным положительным числом.", { span_m: input.span_m });
   }
-  if (designSpanFamily === 24) {
-    return {
-      status: "legacy_na",
-      frame: null,
-      diagnostics: [diagnostic("FRAME_LEGACY_NA", "unsupported", "Ветка семейства 24 м сохраняет активную legacy-ошибку #N/A.", { span_m: input.span_m, design_span_family: 24, trigger: "design_span_family=24" }, "#N/A")],
-    };
-  }
   if (!Number.isFinite(input.building_height_m) || input.building_height_m <= 0) return invalid("Высота здания должна быть положительным числом.", { building_height_m: input.building_height_m });
   if (!Number.isFinite(input.building_length_m) || input.building_length_m <= 0) return invalid("Длина здания должна быть положительным числом.", { building_length_m: input.building_length_m });
   if (input.frame_step_override_m !== null && input.frame_step_override_m !== undefined && (!Number.isFinite(input.frame_step_override_m) || input.frame_step_override_m <= 0)) {
@@ -270,11 +272,13 @@ export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView
   }
   const branch = input.legacy_frame_branch ?? climateBranch(input.climate);
   if (!branch) return { status: "unknown_domain", frame: null, diagnostics: [diagnostic("UNKNOWN_FRAME_DOMAIN", "unsupported", "Районы снега/ветра не позволяют доказанно сформировать ветку рамы.", { climate: input.climate })] };
-  const band = HEIGHT_BANDS.find((candidate) => input.building_height_m <= candidate.max);
+  const band = designSpanFamily === 24
+    ? (input.building_height_m <= 3.8 ? { max: 3.8, datasetHeight: 6 } : undefined)
+    : HEIGHT_BANDS.find((candidate) => input.building_height_m <= candidate.max);
   if (!band) return { status: "unknown_domain", frame: null, diagnostics: [diagnostic("UNKNOWN_FRAME_DOMAIN", "unsupported", "Высота выходит за доказанные высотные таблицы FrameSelector.", { building_height_m: input.building_height_m })] };
 
   const requestedStep = input.frame_step_override_m ?? null;
-  const automaticStep = requestedStep === null ? AUTOMATIC_FRAME_STEP_M[designSpanFamily as 9 | 12 | 15 | 18 | 21] ?? null : null;
+  const automaticStep = requestedStep === null ? AUTOMATIC_FRAME_STEP_M[designSpanFamily] ?? null : null;
   const block = selectBlock(dataset.records, input, branch, band.datasetHeight, automaticStep);
   if (!block) return { status: "no_match", frame: null, diagnostics: [diagnostic("FRAME_NO_MATCH", "unsupported", "Для сочетания ветки климата, высоты и ответственности нет строки подбора рамы.", { branch, dataset_height_m: band.datasetHeight, responsibility_factor: input.responsibility_factor })] };
   const base = columnNumber(block.start);
@@ -291,6 +295,8 @@ export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView
     return { status: "no_match", frame: null, diagnostics: [diagnostic("FRAME_NO_MATCH", "unsupported", "Строка рамы содержит неполные cached values.", { branch, row: block.row, start: block.start })] };
   }
   const frameMass = number(valueAt(dataset.records, `${columnName(base + 16)}${block.row}`));
+  const structuralBase = designSpanFamily === 24 ? number(valueAt(dataset.records, `${columnName(base + 20)}${block.row}`)) : null;
+  const reportedFrameMass = designSpanFamily === 24 ? number(valueAt(dataset.records, `${columnName(base + 14)}${block.row}`)) : frameMass;
   const tubeMass = lengthAdjustedTubeMass(dataset.records, base, block.row, input.span_m, input.building_length_m);
   if (tubeMass === null) return { status: "no_match", frame: null, diagnostics: [diagnostic("FRAME_NO_MATCH", "unsupported", "Не удалось воспроизвести length-dependent массу трубной/вторичной составляющей по локальной формуле строки.", { span_m: input.span_m, building_length_m: input.building_length_m, block: `${block.start}${block.row}` })] };
   return {
@@ -304,9 +310,10 @@ export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView
       column_profile: columnProfile,
       column_steel: FRAME_STEEL,
       column_utilization: columnUtilization,
-      frame_mass_kg: frameMass,
-      frame_tie_unit_mass_kg: FRAME_TIE_UNIT_MASS_KG[designSpanFamily as 9 | 12 | 15 | 18 | 21] ?? null,
+      frame_mass_kg: reportedFrameMass,
+      frame_tie_unit_mass_kg: designSpanFamily === 24 ? null : FRAME_TIE_UNIT_MASS_KG[designSpanFamily as 9 | 12 | 15 | 18 | 21] ?? null,
       tube_mass_kg_per_m2: tubeMass,
+      structural_base_kg_per_m2: structuralBase,
       trace: {
         selected_span_dataset: `frame_${designSpanFamily}m_cells`,
         literal_span_m: input.span_m,

@@ -18,11 +18,11 @@ export interface StructuralSummaryTrace {
   source_formula: "вывод!D69 = IF(D9=0,E8,E9)+D68";
   source_cells: string[];
   area_m2: number;
-  frame_count: number;
-  tie_bays: number;
-  frame_mass_kg_per_frame: number;
-  ties_mass_kg: number;
-  tube_mass_kg_per_m2: number;
+  frame_count: number | null;
+  tie_bays: number | null;
+  frame_mass_kg_per_frame: number | null;
+  ties_mass_kg: number | null;
+  tube_mass_kg_per_m2: number | null;
   frame_base_kg_per_m2: number;
   purlin_kg_per_m2: number;
   opening_kg_per_m2: number;

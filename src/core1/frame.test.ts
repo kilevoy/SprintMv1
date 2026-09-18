@@ -53,10 +53,23 @@ describe("FrameSelector", () => {
     if (first.status === "success") expect(first.frame.trace.selected_span_dataset).toBe(`frame_${span}m_cells`);
   });
 
-  it("preserves 24 m legacy #N/A instead of selecting a corrected profile", async () => {
+  it("selects the proven 24 m automatic row from the local 24 m table", async () => {
     const result = selectFrame({ span_m: 24, building_length_m: 18, building_height_m: 3, responsibility_factor: 0.8, frame_step_override_m: null, climate }, await frame(24));
-    expect(result.status).toBe("legacy_na");
-    expect(result.diagnostics[0]).toMatchObject({ code: "FRAME_LEGACY_NA", excel_error: "#N/A", legacy_equivalent: "#N/A" });
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    expect(result.frame).toMatchObject({
+      frame_step_m: 4.3,
+      beam_profile: "ПГС300/20х80х3",
+      column_profile: "ПГС300/20х80х2,5",
+      frame_mass_kg: 1451.568496,
+      structural_base_kg_per_m2: 31.396287367283954,
+    });
+  });
+
+  it("keeps unproven 24 m upper-height rows typed as unknown", async () => {
+    const result = selectFrame({ span_m: 24, building_length_m: 18, building_height_m: 5, responsibility_factor: 0.8, frame_step_override_m: null, climate }, await frame(24));
+    expect(result.status).toBe("unknown_domain");
+    expect(result.diagnostics[0]?.code).toBe("UNKNOWN_FRAME_DOMAIN");
   });
 
   it("supports an exact proven manual frame step", async () => {

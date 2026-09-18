@@ -14,7 +14,7 @@
 | Параметр | Доказанная область v1 | Статус | Поведение вне области |
 |---|---|---|---|
 | `span_m` | конечное число `0 < span_m <= 24`; frame lookup uses the proven upper-bound family mapper | `SUPPORTED` for domain validation; literal geometry is preserved | `>24` → `UNKNOWN_DOMAIN`/unsupported; no rounding or clamping |
-| `span_m` in `(21,24]` | family `24` | `SUPPORTED_WITH_LEGACY_ANOMALY` downstream | run the family-24 compatibility path and return active `#N/A`; do not emit a constructive result |
+| `span_m` in `(21,24]` | family `24`; automatic low-height local row is proven | `SUPPORTED` for the proven automatic family-24 row | manual step, upper height bands and unproven branches return typed `UNKNOWN_DOMAIN` |
 | `length_m` | конечное положительное число; `вывод!D5` не имеет list-validation/min/max и используется в арифметике/ветвлении; подтверждено реальным `22318: 24` м | `SUPPORTED` для domain validation; parity каждого сценария отдельно | `<=0`/нечисловое отклонить; верхний предел не придумывать |
 | `height_m` | конечное положительное число до `6,2` м; `вывод!D6` не имеет list-validation/min/max, а `15м` содержит высотные bands `3,6`, `4,8`, `6,0`; реальный `22318: 5` м попадает в band `4,8` | `SUPPORTED` для domain validation; parity каждого сценария отдельно | `<=0` или `>6,2` → `UNKNOWN_DOMAIN` |
 | `responsibility_factor` | `0,8`, `1,0` | `SUPPORTED` | иные коэффициенты отклонить |
@@ -43,7 +43,7 @@
 | 15 м | `15м` | `SUPPORTED` | обычный расчёт после прохождения golden tests |
 | 18 м | `18м` | `SUPPORTED` | обычный расчёт после прохождения golden tests |
 | 21 м | `21м` | `SUPPORTED` | обычный расчёт после прохождения golden tests |
-| 24 м family | `24м` | `SUPPORTED_WITH_LEGACY_ANOMALY` | `#N/A`/`SPAN_24_LEGACY_NA`; запрещено выдавать якобы нормальный профиль |
+| 24 м family | `24м` | `SUPPORTED` for auto and `height<=3.8` | numeric local structural-base/purlin path; stale saved-cache `#N/A` is not an active rule |
 
 `SUPPORTED` означает, что архитектура и локальный источник доказаны. До выпуска каждый вариант всё равно должен пройти golden test; отсутствие теста не расширяет domain.
 

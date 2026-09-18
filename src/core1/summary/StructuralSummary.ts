@@ -32,6 +32,36 @@ export function calculateStructuralSummary(input: StructuralSummaryInput): Struc
   const frameMass = frame.frame_mass_kg;
   const tieUnitMass = frame.frame_tie_unit_mass_kg;
   const tubeMass = frame.tube_mass_kg_per_m2;
+  const directStructuralBase = frame.structural_base_kg_per_m2;
+  if (finite(directStructuralBase) && finite(purlin.purlin_kg_per_m2) && finite(openings.opening_mass_kg_per_m2)) {
+    const kgPerM2 = directStructuralBase + purlin.purlin_kg_per_m2 + openings.opening_mass_kg_per_m2;
+    return {
+      status: "success",
+      summary: {
+        kg_per_m2: kgPerM2,
+        trace: {
+          source_formula: "вывод!D69 = IF(D9=0,E8,E9)+D68",
+          source_cells: ["подбор!O7", "подбор!O14", "вывод!D68", "вывод!D69"],
+          area_m2: area,
+          frame_count: null,
+          tie_bays: null,
+          frame_mass_kg_per_frame: frameMass ?? null,
+          ties_mass_kg: null,
+          tube_mass_kg_per_m2: tubeMass ?? null,
+          frame_base_kg_per_m2: directStructuralBase,
+          purlin_kg_per_m2: purlin.purlin_kg_per_m2,
+          opening_kg_per_m2: openings.opening_mass_kg_per_m2,
+          included_components: ["legacy 24m structural-base lookup", "прогоны", "D68 openings"],
+          excluded_components: ["manual tie decomposition", "pricing", "Core2"],
+          purlin_weight_kg_excluded_from_summary: true,
+          windows_already_in_openings: true,
+          secondary_steel_recalculated: false,
+          intermediate_rounding: "none_observed",
+        },
+      },
+      diagnostics: [],
+    };
+  }
   if (!finite(area) || area <= 0 || !finite(frameStep) || frameStep <= 0 || !finite(frameMass) || !finite(tieUnitMass) || !finite(tubeMass) || !finite(purlin.purlin_kg_per_m2) || !finite(openings.opening_mass_kg_per_m2)) {
     return invalid("Для StructuralSummary отсутствуют доказанные промежуточные массы или площадь.", { area_m2: area, frame_step_m: frameStep, frame_mass_kg: frameMass, tie_unit_mass_kg: tieUnitMass, tube_mass_kg_per_m2: tubeMass, purlin_kg_per_m2: purlin.purlin_kg_per_m2, opening_kg_per_m2: openings.opening_mass_kg_per_m2 });
   }

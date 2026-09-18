@@ -10,12 +10,12 @@
 
 ## Golden fixtures
 
-Создано 17 сценариев и 34 fixture files:
+Создано 18 сценариев и 36 fixture files:
 
-- 4 `READY`;
-- 2 `EXPECTED_LEGACY_ERROR`;
+- 5 `READY`;
+- 1 `EXPECTED_LEGACY_ERROR`;
 - 0 `REQUIRED_MODULE_NOT_IMPLEMENTED`;
-- 11 `UNKNOWN` (ненулевой оконный fixture теперь относится сюда: реализация есть, golden oracle отсутствует).
+- 12 `UNKNOWN` (исторический saved-cache 24 м fixture относится сюда; active auto fixture доказан отдельно).
 
 ## Доказанные expected outputs
 
@@ -23,7 +23,7 @@
 
 Отдельно доказаны ожидаемые diagnostics:
 
-- span 24 м → `SPAN_24_LEGACY_NA` / `#N/A`;
+- stale saved-cache 24 м `#N/A` не является active rule; typed `SPAN_24_LEGACY_NA` сохраняется только для реально выбранной активной ошибки;
 - purlin step 500 → `PURLIN_STEP_500_REF` / `#REF!` при достижении кандидатом итогового выбора;
 - nonzero windows → deterministic `WindowGirtResult`; отсутствие golden oracle блокирует только parity acceptance.
 
@@ -45,8 +45,8 @@
 - `CORE1_OTHER_SPANS_PARITY_STATUS: NOT_PROVEN` (9/15/18/21 deterministic path, golden values UNKNOWN)
 - `WINDOW_PARITY_STATUS: NOT_PROVEN` (local non-zero chain implemented, oracle отсутствует)
 - `KZ_PARITY_STATUS: NOT_PROVEN` для `SP_20` и `SP_RK_EN` (маршрутизация реализована, KZ golden oracle отсутствует)
-- `KNOWN_LEGACY_ERRORS: span 24 → #N/A; purlin step 500 → #REF!`
-- `KNOWN_UNKNOWN_FIXTURES: 11` согласно manifest
+- `KNOWN_LEGACY_ERRORS: selected active lookup #N/A; purlin step 500 → #REF!`
+- `KNOWN_UNKNOWN_FIXTURES: 12` согласно manifest
 
 ## Можно ли использовать Calculation Engine
 
@@ -56,8 +56,8 @@
 по доказанной локальной формульной границе. Для supported scenarios
 orchestration возвращает полноценный `success` с `Core1Result`; `NOT_IMPLEMENTED`
 больше не является штатным финальным статусом.
-Исправление 24 м и восстановление ссылки шага 500 мм не входят в разрешённую
-реализацию.
+Непроверенные 24 м manual/upper-height/ROW15 branches и восстановление ссылки
+шага 500 мм не входят в разрешённую реализацию.
 
 ## Exit criteria перед engine acceptance
 
@@ -67,4 +67,4 @@ orchestration возвращает полноценный `success` с `Core1Res
 4. Legacy errors возвращаются без исправления.
 5. UNKNOWN fixtures не используются как доказательство корректности.
 6. Ненулевые окна возвращают `WindowGirtResult`; числовой parity oracle ещё не утверждён.
-7. `calculateCore1()` возвращает полноценный `success` для supported 9/12/15/18/21 м; 24 м и шаг 500 мм сохраняют legacy errors.
+7. `calculateCore1()` возвращает полноценный `success` для supported 9/12/15/18/21 м и proven automatic low-height 24 м; шаг 500 мм сохраняет legacy error.

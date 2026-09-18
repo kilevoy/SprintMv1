@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "source_workbook": "Таблица по подбору сечений теплых ангаров пролетами 9м, 12м, 15м, 18м, 21м, 24м версия 1,5.xlsx",
   "extraction_date": "2026-09-16",
-  "fixture_count": 17,
+  "fixture_count": 18,
   "fixtures": [
     {
       "id": "baseline_12m",
@@ -82,8 +82,8 @@
     },
     {
       "id": "legacy_24m_na",
-      "description": "Пролёт 24 м сохраняет активный #N/A",
-      "supported_domain": "SUPPORTED_WITH_LEGACY_ANOMALY",
+      "description": "Исторический saved-cache #N/A; active 24 m recalculation is proven separately",
+      "supported_domain": "SUPPORTED",
       "legacy_scenario": true,
       "input_file": "legacy_24m_na.input.json",
       "expected_file": "legacy_24m_na.expected.json",
@@ -93,7 +93,23 @@
         "подбор!U7:AI14"
       ],
       "confidence": "high",
-      "status": "EXPECTED_LEGACY_ERROR"
+      "status": "UNKNOWN"
+    },
+    {
+      "id": "active_24m_auto",
+      "description": "Active recalculated 24 м automatic low-height row",
+      "supported_domain": "SUPPORTED",
+      "legacy_scenario": false,
+      "input_file": "active_24m_auto.input.json",
+      "expected_file": "active_24m_auto.expected.json",
+      "excel_source_cells": [
+        "24м!A10:U10",
+        "подбор!O7",
+        "Подбор прогонов!T28",
+        "вывод!D68:D69"
+      ],
+      "confidence": "high",
+      "status": "READY"
     },
     {
       "id": "legacy_purlin_step_500_ref",

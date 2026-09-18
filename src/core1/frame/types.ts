@@ -35,6 +35,7 @@ export interface FrameResult {
   column_steel: string;
   column_utilization: number;
   frame_mass_kg?: number | null;
+  structural_base_kg_per_m2?: number | null;
   /** Proven intermediate values used by Расчёт!O2:O14 → D69. */
   frame_tie_unit_mass_kg?: number | null;
   tube_mass_kg_per_m2?: number | null;

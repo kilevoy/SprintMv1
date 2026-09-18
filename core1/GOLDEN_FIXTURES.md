@@ -18,13 +18,13 @@ Expected status:
 
 ## Состав
 
-Создано 17 fixtures:
+Создано 18 fixtures:
 
 | Status manifest | Count | Сценарии |
 |---|---:|---|
-| `READY` | 4 | baseline 12 м, zero openings, snow retention `нет`, enclosure purlin `нет` |
-| `EXPECTED_LEGACY_ERROR` | 2 | 24 м `#N/A`, purlin step 500 `#REF!` |
-| `UNKNOWN` | 11 | включая ненулевые окна без независимого golden oracle, нормальные 9/15/18/21 м, флаги `есть`, manual frame step, roof/deck variants и responsibility 1,0 |
+| `READY` | 5 | baseline 12 м, active automatic 24 м low-height row, zero openings, snow retention `нет`, enclosure purlin `нет` |
+| `EXPECTED_LEGACY_ERROR` | 1 | purlin step 500 `#REF!` |
+| `UNKNOWN` | 12 | включая historical 24 м saved-cache `#N/A`, ненулевые окна без независимого golden oracle, нормальные 9/15/18/21 м, флаги `есть`, manual frame step, roof/deck variants и responsibility 1,0 |
 
 READY-сценарии используют один доказанный сохранённый Excel state и поэтому не считаются четырьмя независимыми пересчётами. Baseline содержит 32 конкретных поля результата; `engineering_loads` оставлено `null`, потому что единый утверждённый output object нагрузки не был зафиксирован.
 

@@ -39,7 +39,7 @@ Vitest проверяет путь GitHub Pages, lazy loading, кеширова�
 
 Типы `LEGACY_NA`, `LEGACY_REF`, `LEGACY_VALUE`, `LEGACY_DIV0` подготовлены для будущего движка. Excel functions пока не реализованы.
 
-`kg_per_m2` остаётся в кг/м². `structural_weight_kg` отсутствует. UNKNOWN fixtures никогда не считаются numeric oracle. Пролёт 24 м и шаг прогона 500 мм должны сохранять legacy diagnostics согласно существующим контрактам.
+`kg_per_m2` остаётся в кг/м². `structural_weight_kg` отсутствует. UNKNOWN fixtures никогда не считаются numeric oracle. Доказанный automatic low-height 24 м path вычисляется локально; manual/upper-height/ROW15 gaps и шаг прогона 500 мм сохраняют typed diagnostics.
 
 ## Input contract updates
 
@@ -59,8 +59,9 @@ non-zero golden oracle блокирует только `PARITY_PROVEN`.
 остаётся конечным пользовательским числом в диапазоне `(0,24]`, а
 `resolveDesignSpanFamily(span_m)` выводит только lookup-ключ `9|12|15|18|21|24`
 по включительным верхним границам. Adapter не округляет и не меняет literal
-span. Для 24 m family downstream сохраняется legacy `#N/A`; `span_m>24`
-возвращает `UNKNOWN_DOMAIN`.
+span. Для 24 m family доказанный automatic low-height путь вычисляется локально;
+`#N/A` возвращается только если выбранная и пересчитанная legacy lookup-ячейка
+действительно ошибочна. `span_m>24` возвращает `UNKNOWN_DOMAIN`.
 
 Климат задаётся discriminated union `ClimateInput`:
 
@@ -148,12 +149,12 @@ ClimateResult
 `FrameSelector` получает literal `span_m`, но выбирает dataset по
 `design_span_family`; trace содержит оба значения (`literal_span_m` и
 `design_span_family`). Пролёты в `(0,24]` проходят generic family mapping;
-семейство 24 m сохраняет downstream legacy `#N/A`. Высота проходит
+семейство 24 m использует proven automatic low-height local row. Высота проходит
 через доказанные legacy bands `3,6/4,8/6,0` при пользовательском диапазоне
 `(0,6,2]`; длина является положительным арифметическим входом без придуманного
 максимума. Доказанная
 Excel parity зафиксирована только для сохранённого 12‑м baseline. Пролёт 24 м
-возвращает downstream legacy `#N/A`, а отсутствие строки или ручного шага — typed
+вычисляет local structural base для proven row, а отсутствие строки или ручного шага — typed
 `FRAME_NO_MATCH`/`UNKNOWN_FRAME_DOMAIN` без исключения.
 
 После выбора рамы результат доступен как `context.frame`; затем оркестрация
@@ -249,7 +250,8 @@ LEGACY_REPLAY
 `LegacyConnectionReplayResolver` принимает только доказанный snapshot,
 проверяет provenance, design family и source range, а затем отображает
 `F/J/K/L/M/N` в семантические outputs. При отсутствии snapshot он возвращает
-`LEGACY_CONNECTION_SNAPSHOT_REQUIRED`; fallback на MASTER запрещён. `24 м`
-сохраняет typed `#N/A` как `LEGACY_NA`. Этот resolver не является заменой
+`LEGACY_CONNECTION_SNAPSHOT_REQUIRED`; fallback на MASTER запрещён. Исторический
+24 м saved-cache `#N/A` сохраняется только в replay snapshot и не навязывается
+canonical calculation. Этот resolver не является заменой
 generic `LegacyConnectionResolver` и не вызывается каноническим
 `calculateCore1` без явного replay snapshot.

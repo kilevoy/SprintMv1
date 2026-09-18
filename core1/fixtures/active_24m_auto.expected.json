@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "id": "active_24m_auto",
+  "expected_output": {
+    "status": "SUCCESS",
+    "values": {
+      "frame_step_m": 4.3,
+      "beam_profile": "ПГС300/20х80х3",
+      "column_profile": "ПГС300/20х80х2,5",
+      "purlin_kg_per_m2": 4.3365,
+      "kg_per_m2": 35.73278736728395
+    }
+  },
+  "expected_diagnostics": [],
+  "source_cells": [
+    "24м!A10:U10",
+    "подбор!O7",
+    "Подбор прогонов!T28",
+    "вывод!D68:D69"
+  ],
+  "confidence": "high",
+  "notes": "Active Excel COM full-rebuild oracle; stale saved-cache #N/A fixture remains separate."
+}

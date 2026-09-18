@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0.0",
-  "id": "legacy_24m_na",
-  "description": "Исторический saved-cache #N/A при старом span-12 состоянии книги; не active 24m oracle",
+  "id": "active_24m_auto",
+  "description": "Active recalculated 24 m automatic low-height scenario",
   "source_workbook": "Таблица по подбору сечений теплых ангаров пролетами 9м, 12м, 15м, 18м, 21м, 24м версия 1,5.xlsx",
-  "extraction_date": "2026-09-16",
+  "extraction_date": "2026-09-18",
   "input": {
     "city": "Роза",
     "span_m": 24,

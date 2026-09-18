@@ -81,24 +81,6 @@ export function validateCore1InputDomain(input: unknown): Core1InputDomainResult
     );
   }
   if (diagnostics.some((diagnostic) => diagnostic.code === "INVALID_INPUT")) return { state: "INVALID_INPUT", diagnostics };
-  if (value.span_m === 24) {
-    diagnostics.push(
-      createCore1Diagnostic({
-        code: "LEGACY_NA",
-        severity: "error",
-        classification: "legacy_anomaly",
-        module: "FrameSelector",
-        message: "Для пролёта 24 м сохраняется активная legacy-ветка #N/A.",
-        source: ["24м", "LEGACY_ERROR_CONTRACT.md"],
-        legacy_equivalent: "#N/A",
-        excel_error: "#N/A",
-        trigger: "span_m=24",
-        affected_outputs: ["beam_profile", "column_profile", "kg_per_m2"],
-        details: { span_m: 24 },
-      }),
-    );
-  }
-
   if (!Number.isFinite(value.span_m) || value.span_m <= 0 || value.span_m > 24) {
     diagnostics.push(
       createCore1Diagnostic({
