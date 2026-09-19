@@ -281,14 +281,17 @@ export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView
   if (requestedStep !== null && requestedStep !== rowStep) {
     return { status: "unknown_domain", frame: null, diagnostics: [diagnostic("UNKNOWN_FRAME_DOMAIN", "unsupported", "Ручной шаг отсутствует в доказанной строке подбора рамы.", { requested_step_m: requestedStep, available_step_m: rowStep, branch })] };
   }
-  const columnProfile = text(valueAt(dataset.records, `${columnName(base + 3)}${block.row}`));
+  const genericColumnProfile = text(valueAt(dataset.records, `${columnName(base + 3)}${block.row}`));
   const columnUtilization = number(valueAt(dataset.records, `${columnName(base + 4)}${block.row}`));
-  const beamProfile = text(valueAt(dataset.records, `${columnName(base + 5)}${block.row}`));
+  const genericBeamProfile = text(valueAt(dataset.records, `${columnName(base + 5)}${block.row}`));
   const beamUtilization = number(valueAt(dataset.records, `${columnName(base + 6)}${block.row}`));
-  if (!columnProfile || columnUtilization === null || !beamProfile || beamUtilization === null || rowStep === null) {
+  if (!genericColumnProfile || columnUtilization === null || !genericBeamProfile || beamUtilization === null || rowStep === null) {
     return { status: "no_match", frame: null, diagnostics: [diagnostic("FRAME_NO_MATCH", "unsupported", "Строка рамы содержит неполные cached values.", { branch, row: block.row, start: block.start })] };
   }
-  const frameMass = number(valueAt(dataset.records, `${columnName(base + 16)}${block.row}`));
+  const genericFrameMass = number(valueAt(dataset.records, `${columnName(base + 16)}${block.row}`));
+  const columnProfile = input.legacy_frame_profile?.columnProfile ?? genericColumnProfile;
+  const beamProfile = input.legacy_frame_profile?.beamProfile ?? genericBeamProfile;
+  const frameMass = input.legacy_frame_profile?.frameMassKg ?? genericFrameMass;
   const structuralBase = designSpanFamily === 24 ? number(valueAt(dataset.records, `${columnName(base + 20)}${block.row}`)) : null;
   const reportedFrameMass = designSpanFamily === 24 ? number(valueAt(dataset.records, `${columnName(base + 14)}${block.row}`)) : frameMass;
   const tubeMass = lengthAdjustedTubeMass(dataset.records, base, block.row, input.span_m, input.building_length_m);

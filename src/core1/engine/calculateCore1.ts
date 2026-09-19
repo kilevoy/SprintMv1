@@ -3,7 +3,7 @@ import { BrowserCore1DataRepository, BrowserDataSource } from "../data";
 import { resolveClimate } from "../climate";
 import { deriveLegacyClimate, legacyFrameBranchDiagnostic, resolveLegacyFrameBranch } from "../legacy";
 import { resolveLegacyConnection } from "../legacyConnection";
-import { resolveDesignSpanFamily, resolveLegacyFrameStep, selectFrame } from "../frame";
+import { resolveDesignSpanFamily, resolveLegacyFrameProfile, resolveLegacyFrameStep, selectFrame } from "../frame";
 import type { FrameResult, LegacyFrameStepResult } from "../frame";
 import { calculatePurlin } from "../purlin";
 import { calculateSecondarySteel } from "../secondary";
@@ -201,6 +201,19 @@ export async function calculateCore1(
       }
       legacyFrameStep = frameStepResolution;
     }
+    let legacyFrameProfile = null;
+    if (climateInput.mode === "CITY_LOOKUP" && legacyClimate && (designSpanFamily === 9 || designSpanFamily === 12 || designSpanFamily === 15)) {
+      const profileResolution = resolveLegacyFrameProfile({
+        designSpanFamily,
+        buildingHeightM: value.building_height_m,
+        legacySnowFactor: Number(legacyClimate.activeSnowFactor),
+        legacyFrameBranch: legacyFrameBranch?.mappedBranchKey ?? "",
+      }, frameDataset);
+      if (profileResolution.status !== "success" || !profileResolution.profile) {
+        return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context, diagnostics: [...domain.diagnostics, ...profileResolution.diagnostics] };
+      }
+      legacyFrameProfile = profileResolution.profile;
+    }
     const frameResolution = selectFrame(
       {
         span_m: value.span_m,
@@ -211,6 +224,7 @@ export async function calculateCore1(
         climate: context.climate,
         legacy_frame_branch: legacyFrameBranch?.mappedBranchKey ?? null,
         automatic_frame_step_m: legacyFrameStep?.automaticFrameStepM ?? null,
+        legacy_frame_profile: legacyFrameProfile,
       },
       frameDataset,
     );

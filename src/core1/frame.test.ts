@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { BrowserCore1DataRepository } from "./data";
 import type { Core1DataSource } from "./data";
-import { resolveLegacyFrameStep, selectFrame } from "./frame";
+import { resolveLegacyFrameProfile, resolveLegacyFrameStep, selectFrame } from "./frame";
 import type { Core1ClimateResult } from "./types";
 
 class TestDataSource implements Core1DataSource {
@@ -34,6 +34,22 @@ async function frame(span: 9 | 12 | 15 | 18 | 21 | 24) {
 }
 
 describe("FrameSelector", () => {
+  it.each([
+    [9, 3, "ПГС245/20х80х1,5", "ПГС245/20х80х1,5", 353.56],
+    [9, 3.8, "ПГС245/20х80х1,5", "ПГС245/20х80х1,5", 353.56],
+    [9, 3.81, "ПГС245/20х80х2", "ПГС245/20х80х2", 427.2],
+    [12, 3, "ПГС245/20х80х2", "ПГС300/20х80х1,5", 487],
+    [12, 3.8, "ПГС245/20х80х2", "ПГС300/20х80х1,5", 487],
+    [12, 3.81, "ПГС245/20х80х2", "ПГС300/20х80х2", 548],
+    [15, 3, "ПГС300/20х80х2,5", "ПГС245/20х80х2", 715],
+    [15, 3.8, "ПГС300/20х80х2,5", "ПГС245/20х80х2", 715],
+    [15, 3.81, "ПГС300/20х80х2,5", "ПГС300/20х80х2", 792],
+  ] as const)("reproduces the proven %dm legacy HZ18/HZ5 profile lookup at height %dm", async (span, height, beam, column, mass) => {
+    const result = resolveLegacyFrameProfile({ designSpanFamily: span, buildingHeightM: height, legacySnowFactor: 0.8, legacyFrameBranch: "3/2" }, await frame(span));
+    expect(result.status).toBe("success");
+    if (result.status === "success") expect(result.profile).toMatchObject({ beamProfile: beam, columnProfile: column, frameMassKg: mass });
+  });
+
   it("reproduces the controlled legacy D8 matrix for Роза at height 3 m and factor 0.8", async () => {
     const expected = new Map([[9, 6], [12, 6], [15, 6], [18, 5], [21, 4], [24, 4.3]] as const);
     for (const [span, step] of expected) {

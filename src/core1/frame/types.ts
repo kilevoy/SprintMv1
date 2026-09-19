@@ -1,5 +1,6 @@
 import type { DatasetRecord } from "../data";
 import type { Core1ClimateResult, Core1Diagnostic, DesignSpanFamily, ResponsibilityFactor, SpanM } from "../types";
+import type { LegacyFrameProfileSelection } from "./LegacyFrameProfileResolver";
 
 export interface FrameDatasetView {
   records: DatasetRecord[];
@@ -17,6 +18,8 @@ export interface FrameSelectorInput {
   legacy_frame_branch?: string | null;
   /** Resolved вывод!D8 for automatic legacy city-lookup mode. */
   automatic_frame_step_m?: number | null;
+  /** Proven 9/12/15 m legacy HZ18 → IA/IB/IE profile selection. */
+  legacy_frame_profile?: LegacyFrameProfileSelection | null;
 }
 
 export interface FrameSelectionTrace {
