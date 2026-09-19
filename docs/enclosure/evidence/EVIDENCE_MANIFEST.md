@@ -16,5 +16,7 @@ ready for runtime implementation.
 | Window/jamb/strip framing | `NOT_PRESENT in primary workbook` | NO | requires another authoritative source |
 | Bracket price | `UNKNOWN` | NO | price source not audited |
 | Real-project manual wall-girt validation | `NOT_TESTED: no replayable zones available` | NO | `REAL_PROJECT_MANUAL_WALL_GIRT_VALIDATION.md`; 21876 unavailable, 21640 downstream aggregate |
+| Profnastil / cladding area and quantity | `UNKNOWN: not present in authoritative enclosure workbook` | NO | `PROFNASTIL_SOURCE_AUDIT.md`, `PROFNASTIL_RULES.md` |
+| Profnastil fasteners | `UNKNOWN: not present in authoritative enclosure workbook` | NO | `FASTENER_RULES.md` |
 
 No status above should be broadened beyond its stated evidence boundary.
