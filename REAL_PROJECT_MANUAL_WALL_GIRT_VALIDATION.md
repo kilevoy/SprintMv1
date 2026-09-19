@@ -15,21 +15,95 @@ reported as `NOT_AVAILABLE`; they are not reconstructed from totals or labels.
 
 | Project | Local source | SHA-256 | Classification | Relevant sheets |
 |---|---|---|---|---|
-| 21876 | `NOT FOUND` in the workspace, reference folders, and Downloads | — | `UNKNOWN` | — |
+| 21876 | `E:\SprintMv1\21876.xlsx` | `D77591C7DBE46C972945532BF9A8155B8A76646A29FF47B93470F70462106D20` | `DOWNSTREAM_BOM` | `12м`, `15`, `18`, `21`, `1ск` |
 | 21640 | `C:\Users\Deako\Downloads\21640.xlsx` | `4705A40DD3D1A6698937C793460AEC25243652FC44BFAC7DB55F780DAD6F519B` | `DOWNSTREAM_BOM` | `12м`, `15`, `18`, `21`, `1ск` |
 
 `C:\Users\Deako\Downloads\21640 (1).xlsx` has the same SHA-256 and was
 treated as a duplicate, not as a second independent source.
 
-## 21876
+## 21876 classification and candidate evidence
 
-No local workbook was available. No sheets, wall-girt rows, expected values,
-or replay inputs were fabricated.
+The workbook is available and was inspected as a read-only source. It has five
+visible sheets and six external links, but no sheets named `Расчет Угловая`,
+`Расчет Рядовая`, or `несушки`. The relevant content is a preliminary
+material statement with project inputs and downstream wall-material rows.
+
+The strongest candidate is `12м`, where the project-level inputs are direct
+values:
+
+| Field | Cell | Value | Status |
+|---|---|---:|---|
+| project id | `12м!G5` | `21876` | `DIRECT_SOURCE` |
+| city | `12м!B6` | `Каргалейка` | `DIRECT_SOURCE` |
+| span | `12м!C8` | `12 m` | `DIRECT_SOURCE` |
+| building length | `12м!C9` | `30 m` | `DIRECT_SOURCE` |
+| building height | `12м!C10` | `4.5 m` | `DIRECT_SOURCE` |
+| frame step | `12м!C11` | `6 m` | `DIRECT_SOURCE`, project-level only |
+
+Candidate wall rows are aggregate BOM rows, not explicit zones:
+
+| Row | Profile | Formula | Cached quantity | Unit mass | Missing replay fields |
+|---|---|---|---:|---:|---|
+| `12м!B34:H34` | `ПП 145х45х1,5` | `C34=0` | `0` | `H34=2.67` | section type, girt step, zone type/length |
+| `12м!B35:H35` | `ПП 145х45х1,2` | `C35=5*2*12*2+4*2*30*2` | `720` | `H35=2.14` | section type, girt step, zone decomposition, bracket result |
+
+The row `12м!B35` is the closest apparent wall-girt candidate, but its
+quantity is an aggregate formula with two terms. Treating `5`, `4`, `12`, or
+`30` as a row count, section type, girt step, or zone length would be an
+unsupported inference. The workbook does not identify whether this row is
+corner, typical, side-wall, end-wall, or a mixture.
+
+The bracket row is also aggregate:
 
 ```text
-PROJECT_21876_AVAILABLE = NO
+12м!B38 = "Кронштейны"
+12м!C38 = G38/0.75*0.2       cached quantity = 24
+12м!G38 = (15+30)*2          cached mass = 90 kg
+```
+
+It cannot be assigned to the `bracketCount` and `bracketMass` of one replay
+zone. Other sheets contain analogous BOM rows and additional labels such as
+`нс`, `сс`, and `цок`, but no explicit `]`, `[]`, `][`, or `[-]` section type.
+
+```text
+PROJECT_21876_AVAILABLE = YES
+PROJECT_21876_WORKBOOK_TYPE = DOWNSTREAM_BOM
+PROJECT_21876_GIRT_SHEETS_FOUND = 0 authoritative zone-level sheets
 PROJECT_21876_USABLE_GIRT_ZONES = 0
 PROJECT_21876_EXACT_ZONES = 0
+```
+
+## 21876 field-level availability
+
+| Field | Status | Evidence |
+|---|---|---|
+| wall side (`SIDE`/`END`) | `MISSING` | no side attached to `12м!B35` |
+| zone (`CORNER`/`TYPICAL`) | `MISSING` | no zone field; BOM labels are not reinterpreted |
+| wall height | `DIRECT_SOURCE` at sheet level | `12м!C10=4.5`, not zone-specific |
+| zone length | `MISSING` | building length exists, zone length does not |
+| support/post/frame spacing | `DIRECT_SOURCE` at sheet level | `12м!C11=6`, not proven as girt support step |
+| selected profile | `DIRECT_SOURCE` | `12м!B35` |
+| section type | `MISSING` | no exact section-type marker |
+| girt step | `MISSING` | no explicit girt-step source for the row |
+| reported row count | `MISSING` | aggregate linear quantity only |
+| profile total length | `DERIVED_FROM_SOURCE_FORMULA` | `12м!C35=720`, aggregate quantity |
+| profile mass | `DERIVED_FROM_SOURCE_FORMULA` | `12м!G35=C35*H35`, aggregate mass `1540.8 kg` |
+| bracket quantity/mass | `DIRECT_SOURCE` only as aggregate | `12м!C38`, `12м!G38` |
+
+## Replay decision
+
+No `manualWallGirtReplay` call was made. The required explicit input contract
+cannot be constructed from `21876.xlsx` without guessing. No real-project
+fixture was created.
+
+```text
+REAL_PROJECT_GIRT_VALIDATION = BLOCKED_BY_ZONE_LEVEL_SOURCE
+BLOCKING_FIELDS = wall side, zone type, zone length, exact section type,
+                  girt step, row count, separable profile length,
+                  separable profile mass, per-zone bracket quantity,
+                  per-zone bracket mass
+REAL_PROJECT_GIRT_FIXTURES_CREATED = 0
+MANUAL_WALL_GIRT_REAL_PROJECT_PARITY = NOT_TESTED
 ```
 
 ## 21640 classification
@@ -87,9 +161,8 @@ REAL_PROJECT_GIRT_FIXTURES_CREATED = 0
 
 ## Replay comparison
 
-No replay call was made for 21640 because the minimum explicit input contract
-cannot be established from the workbook. No replay call was made for 21876
-because the workbook is unavailable.
+No replay call was made for 21640 or 21876 because the minimum explicit input
+contract cannot be established from either downstream BOM workbook.
 
 There are consequently no `EXACT`, `ROUNDING_ONLY`, or `MISMATCH` claims.
 
@@ -115,7 +188,7 @@ OPENING_FRAMING_IMPLEMENTED = NO
 SAFE_TO_INTEGRATE_MANUAL_GIRT_INTO_ENCLOSURE_CORE = NO
 ```
 
-The next useful step is to obtain `21876.xlsx` and a source or detailed BOM
-workbook for 21640 that explicitly preserves wall-girt zone, section type, and
-girt step. Only then can real-project golden fixtures be created without
-guessing.
+The next useful step is to obtain the original wall-girt calculation workbook,
+an explicit enclosure calculation sheet, or a KM drawing/BOM that preserves
+wall-girt zone, section type, girt step, and per-zone quantities for 21876.
+Only then can a real-project golden fixture be created without guessing.
