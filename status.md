@@ -2,11 +2,11 @@
 
 ## Current phase
 
-Legacy climate derivation and frame-branch implementation; 22329 post-branch parity audit
+Generic legacy connection model implemented for automatic 9–21 m; supported-domain regression expansion next
 
 ## Status
 
-`UNKNOWN_DOMAIN_GEOMETRY_GAP = CLOSED`. `ARBITRARY_SPAN_DOMAIN_GAP = CLOSED` (generic literal-span validation and family mapping). `PURLIN_DECK_GAP = CLOSED`. `WRONG_SNOW_FIELD = CLOSED`. `CANDIDATE_ORDER_ERROR = CLOSED`. `FRAME_LENGTH_ERROR = CLOSED`. `22318 = REAL_PROJECT_REFERENCE`. `22316 = REAL_PROJECT_REFERENCE`. `22326 = SOURCE_SUSPICIOUS / COMPATIBILITY_CASE`. The 22318 and 22316 chains reach exact source D69 parity; 22326 retains its documented structural-summary mismatch and is not a normative reference. The branch contains the two local commits that establish these results; push remains pending due the current execution environment restriction.
+`UNKNOWN_DOMAIN_GEOMETRY_GAP = CLOSED`. `ARBITRARY_SPAN_DOMAIN_GAP = CLOSED` (generic literal-span validation and family mapping). `PURLIN_DECK_GAP = CLOSED`. `WRONG_SNOW_FIELD = CLOSED`. `CANDIDATE_ORDER_ERROR = CLOSED`. `FRAME_LENGTH_ERROR = CLOSED`. `22318 = REAL_PROJECT_REFERENCE`. `22316 = REAL_PROJECT_REFERENCE`. `22329 = REAL_PROJECT_REFERENCE`. `22326 = SOURCE_SUSPICIOUS / COMPATIBILITY_CASE`. The three normative references reach exact source D69 parity and now exact generic connection/BOM parity for D52/E52/D53/D54/D55/D57. 22326 remains a compatibility case and is not a normative structural-score oracle.
 
 ## Decisions
 
@@ -25,7 +25,7 @@ Legacy climate derivation and frame-branch implementation; 22329 post-branch par
 - Literal `span_m` is validated as finite positive `<=24`; `resolveDesignSpanFamily` maps inclusive upper bands without rounding. Family 24 retains downstream legacy `#N/A`; spans `>24` return `UNKNOWN_DOMAIN`.
 - `ClimateResolver` remains canonical. City lookup now derives the proven legacy `E + AM26 → J/K/L/M` result separately and passes the mapped `AJ11 → V7` branch into `FrameSelector`.
 - Excel approximate `MATCH` on the ordered non-monotonic `AB5:AB58` range is characterized by Excel COM; the compatibility matcher preserves binary-search behavior and does not sort or deduplicate the tail.
-- 22329 branch parity is closed through beam/column/frame outputs; the next audit boundary is the first bolt pattern divergence (`вывод!D52`: source `8х2`, Core1 current `7х2`). No downstream repair was made.
+- 22329 branch parity and generic connection output parity are closed. The remaining connection boundaries are manual frame-step semantics and the 24 m legacy `#N/A` path.
 
 ## Blockers
 
@@ -33,11 +33,11 @@ Geometry, climate, purlin step-selection and the proven frame-length path are no
 
 ## Verification
 
-- `npm test`: 147/147 passed across 14 test files, including family-boundary mapping, 22316 and 22318 real-project parity, 22326 literal-span routing and 24 m legacy error.
+- `npm test -- --run`: 168/168 passed across 17 test files, including generic connection parity and the three real-project connection regressions.
 - `npm run typecheck`: passed.
 - `npm run build`: passed.
 - `git diff --check`: passed (only normal Git line-ending warnings).
-- `pytest core1/tests/test_static_data_integrity.py`: 25/25 passed.
+- `py -m pytest core1/tests/test_static_data_integrity.py`: 26/26 passed, including the 599-row connection lookup contract.
 - `npm run typecheck`: passed.
 - `npm run build`: passed.
 - `git diff --check`: passed.
@@ -45,7 +45,7 @@ Geometry, climate, purlin step-selection and the proven frame-length path are no
 - Project adapter/UI tests: 17/17 focused tests passed in the latest targeted run.
 - FrameSelector + 22318 targeted tests: 15/15 passed.
 - Legacy pipeline targeted tests: 6/6 passed; full Vitest run: 152/152 passed after the branch integration.
-- `py -m pytest core1/tests/test_static_data_integrity.py`: 25/25 passed. The bundled `python` runtime has no pytest; the system Python launcher was used.
+- The connection extractor was rerun against the unchanged master workbook and reproduced 599 rows / 3 typed anomalies.
 
 ## Sprint archive validation pilot
 
@@ -106,15 +106,15 @@ Validation notes:
 
 - `M1_FRAME_SELECTION_PARITY = PROVEN_FOR_REFERENCES`.
 - `M2_STRUCTURAL_D69_PARITY = PROVEN` for 22318, 22316, and 22329.
-- `M3_CONNECTION_BOM_PARITY = REPLAY_PROVEN / GENERIC_INCOMPLETE`.
+- `M3_CONNECTION_BOM_PARITY = MODEL_COMPLETE / REFERENCE_PARITY_PROVEN` for automatic 9–21 m.
 - `M4_SUPPORTED_DOMAIN_MATRIX = PARTIAL`.
 - `M5_CORE1_FROZEN = NO`.
 - `M6_CORE2_SOURCE_PARITY = PARTIAL`.
 - `M7_FULL_PROPOSAL_PARITY = NOT_READY`.
 
-The generic connection resolver remains blocked because project-scoped selector state and lookup values sit behind `HZ18`, `RP18`, `KL18`, and `WN18`. The minimal historical replay contract is now proven: `activeBranch` plus the selected span source row `F/J/K/L/M/N` reproduces the six connection outputs exactly for 22318, 22316, 22329, and 22326.
+The former project-scoped blocker is closed. `снегветер!AZ335` is a shared formula child, not a hardcoded cached input. `LegacyConnectionResolver` now reproduces `D52/E52/D53/D54/D55/D57` for 22318, 22316 and 22329, and selects the expected compatibility row for 22326. The generated lookup dataset contains 599 candidate-specific rows with three preserved legacy anomalies.
 
-`LegacyConnectionReplayResolver` is implemented as an explicit snapshot-only path. It does not replace the generic resolver, does not use `projectId` as a calculation selector, and preserves 24 m `#N/A`.
+`LegacyConnectionReplayResolver` remains an explicit snapshot-only provenance path. Canonical automatic 9–21 m calculation uses the generic resolver. Manual frame-step is still unverified and 24 m connection output remains a typed legacy `#N/A` boundary.
 
 Validation terminology is now split:
 

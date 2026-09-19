@@ -1,5 +1,12 @@
 # Legacy connection lookup matrix provenance audit
 
+> **Correction (2026-09-18):** the conclusion
+> `PROJECT_SCOPED_SNAPSHOT_REQUIRED` is superseded. `AZ335` is a child of
+> shared formula `AZ323:AZ354`, not a hardcoded value. The corrected proof,
+> formula-model hashes and implementation gate are in
+> `LEGACY_CONNECTION_MODEL_COMPLETION_AUDIT.md`. Current classification:
+> `LEGACY_CONNECTION_MODEL_COMPLETE` for automatic 9–21 m.
+
 Статус: read-only reverse engineering. Production TypeScript и XLSX не
 изменялись; commit/push не выполнялись.
 

@@ -1,5 +1,10 @@
 # Legacy connection selector dependency audit
 
+> **Correction (2026-09-18):** user inputs originate at `вывод!D2/D4:D7`,
+> and the apparent hardcoded `снегветер!AZ335` value is a reconstructed shared
+> formula. See `LEGACY_CONNECTION_MODEL_COMPLETION_AUDIT.md` for the corrected
+> full dependency graph and the now-complete generic model.
+
 Статус: reverse engineering only. Production TypeScript и XLSX не изменялись.
 
 Проверены source-selection книги `22318`, `22316`, `22329` и compatibility-control

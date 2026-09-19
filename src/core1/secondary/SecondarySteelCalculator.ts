@@ -131,15 +131,23 @@ export const calculateSecondarySteel: SecondarySteelCalculatorFn = (
     componentFromValues(text(valueAt(bolts, "D48")) ?? "t5", text(valueAt(bolts, "E48")) ?? "С255", "Пластина карниз, конек", "вывод!D48:E48"),
     componentFromValues(text(valueAt(bolts, "D49")) ?? "t6", text(valueAt(bolts, "E49")) ?? "С255", "Пластина опора", "вывод!D49:E49"),
   ];
+  const connection = input.legacy_connection ?? null;
+  const resolvedPatterns = connection ? [
+    connection.ridgeBeamBoltPattern,
+    connection.eaveBeamBoltPattern,
+    connection.supportColumnBoltPattern,
+    connection.eaveColumnBoltPattern,
+  ] : null;
   const boltPatterns = ["D52", "D53", "D54", "D55"].map((cell, index) => ({
     name: ["Балки конек", "Балки карниз", "Колонны опора", "Колонны карниз"][index]!,
-    pattern: text(valueAt(bolts, cell)) ?? "",
+    pattern: resolvedPatterns?.[index] ?? text(valueAt(bolts, cell)) ?? "",
     source_cell: `вывод!${cell}`,
     quantity_unit: "pcs" as const,
+    ...(index === 0 && connection ? { quantity: connection.ridgeBeamBoltQuantity } : {}),
   }));
   if (boltPatterns.some((bolt) => !bolt.pattern)) return unsupported("В локальном наборе не найден шаблон болтов.", { cells: ["D52", "D53", "D54", "D55"] });
   const m16 = number(valueAt(bolts, "D56"));
-  const fittings = number(valueAt(bolts, "D57"));
+  const fittings = connection?.fittingsWeightKg ?? number(valueAt(bolts, "D57"));
   if (m16 === null || fittings === null) return unsupported("В локальном наборе отсутствуют количество M16 или масса фасонок.", { cells: ["D56", "D57"] });
 
   const result: SecondarySteelResult = {
@@ -165,10 +173,12 @@ export const calculateSecondarySteel: SecondarySteelCalculatorFn = (
         `frame_step_m=${frameStep}`,
         `snow_region=${region(climate.snow_region)}`,
       ],
-      selected_rules: ["secondary_steel_rules.csv", "bolts_plates_fittings.csv"],
+      selected_rules: connection
+        ? ["secondary_steel_rules.csv", "bolts_plates_fittings.csv (static D48:E49/D56:E56 only)", "legacy_connections/connection_lookup_rows.json"]
+        : ["secondary_steel_rules.csv", "bolts_plates_fittings.csv"],
       component_sources: ["вывод!D36:E57"],
       zero_controlled_terms: [],
-      parity: provenBaseline(input, climate, frame, purlin) ? "PROVEN_12M_BASELINE" : "LOCAL_DETERMINISTIC",
+      parity: connection ? "PROVEN_LEGACY_CONNECTION" : provenBaseline(input, climate, frame, purlin) ? "PROVEN_12M_BASELINE" : "LOCAL_DETERMINISTIC",
     },
   };
   return { status: "success", secondary: result, diagnostics: [] };

@@ -55,6 +55,17 @@ describe("real project 22318 geometry-domain regression", () => {
       purlin_steel: "М.п.390",
       purlin_step_mm: 1900,
     });
+    expect(result.context?.legacyConnection).toMatchObject({
+      activeBranch: "ROW14",
+      ridgeBeamBoltPattern: "8х2",
+      ridgeBeamBoltQuantity: 276,
+      eaveBeamBoltPattern: "9х2",
+      supportColumnBoltPattern: "7х2",
+      eaveColumnBoltPattern: "10х2",
+      fittingsWeightKg: 238,
+    });
+    expect(result.result.bolts?.map((bolt) => bolt.pattern)).toEqual(["8х2", "9х2", "7х2", "10х2"]);
+    expect(result.result.fittings_weight_kg).toBe(238);
     // The length-dependent frame/secondary mass now reproduces the source D69.
     expect(result.result.kg_per_m2).toBeCloseTo(32.285826388888886, 12);
   });

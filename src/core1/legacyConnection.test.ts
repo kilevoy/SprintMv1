@@ -1,7 +1,76 @@
 import { describe, expect, it } from "vitest";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import { validateCore1Diagnostic } from "./compatibility";
-import { getLegacyConnectionReplayFixture, resolveLegacyConnectionReplay } from "./legacyConnection";
+import { BrowserCore1DataRepository } from "./data";
+import type { Core1DataSource } from "./data";
+import { calculateCore1 } from "./engine";
+import { resolveDesignSpanFamily } from "./frame";
+import { getLegacyConnectionReplayFixture, resolveLegacyConnection, resolveLegacyConnectionReplay } from "./legacyConnection";
 import type { LegacyConnectionSnapshot } from "./legacyConnection";
+import type { Core1Input } from "./types";
+
+class TestDataSource implements Core1DataSource {
+  public constructor(private readonly rootDirectory: string) {}
+  public async getText(assetPath: string): Promise<string> { return readFile(resolve(this.rootDirectory, assetPath), "utf8"); }
+  public async getJson<T>(assetPath: string): Promise<T> { return JSON.parse(await this.getText(assetPath)) as T; }
+}
+
+const repository = new BrowserCore1DataRepository(new TestDataSource(resolve(import.meta.dirname, "../..")));
+
+function input(city: string, span_m: number, building_length_m: number, building_height_m: number, snow_retention_purlin: "есть" | "нет"): Core1Input {
+  return {
+    climate: { mode: "CITY_LOOKUP", country: "RU", city, normative_system: "SP_20" },
+    span_m,
+    building_length_m,
+    building_height_m,
+    responsibility_factor: 1,
+    frame_step_override_m: null,
+    roof_covering: "С-П 150",
+    roof_deck_grade: "С44-1000-0,7",
+    snow_retention_purlin,
+    enclosure_purlin: "нет",
+    horizontal_bracing_override: null,
+    gates_le_6m_count: 0,
+    gates_gt_6m_count: 0,
+    doors_count: 0,
+    windows: { enabled: false, window_type: 1, window_height_m: 0, window_strip_length_m: 0, separate_window_count: 0, glazing_construction: "2ой стеклопакет" },
+    selection_mode: "стандарт",
+    building_roof_type: "двускатное",
+    purlin_max_step_override_mm: null,
+    purlin_min_step_mm: 0,
+    terrain_type: "В",
+    window_scheme_factor: 1,
+    window_utilization_limit: 0.85,
+  };
+}
+
+async function resolveGeneric(projectInput: Core1Input) {
+  const engine = await calculateCore1(projectInput, repository);
+  expect(engine.status).toBe("success");
+  if (engine.status !== "success" || !engine.context?.legacyClimate || !engine.context.legacyFrameBranch || !engine.context.frame || !engine.context.purlin) throw new Error("Core1 reference context is incomplete");
+  const family = resolveDesignSpanFamily(projectInput.span_m);
+  if (family === null) throw new Error("Missing design family");
+  const [frame, selectionRules, profileCatalogue, calculationAxis, calculationConstants, literals, steelGrades, roofProperties, deckProperties] = await Promise.all([
+    repository.loadFrameDataset(family),
+    repository.loadPurlinDataset("purlin_selection_rules"),
+    repository.loadPurlinDataset("purlin_profile_catalogue"),
+    repository.loadPurlinDataset("purlin_calculation_axis"),
+    repository.loadPurlinDataset("purlin_calculation_constants"),
+    repository.loadPurlinDataset("purlin_literals"),
+    repository.loadPurlinDataset("purlin_steel_grades"),
+    repository.loadRoofProperties(),
+    repository.loadDeckProperties(),
+  ]);
+  return resolveLegacyConnection({
+    ...projectInput,
+    climate: engine.context.climate,
+    baseLegacyClimate: engine.context.legacyClimate,
+    baseLegacyFrameBranch: engine.context.legacyFrameBranch,
+    baseFrame: engine.context.frame,
+    basePurlin: engine.context.purlin,
+  }, { frame, purlin: { selectionRules, profileCatalogue, calculationAxis, calculationConstants, literals, steelGrades, roofProperties, deckProperties } });
+}
 
 const projectInputs = {
   "22318": { span_m: 15 },
@@ -83,5 +152,57 @@ describe("LegacyConnectionReplayResolver", () => {
     expect(result.result.ridgeBeamBoltQuantity).toBe("#N/A");
     expect(result.result.eaveColumnBoltPattern).toBe("#N/A");
     expect(result.diagnostics[0]?.code).toBe("LEGACY_NA");
+  });
+});
+
+describe("LegacyConnectionResolver", () => {
+  const controls = [
+    { id: "22318", input: input("Сургут", 15, 24, 5, "нет"), expected: expected["22318"] },
+    { id: "22316", input: input("Березовский", 18, 30, 5, "есть"), expected: expected["22316"] },
+    { id: "22329", input: input("Увильды", 12, 26, 4, "нет"), expected: expected["22329"] },
+    { id: "22326", input: input("Увильды", 10.4, 25.7, 4, "нет"), expected: expected["22326"] },
+  ] as const;
+
+  it.each(controls)("reproduces generic connection outputs for $id", async ({ input: projectInput, expected: output }) => {
+    const result = await resolveGeneric(projectInput);
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    expect(result.connection).toMatchObject(output);
+  });
+
+  it("preserves ROW14 on exact E8/E9 equality", async () => {
+    const result = await resolveGeneric(input("Увильды", 12, 26, 4, "нет"));
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    expect(result.connection.trace.row14.scoreKgPerM2).toBe(result.connection.trace.row15.scoreKgPerM2);
+    expect(result.connection.activeBranch).toBe("ROW14");
+  });
+
+  it("selects ROW15 at the first score divergence for 22326", async () => {
+    const result = await resolveGeneric(input("Увильды", 10.4, 25.7, 4, "нет"));
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    // 22326 remains a SOURCE_SUSPICIOUS compatibility case, so its absolute
+    // candidate scores are diagnostic rather than normative oracles.  The
+    // proven selector relation and resulting ROW15 output remain stable.
+    expect(result.connection.trace.row14.scoreKgPerM2).toBeGreaterThan(result.connection.trace.row15.scoreKgPerM2);
+    expect(result.connection.activeBranch).toBe("ROW15");
+  });
+
+  it("keeps manual frame-step and 24 m outside the proven generic domain", async () => {
+    const manual = input("Увильды", 12, 26, 4, "нет");
+    manual.frame_step_override_m = 6;
+    const manualEngine = await calculateCore1({ ...manual, frame_step_override_m: null }, repository);
+    expect(manualEngine.status).toBe("success");
+    if (manualEngine.status !== "success" || !manualEngine.context?.legacyClimate || !manualEngine.context.legacyFrameBranch || !manualEngine.context.frame || !manualEngine.context.purlin) return;
+    const family = resolveDesignSpanFamily(manual.span_m)!;
+    const [frame, selectionRules, profileCatalogue, calculationAxis, calculationConstants, literals, steelGrades, roofProperties, deckProperties] = await Promise.all([
+      repository.loadFrameDataset(family), repository.loadPurlinDataset("purlin_selection_rules"), repository.loadPurlinDataset("purlin_profile_catalogue"), repository.loadPurlinDataset("purlin_calculation_axis"), repository.loadPurlinDataset("purlin_calculation_constants"), repository.loadPurlinDataset("purlin_literals"), repository.loadPurlinDataset("purlin_steel_grades"), repository.loadRoofProperties(), repository.loadDeckProperties(),
+    ]);
+    const result = resolveLegacyConnection({ ...manual, climate: manualEngine.context.climate, baseLegacyClimate: manualEngine.context.legacyClimate, baseLegacyFrameBranch: manualEngine.context.legacyFrameBranch, baseFrame: manualEngine.context.frame, basePurlin: manualEngine.context.purlin }, { frame, purlin: { selectionRules, profileCatalogue, calculationAxis, calculationConstants, literals, steelGrades, roofProperties, deckProperties } });
+    expect(result.status).toBe("unsupported");
+    const family24 = resolveLegacyConnection({ ...manual, span_m: 24, frame_step_override_m: null, climate: manualEngine.context.climate, baseLegacyClimate: manualEngine.context.legacyClimate, baseLegacyFrameBranch: manualEngine.context.legacyFrameBranch, baseFrame: manualEngine.context.frame, basePurlin: manualEngine.context.purlin }, { frame, purlin: { selectionRules, profileCatalogue, calculationAxis, calculationConstants, literals, steelGrades, roofProperties, deckProperties } });
+    expect(family24.status).toBe("legacy_error");
+    expect(family24.diagnostics[0]?.code).toBe("LEGACY_NA");
   });
 });

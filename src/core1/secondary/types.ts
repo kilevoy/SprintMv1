@@ -2,6 +2,7 @@ import type { LoadedDataset } from "../data";
 import type { Core1ClimateResult, Core1Diagnostic, Core1Input } from "../types";
 import type { FrameResult } from "../frame";
 import type { PurlinResultValue } from "../purlin";
+import type { LegacyConnectionResolvedValue } from "../legacyConnection";
 
 export interface SecondarySteelInput {
   span_m: Core1Input["span_m"];
@@ -9,6 +10,7 @@ export interface SecondarySteelInput {
   building_height_m: number;
   frame_step_m: number;
   horizontal_bracing_override?: Core1Input["horizontal_bracing_override"];
+  legacy_connection?: LegacyConnectionResolvedValue | null;
 }
 
 export interface SecondarySteelDatasetBundle {
@@ -29,6 +31,7 @@ export interface SecondarySteelBolt {
   pattern: string;
   source_cell: string;
   quantity_unit: "pcs";
+  quantity?: number;
 }
 
 export type ZeroLogicClassification =
@@ -52,7 +55,7 @@ export interface SecondarySteelTrace {
   selected_rules: string[];
   component_sources: string[];
   zero_controlled_terms: ZeroControlledTerm[];
-  parity: "PROVEN_12M_BASELINE" | "LOCAL_DETERMINISTIC";
+  parity: "PROVEN_12M_BASELINE" | "PROVEN_LEGACY_CONNECTION" | "LOCAL_DETERMINISTIC";
 }
 
 export interface SecondarySteelResult {

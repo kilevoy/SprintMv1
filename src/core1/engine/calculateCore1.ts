@@ -2,6 +2,7 @@ import { validateCore1Input } from "../compatibility";
 import { BrowserCore1DataRepository, BrowserDataSource } from "../data";
 import { resolveClimate } from "../climate";
 import { deriveLegacyClimate, legacyFrameBranchDiagnostic, resolveLegacyFrameBranch } from "../legacy";
+import { resolveLegacyConnection } from "../legacyConnection";
 import { selectFrame } from "../frame";
 import { resolveDesignSpanFamily } from "../frame/designSpanFamily";
 import { calculatePurlin } from "../purlin";
@@ -16,6 +17,7 @@ import type { ClimateDatasetView } from "../climate";
 import type { Core1ClimateResult, Core1Input } from "../types";
 import type { FrameResult } from "../frame";
 import type { LegacyClimateResult, LegacyFrameBranchResult } from "../legacy";
+import type { LegacyConnectionResolvedValue } from "../legacyConnection";
 import type { PurlinDatasetBundle, PurlinResultValue } from "../purlin";
 import type { SecondarySteelResult } from "../secondary";
 import type { WindowGirtResult } from "../window";
@@ -161,7 +163,7 @@ export async function calculateCore1(
       return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context: { ...context, legacyClimate }, diagnostics: [...domain.diagnostics, ...legacyClimate.diagnostics, diagnostic] };
     }
   }
-  let finalContext: { climate: Core1ClimateResult; legacyClimate?: LegacyClimateResult | null; legacyFrameBranch?: LegacyFrameBranchResult | null; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult; windows?: WindowGirtResult | null; openings?: import("../opening").OpeningMassResult | null } = { ...context, legacyClimate, legacyFrameBranch };
+  let finalContext: { climate: Core1ClimateResult; legacyClimate?: LegacyClimateResult | null; legacyFrameBranch?: LegacyFrameBranchResult | null; legacyConnection?: LegacyConnectionResolvedValue | null; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult; windows?: WindowGirtResult | null; openings?: import("../opening").OpeningMassResult | null } = { ...context, legacyClimate, legacyFrameBranch, legacyConnection: null };
 
   try {
     if (domain.state === "SUPPORTED_WITH_LEGACY_ANOMALY") {
@@ -259,7 +261,37 @@ export async function calculateCore1(
     if (purlinResolution.status !== "success" || !purlinResolution.purlin) {
       return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context: frameContext, diagnostics: [...domain.diagnostics, ...purlinResolution.diagnostics] };
     }
-    const purlinContext = { ...frameContext, purlin: purlinResolution.purlin };
+    let legacyConnection: LegacyConnectionResolvedValue | null = null;
+    if ((value.frame_step_override_m === null || value.frame_step_override_m === undefined) && designSpanFamily !== 24 && legacyClimate && legacyFrameBranch) {
+      const connectionResolution = resolveLegacyConnection({
+        span_m: value.span_m,
+        building_length_m: value.building_length_m,
+        building_height_m: value.building_height_m,
+        responsibility_factor: value.responsibility_factor,
+        frame_step_override_m: null,
+        roof_covering: value.roof_covering,
+        roof_deck_grade: value.roof_deck_grade,
+        snow_retention_purlin: value.snow_retention_purlin,
+        enclosure_purlin: value.enclosure_purlin,
+        purlin_max_step_override_mm: value.purlin_max_step_override_mm ?? null,
+        purlin_min_step_mm: value.purlin_min_step_mm ?? 0,
+        building_roof_type: value.building_roof_type ?? "двускатное",
+        climate: context.climate,
+        baseLegacyClimate: legacyClimate,
+        baseLegacyFrameBranch: legacyFrameBranch,
+        baseFrame: frameResolution.frame,
+        basePurlin: purlinResolution.purlin,
+      }, { frame: frameDataset, purlin: purlinBundle });
+      if (connectionResolution.status === "legacy_error") {
+        const code = connectionResolution.diagnostics.some((item) => item.code === "LEGACY_NA") ? "LEGACY_NA" : "LEGACY_VALUE_ERROR";
+        return { status: "legacy_error", code, result: null, context: { ...frameContext, purlin: purlinResolution.purlin }, diagnostics: [...domain.diagnostics, ...connectionResolution.diagnostics] };
+      }
+      if (connectionResolution.status !== "success") {
+        return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context: { ...frameContext, purlin: purlinResolution.purlin }, diagnostics: [...domain.diagnostics, ...connectionResolution.diagnostics] };
+      }
+      legacyConnection = connectionResolution.connection;
+    }
+    const purlinContext = { ...frameContext, purlin: purlinResolution.purlin, legacyConnection };
     const [secondaryRules, boltsPlatesFittings] = await Promise.all([
       repository.loadSecondarySteelData(),
       repository.loadBoltsPlatesFittings(),
@@ -271,6 +303,7 @@ export async function calculateCore1(
         building_height_m: value.building_height_m,
         frame_step_m: frameResolution.frame.frame_step_m,
         horizontal_bracing_override: value.horizontal_bracing_override,
+        legacy_connection: legacyConnection,
       },
       context.climate,
       frameResolution.frame,

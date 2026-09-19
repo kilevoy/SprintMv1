@@ -5,6 +5,7 @@ import type { SecondarySteelResult } from "../secondary";
 import type { WindowGirtResult } from "../window";
 import type { OpeningMassResult } from "../opening";
 import type { LegacyClimateResult, LegacyFrameBranchResult } from "../legacy";
+import type { LegacyConnectionResolvedValue } from "../legacyConnection";
 
 export type Core1EngineStatus =
   | "success"
@@ -18,6 +19,7 @@ export type Core1EngineStatus =
 export type Core1EngineCode =
   | "LEGACY_NA"
   | "LEGACY_REF"
+  | "LEGACY_VALUE_ERROR"
   | "UNSUPPORTED_WINDOWS"
   | "UNKNOWN_CLIMATE_DATA"
   | "UNKNOWN_DOMAIN"
@@ -29,7 +31,7 @@ export type Core1EngineCode =
 export interface Core1EngineBase {
   status: Core1EngineStatus;
   diagnostics: Core1Diagnostic[];
-  context?: { climate: Core1ClimateResult; legacyClimate?: LegacyClimateResult | null; legacyFrameBranch?: LegacyFrameBranchResult | null; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult; windows?: WindowGirtResult | null; openings?: OpeningMassResult | null };
+  context?: { climate: Core1ClimateResult; legacyClimate?: LegacyClimateResult | null; legacyFrameBranch?: LegacyFrameBranchResult | null; legacyConnection?: LegacyConnectionResolvedValue | null; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult; windows?: WindowGirtResult | null; openings?: OpeningMassResult | null };
 }
 
 export interface Core1EngineSuccess extends Core1EngineBase {
@@ -39,7 +41,7 @@ export interface Core1EngineSuccess extends Core1EngineBase {
 
 export interface Core1EngineLegacyError extends Core1EngineBase {
   status: "legacy_error";
-  code: "LEGACY_NA" | "LEGACY_REF";
+  code: "LEGACY_NA" | "LEGACY_REF" | "LEGACY_VALUE_ERROR";
   result: null;
 }
 

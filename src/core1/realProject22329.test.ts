@@ -42,5 +42,18 @@ describe("real project 22329 source-mapped replay", () => {
     expect(result.context?.frame?.frame_step_m).toBe(6);
     expect(Math.ceil(project22329.geometry.building_length_m / result.context!.frame!.frame_step_m) + 1).toBe(6);
     expect(result.context?.frame?.beam_profile).toBe("ПГС300/20х80х2,5");
+    expect(result.context?.legacyConnection).toMatchObject({
+      activeBranch: "ROW14",
+      ridgeBeamBoltPattern: "8х2",
+      ridgeBeamBoltQuantity: 276,
+      eaveBeamBoltPattern: "9х2",
+      supportColumnBoltPattern: "7х2",
+      eaveColumnBoltPattern: "9х2",
+      fittingsWeightKg: 233,
+    });
+    expect(result.context?.legacyConnection?.trace.row14.scoreKgPerM2).toBe(result.context?.legacyConnection?.trace.row15.scoreKgPerM2);
+    expect(result.result.bolts?.map((bolt) => bolt.pattern)).toEqual(["8х2", "9х2", "7х2", "9х2"]);
+    expect(result.context?.legacyConnection?.ridgeBeamBoltQuantity).toBe(276);
+    expect(result.result.fittings_weight_kg).toBe(233);
   });
 });

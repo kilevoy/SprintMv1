@@ -49,6 +49,12 @@
 
 ## Latest run
 
+- Vitest: 168 passed across 17 test files, including generic connection parity for 22318, 22316, 22329 and compatibility routing for 22326.
+- TypeScript typecheck: passed.
+- Vite production build: passed; the larger bundle warning is caused by the versioned connection lookup dataset and is non-failing.
+- Static dataset integrity: 26 passed, including connection dataset statistics and source SHA validation.
+- `git diff --check`: passed.
+
 - Vitest: 144 passed across 13 test files; includes family-boundary mapping, 22326 literal-span routing, frame-length regression and 22318 source-parity assertions.
 - Purlin tie-break regression: equal-mass `1875/1900` candidates select `1900`; lower mass remains primary.
 - TypeScript typecheck: passed.
@@ -123,13 +129,13 @@
 
 ## Next regression gates: connection selector model
 
-1. Trace `project inputs → selector state → selected span row → D52/E52/D53/D54/D55/D57` for 22318, 22316, 22329, and compatibility control 22326.
-2. Preserve exact formula and cached-value provenance for `HZ18`, `RP18`, `KL18`, `WN18` and their lookup vectors.
-3. Demonstrate that the minimal selector contract reproduces all six connection outputs before production implementation.
-4. After implementation, assert connection parity independently from structural D69 parity.
+1. `[x]` Trace `project inputs → base/adjusted selector state → selected span row → D52/E52/D53/D54/D55/D57` for 22318, 22316, 22329, and compatibility control 22326.
+2. `[x]` Reconstruct shared formulas and preserve exact formula/value provenance for both candidate matrices.
+3. `[x]` Extract 599 candidate-specific lookup rows and retain the family-15 no-match plus family-21 numeric-pattern anomalies.
+4. `[x]` Assert generic connection parity independently from structural D69 parity for the three normative references.
 5. Keep `D48:E49` and `D56:E56` as proven static constants; reject universal-cache use of `D52:E52`, `D53:D55`, and `D57`.
 6. Classify 24 m before including it in the supported matrix. Preserve typed `#N/A` unless evidence proves another behavior.
 7. Mark each archive fixture as `FULL PARITY` or `EXPRESS VALIDATION`; result-only fixtures must not be promoted to formula-path oracles.
 8. Protect exact structural D69 references for 22318, 22316, and 22329 throughout connection work.
 
-Implementation gate: `LEGACY_CONNECTION_MODEL_COMPLETE`. Until that status is reached, no `LegacyConnectionResolver` production change is allowed.
+Implementation gate `LEGACY_CONNECTION_MODEL_COMPLETE` is reached for automatic 9–21 m. Next gates are the cross-family matrix, explicit anomaly diagnostics, manual-frame-step audit, and unchanged 24 m legacy-error behavior.

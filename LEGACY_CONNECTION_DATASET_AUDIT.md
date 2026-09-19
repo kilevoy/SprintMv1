@@ -1,5 +1,11 @@
 # Legacy connection lookup dataset audit
 
+> **Superseded gate (2026-09-18):** the extraction below captured only current
+> selected cells. The complete nested matrices are now extracted by
+> `tools/extract_legacy_connection_lookup.py`; see
+> `LEGACY_CONNECTION_MODEL_COMPLETION_AUDIT.md`. Generic automatic 9–21 m
+> implementation is now permitted.
+
 Status: extraction and characterization only. Production logic, `StructuralSummary`, `D69`, XLSX files, tests, `plans.md`, `status.md`, `test-plan.md`, `outputs/` and `tools/` were not changed.
 
 ## Provenance

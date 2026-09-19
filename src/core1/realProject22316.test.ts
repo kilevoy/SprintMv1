@@ -50,6 +50,17 @@ describe("real project 22316 source-mapped replay", () => {
       purlin_kg_per_m2: 6.172833333333334,
     });
     expect(result.context?.purlin?.purlin_weight_kg).toBeCloseTo(3174.6000000000004, 12);
+    expect(result.context?.legacyConnection).toMatchObject({
+      activeBranch: "ROW14",
+      ridgeBeamBoltPattern: "10х2",
+      ridgeBeamBoltQuantity: 308,
+      eaveBeamBoltPattern: "10х2",
+      supportColumnBoltPattern: "7х2",
+      eaveColumnBoltPattern: "10х2",
+      fittingsWeightKg: 264,
+    });
+    expect(result.result.bolts?.map((bolt) => bolt.pattern)).toEqual(["10х2", "10х2", "7х2", "10х2"]);
+    expect(result.result.fittings_weight_kg).toBe(264);
     // The source flag D26=есть adds one purlin line; this is an input mapping
     // boundary, not a reason to alter the generic purlin formula.
     expect(result.result.kg_per_m2).toBeCloseTo(28.922792592592597, 12);

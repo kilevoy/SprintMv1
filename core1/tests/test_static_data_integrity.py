@@ -137,3 +137,49 @@ def test_schemas_and_fixture_manifest_are_machine_readable():
     for fixture in fixture_manifest["fixtures"]:
         assert (CORE1_DIR / "fixtures" / fixture["input_file"]).is_file()
         assert (CORE1_DIR / "fixtures" / fixture["expected_file"]).is_file()
+
+
+def test_legacy_connection_lookup_dataset_contract():
+    path = CORE1_DIR / "data" / "legacy_connections" / "connection_lookup_rows.json"
+    dataset = json.loads(path.read_text(encoding="utf-8"))
+    assert dataset["schemaVersion"] == 1
+    assert dataset["classification"] == "LEGACY_CONNECTION_MODEL_COMPLETE"
+    assert dataset["source"]["sha256"] == DATA_MANIFEST["source_workbook_sha256"]
+    assert dataset["statistics"] == {
+        "rowCount": 599,
+        "row14Count": 299,
+        "row15Count": 300,
+        "sharedEqualKeys": 299,
+        "anomalyCount": 3,
+    }
+    rows = dataset["rows"]
+    keys = {
+        (row["designFamily"], row["candidate"], row["factor"], row["heightBandM"], row["branchKey"])
+        for row in rows
+    }
+    assert len(keys) == len(rows) == 599
+
+    expected = {
+        (15, "ROW14", 1.0, 4.8, "4/1"): (276, 238, "8х2", "9х2", "7х2", "10х2"),
+        (18, "ROW14", 0.8, 4.8, "4/1"): (308, 264, "10х2", "10х2", "7х2", "10х2"),
+        (12, "ROW14", 0.8, 4.8, "4/3"): (276, 233, "8х2", "9х2", "7х2", "9х2"),
+        (12, "ROW15", 0.8, 4.8, "3/2"): (260, 223, "8х2", "9х2", "6х2", "8х2"),
+    }
+    by_key = {
+        (row["designFamily"], row["candidate"], row["factor"], row["heightBandM"], row["branchKey"]): row
+        for row in rows
+    }
+    for key, values in expected.items():
+        row = by_key[key]
+        assert (
+            row["ridgeBeamBoltQuantity"],
+            row["fittingsWeightKg"],
+            row["ridgeBeamBoltPattern"],
+            row["eaveBeamBoltPattern"],
+            row["supportColumnBoltPattern"],
+            row["eaveColumnBoltPattern"],
+        ) == values
+
+    anomaly_classes = [item["classification"] for item in dataset["anomalies"]]
+    assert anomaly_classes.count("LEGACY_LOOKUP_NO_MATCH") == 1
+    assert anomaly_classes.count("LEGACY_NON_TEXT_BOLT_PATTERN") == 2

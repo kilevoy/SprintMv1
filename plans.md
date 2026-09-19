@@ -102,7 +102,7 @@ Progress is tracked by evidence-backed milestones, not by a percentage.
 
 - **M1 — Frame selection parity:** `PROVEN FOR REFERENCES`.
 - **M2 — Structural D69 parity:** `PROVEN` for 22318, 22316, and 22329.
-- **M3 — Connection/BOM parity:** `INCOMPLETE`.
+- **M3 — Connection/BOM parity:** `MODEL COMPLETE / REFERENCE PARITY PROVEN` for automatic 9–21 m; manual and 24 m remain outside the proven domain.
 - **M4 — Supported-domain regression matrix:** `PARTIAL`.
 - **M5 — Core1 frozen:** `NOT READY`.
 - **M6 — Core2 source parity:** `PARTIAL`.
@@ -110,22 +110,20 @@ Progress is tracked by evidence-backed milestones, not by a percentage.
 
 ### Critical path
 
-1. Synchronize the current checkpoint branch without committing `outputs/` or XLSX/PDF artifacts.
-2. Build the complete connection-selector dependency graph:
-   `project inputs → selector state → HZ18/RP18/KL18/WN18 → selected row → D52/E52/D53/D54/D55/D57`.
-3. Prove the minimal selector contract. Keep generic `LegacyConnectionResolver` blocked while project-scoped state is required.
-4. Implement and regression-test `LegacyConnectionReplayResolver` for 22318, 22316, 22329, and the 22326 compatibility control. Do not infer a generic resolver from replay snapshots.
-5. Classify the 24 m `#N/A` semantics before adding 24 m to the supported regression matrix.
-6. Expand validation using two evidence levels:
+1. Protect the corrected shared-formula proof and reproducible 599-row connection dataset; do not regress to project-scoped cached snapshots.
+2. Expand the automatic 9–21 m regression matrix across design families, factors, height bands and branch keys, including the two preserved lookup anomalies.
+3. Audit the manual frame-step selector separately; do not extrapolate automatic `Y2=1` semantics into that branch.
+4. Preserve 24 m connection `#N/A` as a typed legacy boundary until a different source is proven.
+5. Expand validation using two evidence levels:
    - `FULL PARITY`: source-selection workbook available; inputs, formulas, branches, and outputs can be replayed.
    - `EXPRESS VALIDATION`: result workbook only; observable profiles, masses, BOM, and totals can be checked, but the internal formula path is not proven.
-7. Audit only registry entries marked `PARTIAL` or `UNVERIFIED`; retain `PROVEN`, `LEGACY_ERROR`, and `OUT_OF_SCOPE` classifications.
-8. Freeze the Core1 → Core2 contract with `provenance`, `diagnostic_behavior`, `supported_domain`, `nullable`, and `fallback_allowed` metadata.
-9. Close Core2 external sources, preserve `*0` branches, then implement Core2.
-10. Track final validation independently as `STRUCTURAL_PARITY`, `CONNECTION_BOM_PARITY`, `CORE2_BOM_PARITY`, and `COMMERCIAL_PARITY`.
+6. Audit only registry entries marked `PARTIAL` or `UNVERIFIED`; retain `PROVEN`, `LEGACY_ERROR`, and `OUT_OF_SCOPE` classifications.
+7. Freeze the Core1 → Core2 contract with `provenance`, `diagnostic_behavior`, `supported_domain`, `nullable`, and `fallback_allowed` metadata.
+8. Close Core2 external sources, preserve `*0` branches, then implement Core2.
+9. Track final validation independently as `STRUCTURAL_PARITY`, `CONNECTION_BOM_PARITY`, `CORE2_BOM_PARITY`, and `COMMERCIAL_PARITY`.
 
 ### Cached connection data disposition
 
 - `D48:E49` and `D56:E56` in `bolts_plates_fittings.csv`: `PROVEN_STATIC`.
-- `D52:E52`, `D53:D55`, and `D57`: `DEPRECATED_PROJECT_CACHE` for canonical calculation; retained as source values for explicit historical replay snapshots.
+- `D52:E52`, `D53:D55`, and `D57`: `DEPRECATED_PROJECT_CACHE`; canonical automatic 9–21 m calculation uses `LegacyConnectionResolver` and the versioned full lookup matrix.
 - Do not delete or replace cached rows until the resolver passes the reference regression matrix.

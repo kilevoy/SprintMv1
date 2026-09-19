@@ -1,5 +1,10 @@
 # Minimal legacy connection snapshot audit
 
+> **Historical replay note (2026-09-18):** this snapshot contract remains valid
+> for replay/provenance, but it is no longer required for canonical automatic
+> 9–21 m calculation. The generic formula path is closed in
+> `LEGACY_CONNECTION_MODEL_COMPLETION_AUDIT.md`.
+
 Статус: read-only reverse engineering. Production TypeScript и XLSX не
 изменялись; commit/push не выполнялись.
 
