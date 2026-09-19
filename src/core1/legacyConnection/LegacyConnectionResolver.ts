@@ -1,6 +1,6 @@
 import lookupData from "../../../core1/data/legacy_connections/connection_lookup_rows.json";
 import { createCore1Diagnostic } from "../diagnostics";
-import { resolveDesignSpanFamily, selectFrame } from "../frame";
+import { resolveDesignSpanFamily, resolveLegacyFrameStep, selectFrame } from "../frame";
 import { LEGACY_CLIMATE_CLASSIFICATION, legacyApproximateMatch, resolveLegacyFrameBranch } from "../legacy";
 import { calculatePurlin } from "../purlin";
 import type { Core1Diagnostic } from "../types";
@@ -127,12 +127,24 @@ export function resolveLegacyConnection(
     return failure("no_match", "LOOKUP_NO_MATCH", "Не удалось сформировать adjusted W7 connection branch.", { adjusted_snow_region: adjustedSnowRegion, adjusted_factor: adjustedFactorRaw, wind_region: input.baseLegacyClimate.windRegion });
   }
 
+  const row15StepResolution = resolveLegacyFrameStep({
+    designSpanFamily: designFamily,
+    buildingHeightM: input.building_height_m,
+    responsibilityFactor: input.responsibility_factor,
+    legacySnowFactor: row15Factor,
+    legacyFrameBranch: row15Branch.mappedBranchKey,
+  }, datasets.frame);
+  if (row15StepResolution.status !== "success") {
+    return failure("no_match", "LOOKUP_NO_MATCH", "Не удалось разрешить automatic D8 для ROW15 candidate.", { diagnostics: row15StepResolution.diagnostics });
+  }
+
   const row15FrameResolution = selectFrame({
     span_m: input.span_m,
     building_length_m: input.building_length_m,
     building_height_m: input.building_height_m,
     responsibility_factor: input.responsibility_factor,
     frame_step_override_m: null,
+    automatic_frame_step_m: row15StepResolution.automaticFrameStepM,
     climate: input.climate,
     legacy_frame_branch: row15Branch.mappedBranchKey,
   }, datasets.frame);

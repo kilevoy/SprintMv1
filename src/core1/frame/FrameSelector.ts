@@ -6,12 +6,6 @@ import { resolveDesignSpanFamily } from "./designSpanFamily";
 
 const FRAME_STEEL = "М.п.350";
 const FRAME_TIE_UNIT_MASS_KG: Readonly<Record<9 | 12 | 15 | 18 | 21, number>> = { 9: 115, 12: 148, 15: 181, 18: 224, 21: 290 };
-// Proven from the вывод!D8 -> подбор!AA14/AA15 -> подбор!I2:I7/I9:I14
-// family lookup in the source-selection workbooks. This is the automatic
-// branch for 9–21 m; 24 m is selected from its local span sheet because the
-// recalculated legacy workbook has no common automatic-step scalar. A non-zero
-// frame_step_override_m remains an explicit legacy override.
-const AUTOMATIC_FRAME_STEP_M: Readonly<Record<9 | 12 | 15 | 18 | 21 | 24, number | null>> = { 9: 6, 12: 6, 15: 4, 18: 4.5, 21: 4, 24: null };
 const HEIGHT_BANDS = [
   { max: 3.8, datasetHeight: 3.6 },
   { max: 5, datasetHeight: 4.8 },
@@ -278,7 +272,7 @@ export function selectFrame(input: FrameSelectorInput, dataset: FrameDatasetView
   if (!band) return { status: "unknown_domain", frame: null, diagnostics: [diagnostic("UNKNOWN_FRAME_DOMAIN", "unsupported", "Высота выходит за доказанные высотные таблицы FrameSelector.", { building_height_m: input.building_height_m })] };
 
   const requestedStep = input.frame_step_override_m ?? null;
-  const automaticStep = requestedStep === null ? AUTOMATIC_FRAME_STEP_M[designSpanFamily] ?? null : null;
+  const automaticStep = requestedStep === null ? input.automatic_frame_step_m ?? null : null;
   const block = selectBlock(dataset.records, input, branch, band.datasetHeight, automaticStep);
   if (!block) return { status: "no_match", frame: null, diagnostics: [diagnostic("FRAME_NO_MATCH", "unsupported", "Для сочетания ветки климата, высоты и ответственности нет строки подбора рамы.", { branch, dataset_height_m: band.datasetHeight, responsibility_factor: input.responsibility_factor })] };
   const base = columnNumber(block.start);

@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { BrowserCore1DataRepository } from "./data";
 import type { Core1DataSource } from "./data";
-import { selectFrame } from "./frame";
+import { resolveLegacyFrameStep, selectFrame } from "./frame";
 import type { Core1ClimateResult } from "./types";
 
 class TestDataSource implements Core1DataSource {
@@ -34,6 +34,26 @@ async function frame(span: 9 | 12 | 15 | 18 | 21 | 24) {
 }
 
 describe("FrameSelector", () => {
+  it("reproduces the controlled legacy D8 matrix for Роза at height 3 m and factor 0.8", async () => {
+    const expected = new Map([[9, 6], [12, 6], [15, 6], [18, 5], [21, 4], [24, 4.3]] as const);
+    for (const [span, step] of expected) {
+      const result = resolveLegacyFrameStep({ designSpanFamily: span, buildingHeightM: 3, responsibilityFactor: 0.8, legacySnowFactor: 1, legacyFrameBranch: "3/2" }, await frame(span));
+      expect(result.status).toBe("success");
+      if (result.status === "success") expect(result.automaticFrameStepM).toBe(step);
+    }
+  });
+
+  const frameCountControls = [
+    [6, 18, 4], [6, 20, 5], [6, 24, 5], [6, 25.7, 6], [6, 26, 6], [6, 30, 6],
+    [5, 18, 5], [5, 20, 5], [5, 24, 6], [5, 25.7, 7], [5, 26, 7], [5, 30, 7],
+    [4, 18, 6], [4, 20, 6], [4, 24, 7], [4, 25.7, 8], [4, 26, 8], [4, 30, 9],
+  ] as const;
+  for (const [step, length, expectedFrames] of frameCountControls) {
+    it(`uses CEILING(length / D8) + 1 for D8=${step}m and length=${length}m`, () => {
+      expect(Math.ceil(length / step) + 1).toBe(expectedFrames);
+    });
+  }
+
   it("matches every proven 12 m baseline frame field", async () => {
     const result = selectFrame({ span_m: 12, building_length_m: 18, building_height_m: 3, responsibility_factor: 0.8, frame_step_override_m: null, climate }, await frame(12));
     expect(result.status).toBe("success");
@@ -127,8 +147,8 @@ describe("FrameSelector", () => {
   it("recomputes the length-dependent tube mass for a 15 m frame row", async () => {
     const projectClimate: Core1ClimateResult = { ...climate, snow_region: "IV", wind_region: "I" };
     const dataset = await frame(15);
-    const length18 = selectFrame({ span_m: 15, building_length_m: 18, building_height_m: 5, responsibility_factor: 1.0, frame_step_override_m: null, climate: projectClimate }, dataset);
-    const length24 = selectFrame({ span_m: 15, building_length_m: 24, building_height_m: 5, responsibility_factor: 1.0, frame_step_override_m: null, climate: projectClimate }, dataset);
+    const length18 = selectFrame({ span_m: 15, building_length_m: 18, building_height_m: 5, responsibility_factor: 1.0, frame_step_override_m: null, automatic_frame_step_m: 4, climate: projectClimate }, dataset);
+    const length24 = selectFrame({ span_m: 15, building_length_m: 24, building_height_m: 5, responsibility_factor: 1.0, frame_step_override_m: null, automatic_frame_step_m: 4, climate: projectClimate }, dataset);
     expect(length18.status).toBe("success");
     expect(length24.status).toBe("success");
     if (length18.status !== "success" || length24.status !== "success") return;
@@ -146,6 +166,7 @@ describe("FrameSelector", () => {
       building_height_m: 5,
       responsibility_factor: 1.0,
       frame_step_override_m: null,
+      automatic_frame_step_m: 4.5,
       climate: { ...climate, snow_region: "IV", wind_region: "I" },
     }, await frame(18));
     expect(result.status).toBe("success");

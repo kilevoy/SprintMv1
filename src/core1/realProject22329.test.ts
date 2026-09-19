@@ -39,6 +39,7 @@ describe("real project 22329 source-mapped replay", () => {
     expect(result.context?.climate).toMatchObject({ snow_region: "III", snow_load: 1.5, wind_region: "II", wind_load: 0.3 });
     expect(result.context?.legacyClimate).toMatchObject({ lookupKey: 1.6, jRegion: "IV", kFactor: 0.8, lRegion: "III", mFactor: 0.8, activeSnowRegion: "IV", windRegion: "II" });
     expect(result.context?.legacyFrameBranch).toMatchObject({ rawBranchKey: "4/2", mappedBranchKey: "4/3" });
+    expect(result.context?.legacyFrameStep).toMatchObject({ automaticFrameStepM: 6 });
     expect(result.context?.frame?.frame_step_m).toBe(6);
     expect(Math.ceil(project22329.geometry.building_length_m / result.context!.frame!.frame_step_m) + 1).toBe(6);
     expect(result.context?.frame?.beam_profile).toBe("ПГС300/20х80х2,5");

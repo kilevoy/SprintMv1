@@ -170,6 +170,12 @@ describe("LegacyConnectionResolver", () => {
     expect(result.connection).toMatchObject(output);
   });
 
+  it("exposes the generic D8 result for the compatibility control", async () => {
+    const engine = await calculateCore1(input("Увильды", 10.4, 25.7, 4, "нет"), repository);
+    expect(engine.status).toBe("success");
+    if (engine.status === "success") expect(engine.context?.legacyFrameStep?.automaticFrameStepM).toBe(6);
+  });
+
   it("preserves ROW14 on exact E8/E9 equality", async () => {
     const result = await resolveGeneric(input("Увильды", 12, 26, 4, "нет"));
     expect(result.status).toBe("success");

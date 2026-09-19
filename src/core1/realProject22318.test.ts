@@ -49,6 +49,7 @@ describe("real project 22318 geometry-domain regression", () => {
       column_profile: "ПГС300/20х80х2",
       column_utilization: 79,
     });
+    expect(result.context?.legacyFrameStep).toMatchObject({ automaticFrameStepM: 4 });
     expect(Math.ceil(project22318.geometry.building_length_m / result.context!.frame!.frame_step_m) + 1).toBe(7);
     expect(result.context?.purlin).toMatchObject({
       purlin_profile: "2ПС 195х45х1,5",

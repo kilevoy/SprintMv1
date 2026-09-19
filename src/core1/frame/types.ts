@@ -15,6 +15,8 @@ export interface FrameSelectorInput {
   climate: Core1ClimateResult;
   /** Proven legacy AJ11/V7 branch. Canonical climate remains authoritative for climate outputs. */
   legacy_frame_branch?: string | null;
+  /** Resolved вывод!D8 for automatic legacy city-lookup mode. */
+  automatic_frame_step_m?: number | null;
 }
 
 export interface FrameSelectionTrace {

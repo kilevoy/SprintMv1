@@ -3,8 +3,8 @@ import { BrowserCore1DataRepository, BrowserDataSource } from "../data";
 import { resolveClimate } from "../climate";
 import { deriveLegacyClimate, legacyFrameBranchDiagnostic, resolveLegacyFrameBranch } from "../legacy";
 import { resolveLegacyConnection } from "../legacyConnection";
-import { selectFrame } from "../frame";
-import { resolveDesignSpanFamily } from "../frame/designSpanFamily";
+import { resolveDesignSpanFamily, resolveLegacyFrameStep, selectFrame } from "../frame";
+import type { FrameResult, LegacyFrameStepResult } from "../frame";
 import { calculatePurlin } from "../purlin";
 import { calculateSecondarySteel } from "../secondary";
 import { calculateWindowGirts } from "../window";
@@ -15,7 +15,6 @@ import { resolveClimateInput, resolveWindowsInput, validateCore1InputDomain } fr
 import type { Core1DataRepository } from "../data";
 import type { ClimateDatasetView } from "../climate";
 import type { Core1ClimateResult, Core1Input } from "../types";
-import type { FrameResult } from "../frame";
 import type { LegacyClimateResult, LegacyFrameBranchResult } from "../legacy";
 import type { LegacyConnectionResolvedValue } from "../legacyConnection";
 import type { PurlinDatasetBundle, PurlinResultValue } from "../purlin";
@@ -163,7 +162,7 @@ export async function calculateCore1(
       return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context: { ...context, legacyClimate }, diagnostics: [...domain.diagnostics, ...legacyClimate.diagnostics, diagnostic] };
     }
   }
-  let finalContext: { climate: Core1ClimateResult; legacyClimate?: LegacyClimateResult | null; legacyFrameBranch?: LegacyFrameBranchResult | null; legacyConnection?: LegacyConnectionResolvedValue | null; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult; windows?: WindowGirtResult | null; openings?: import("../opening").OpeningMassResult | null } = { ...context, legacyClimate, legacyFrameBranch, legacyConnection: null };
+  let finalContext: { climate: Core1ClimateResult; legacyClimate?: LegacyClimateResult | null; legacyFrameBranch?: LegacyFrameBranchResult | null; legacyFrameStep?: LegacyFrameStepResult | null; legacyConnection?: LegacyConnectionResolvedValue | null; frame?: FrameResult; purlin?: PurlinResultValue; secondarySteel?: SecondarySteelResult; windows?: WindowGirtResult | null; openings?: import("../opening").OpeningMassResult | null } = { ...context, legacyClimate, legacyFrameBranch, legacyFrameStep: null, legacyConnection: null };
 
   try {
     if (domain.state === "SUPPORTED_WITH_LEGACY_ANOMALY") {
@@ -188,6 +187,20 @@ export async function calculateCore1(
     }
 
     const frameDataset = await repository.loadFrameDataset(designSpanFamily);
+    let legacyFrameStep: LegacyFrameStepResult | null = null;
+    if ((value.frame_step_override_m === null || value.frame_step_override_m === undefined) && climateInput.mode === "CITY_LOOKUP" && legacyClimate && legacyFrameBranch) {
+      const frameStepResolution = resolveLegacyFrameStep({
+        designSpanFamily,
+        buildingHeightM: value.building_height_m,
+        responsibilityFactor: value.responsibility_factor,
+        legacySnowFactor: Number(legacyClimate.activeSnowFactor),
+        legacyFrameBranch: legacyFrameBranch.mappedBranchKey,
+      }, frameDataset);
+      if (frameStepResolution.status !== "success") {
+        return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context, diagnostics: [...domain.diagnostics, ...frameStepResolution.diagnostics] };
+      }
+      legacyFrameStep = frameStepResolution;
+    }
     const frameResolution = selectFrame(
       {
         span_m: value.span_m,
@@ -197,6 +210,7 @@ export async function calculateCore1(
         frame_step_override_m: value.frame_step_override_m ?? null,
         climate: context.climate,
         legacy_frame_branch: legacyFrameBranch?.mappedBranchKey ?? null,
+        automatic_frame_step_m: legacyFrameStep?.automaticFrameStepM ?? null,
       },
       frameDataset,
     );
@@ -215,7 +229,7 @@ export async function calculateCore1(
     if (frameResolution.status !== "success" || !frameResolution.frame) {
       return { status: "unsupported", code: "UNSUPPORTED_FOR_PARITY", result: null, context, diagnostics: [...domain.diagnostics, ...frameResolution.diagnostics] };
     }
-    const frameContext = { ...finalContext, frame: frameResolution.frame };
+    const frameContext = { ...finalContext, legacyFrameStep, frame: frameResolution.frame };
     let purlinBundle: PurlinDatasetBundle;
     try {
       const [selectionRules, profileCatalogue, calculationAxis, calculationConstants, literals, steelGrades, roofProperties, deckProperties] = await Promise.all([

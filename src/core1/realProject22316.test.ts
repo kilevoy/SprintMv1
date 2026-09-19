@@ -42,6 +42,7 @@ describe("real project 22316 source-mapped replay", () => {
       beam_profile: "ПГС300/20х80х3",
       column_profile: "ПГС300/20х80х2,5",
     });
+    expect(result.context?.legacyFrameStep).toMatchObject({ automaticFrameStepM: 4.5 });
     expect(Math.ceil(project22316.geometry.building_length_m / result.context!.frame!.frame_step_m) + 1).toBe(8);
     expect(result.context?.purlin).toMatchObject({
       purlin_profile: "2ПС 200х65х1,5",
