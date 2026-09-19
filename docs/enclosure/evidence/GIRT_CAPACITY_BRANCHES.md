@@ -1,33 +1,31 @@
 # Girt capacity branches
 
-`STATUS = PARTIAL / NUMERIC STRUCTURE ONLY`
+`STATUS = PROVEN for observed numeric workbook formulas; semantic naming remains UNKNOWN`
 
-## Observed structure
+## Authoritative formulas
 
-The imported artifact has multiple section-type branches (`]`, `[]`, `][`,
-`[-]`) and preserves them as neutral `capacityBranch` values. The material
-grade is preserved independently. This proves that a candidate cannot be
-represented only by display profile, mass and one scalar moment.
-
-## Not proven by available artifact
-
-The research branch does not provide the source workbook formulas or an
-independent extracted raw-moment column. Therefore the following claims are
-not promoted to proven rules:
-
-- exactly 316 capacity pairs;
-- `rawMoment upper / rawMoment lower = 1.1`;
-- `PredMoment = rawMoment × defaultUtilization × materialCoefficient`;
-- engineering meaning of any section-type branch.
-
-The research production code describes these hypotheses and uses reported
-`пред_момент`, but production code alone is not accepted as source proof for
-this import.
-
-## Classification
+The primary workbook confirms:
 
 ```text
-CAPACITY_BRANCH_NUMERIC_RULE = PARTIAL
-CAPACITY_BRANCH_ENGINEERING_MEANING = UNKNOWN
-AUTO_CAPACITY_BRANCH_SELECTION = IMPLEMENTATION_BLOCKED
+несушки!N2 = 0.55
+несушки!N4 = 1.1
+несушки!Q123 = Q9*$N$4
+несушки!Q159 = Q45*$N$4
+несушки!R9 = Q9*IF(Лист1!$B$32=0,'Расчет Угловая'!O11,Лист1!$B$32)
+             *IF(K9=1,$N$2,1)
+```
+
+The workbook therefore proves the observed 0.55 thickness-1 factor and the
+1.1 relationship used by the relevant MP390 rows. The raw moment expressions
+are stored in `несушки!Q`; predicted moment is `R`.
+
+The neutral labels `sectionType`, `material`, and source row/block must be
+preserved. The workbook does not prove that a future production field should
+be named `capacityBranch`, so engineering branch semantics remain `UNKNOWN`.
+
+```text
+GIRT_RAW_MOMENT_RULE = PROVEN for stored Q expressions
+GIRT_CAPACITY_BRANCH_NUMERIC_RULE = PROVEN for observed formulas
+GIRT_CAPACITY_BRANCH_SEMANTICS = UNKNOWN
+AUTO_CAPACITY_BRANCH_SELECTION = BLOCKED
 ```

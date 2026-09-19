@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.1.0",
+  "runtime_imported": false,
+  "workbook": "Калькулятор ограждайки v1.5.xlsx",
+  "workbook_sha256": "4a9343a1e3149954dec0f91d5398528f18016a8423ec204ce2b92a59f612deaf",
+  "expected_values_are": "direct_formula_reconstruction_without modifying source workbook",
+  "fixtures": [
+    {
+      "id": "corner-single-145-1_5",
+      "zone": "Угловая",
+      "section_type": "]",
+      "input": {"wallHeight_m": 9.3, "zoneLength_m": 12.0, "girtStep_m": 1.37, "structuralPostStep_m": 6.0, "profile": "]ПП 145x45x1,5", "massPerMeter_kg": 2.6716},
+      "expected": {"rows": 8, "profileLength_m": 96.0, "profileMass_kg": 256.4736, "bracketCount": 16.0, "bracketUnitMass_kg": 0.75, "bracketMass_kg": 12.0, "extraMembers": "not included in base replay"},
+      "provenance": {"source": "Калькулятор ограждайки v1.5.xlsx", "sheet": "Лист1; несушки", "cells_or_rows": "Лист1!B12,B13,E24,D49,F49:G49,H49:I49,K49; несушки!I9,P9,S9,T9,U9", "formula_status": "LEGACY_PROVEN"}
+    },
+    {
+      "id": "typical-single-145-1_5",
+      "zone": "Рядовая",
+      "section_type": "]",
+      "input": {"wallHeight_m": 9.3, "zoneLength_m": 12.0, "girtStep_m": 1.38, "structuralPostStep_m": 6.0, "profile": "]ПП 145x45x1,5", "massPerMeter_kg": 2.6716},
+      "expected": {"rows": 8, "profileLength_m": 96.0, "profileMass_kg": 256.4736, "bracketCount": 16.0, "bracketUnitMass_kg": 0.75, "bracketMass_kg": 12.0, "extraMembers": "not included in base replay"},
+      "provenance": {"source": "Калькулятор ограждайки v1.5.xlsx", "sheet": "Лист1; несушки", "cells_or_rows": "Лист1!B12,B13,E29,D50,F50:G50,H50:I50,K50; несушки!I9,P9,S9,T9,U9", "formula_status": "LEGACY_PROVEN"}
+    },
+    {
+      "id": "corner-paired-145-1_5",
+      "zone": "Угловая",
+      "section_type": "[]",
+      "input": {"wallHeight_m": 9.3, "zoneLength_m": 12.0, "girtStep_m": 1.37, "structuralPostStep_m": 6.0, "profile": "[]ПП 145x45x1,5", "massPerMeter_kg": 5.3432},
+      "expected": {"rows": 7, "profileLength_m": 84.0, "profileMass_kg": 448.8288, "bracketCount": 14.0, "bracketUnitMass_kg": 1.5, "bracketMass_kg": 21.0, "extraMembers": "not included in base replay"},
+      "provenance": {"source": "Калькулятор ограждайки v1.5.xlsx", "sheet": "Лист1; несушки", "cells_or_rows": "Лист1!F49:G49:H49:I49:K49; несушки!I45,P45,S45,T45,U45", "formula_status": "LEGACY_PROVEN"}
+    },
+    {
+      "id": "typical-composite-minus-145-1_5",
+      "zone": "Рядовая",
+      "section_type": "[-]",
+      "input": {"wallHeight_m": 9.3, "zoneLength_m": 12.0, "girtStep_m": 1.38, "structuralPostStep_m": 6.0, "profile": "[-]ПП 145x45x1,5", "massPerMeter_kg": 7.3285},
+      "expected": {"rows": 7, "profileLength_m": 84.0, "profileMass_kg": 615.594, "bracketCount": 14.0, "bracketUnitMass_kg": 1.5, "bracketMass_kg": 21.0, "extraMembers": "section mass includes the source T499 assembly term; not a separate wall-length row"},
+      "provenance": {"source": "Калькулятор ограждайки v1.5.xlsx", "sheet": "Лист1; несушки", "cells_or_rows": "Лист1!F50:G50:H50:I50:K50; несушки!I499,P499,S499,T499,U499", "formula_status": "LEGACY_PROVEN"}
+    }
+  ]
+}

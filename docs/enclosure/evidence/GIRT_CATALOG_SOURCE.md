@@ -1,6 +1,6 @@
 # Girt catalog source evidence
 
-`STATUS = PARTIAL`
+`STATUS = PROVEN for catalog fields and ordering; runtime import remains blocked`
 
 ## Source
 
@@ -8,37 +8,31 @@
 - branch: `claude/start-session-l3r43f`
 - commit: `7920b45979ed25e608310be6996ee63dfe680a5a`
 - artifact: `src/data/girtBearingCatalog.json`
-- declared source workbook: `Калькулятор ограждайки v1.5.xlsx`
-- declared source range: `A1:U636`
+- declared source workbook/range: `Калькулятор ограждайки v1.5.xlsx`, `A1:U636`
 
-The artifact contains **632 ordered rows**. It is imported into
-`src/enclosure/evidence-data/girt-catalog-observed.json` plus eight ordered
-chunk files for evidence review
-only. It is not imported by EnclosureCore runtime.
-
-## Observed fields
-
-The artifact preserves profile, family/view, section type, material grade,
-thickness, profile height, default utilization coefficient, reported predicted
-moment, profile/section mass, node assembly mass, insulation thickness and the
-raw `раскреп` flag.
-
-It does not contain explicit `rawMoment`, material coefficient, original
-workbook row number, or a field explicitly named `Без стоек`. Those fields are
-preserved as `null` in the normalized evidence data rather than inferred.
-
-## Counts observed
+The authoritative workbook contains the full `несушки` catalog. The source
+columns are:
 
 ```text
-rows = 632
-section-type values = ] / [] / ][ / [-]
-material grades = МП220 / МП350 / МП390
-views = ПП / ТПП / ТПС / ПС / ТПГС / ПГССигма
-raw раскреп values = true / false
+I type of section
+J раскреп
+K thickness
+L profile height
+M default utilization coefficient
+N material
+O insulation thickness
+P profile
+Q raw moment expression
+R Pred M
+S mass of 1 m profile
+T mass of 1 m section
+U mass of node assemblies
 ```
 
-## Implementation gate
+The evidence dataset preserves 632 ordered rows and the source distinction
+between profile mass and section mass. For `[]` and `][`, `T` is observed as
+`S*2`; for `[-]`, `T` contains an additional source assembly term. A second
+unconditional `×2` is therefore prohibited.
 
-The catalog data is safe to use as a source-backed candidate dataset only
-after the missing source-row semantics and formula provenance are closed.
-The normalized artifact is evidence, not a runtime selector.
+Runtime selectors must preserve material grade, section type, and source row
+provenance. The evidence JSON remains non-runtime.
