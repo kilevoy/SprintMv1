@@ -2,10 +2,16 @@ import type { Core1ClimateResult } from "../core1/types";
 import type { ProjectClimate, ProjectInput, ProjectOpening } from "../project/types";
 import type { EnclosureDiagnostic } from "./diagnostics";
 import type { EnclosureProvenance, EnclosureEvidenceStatus } from "./provenance";
+import type { ManualWallGirtReplayInput, ManualWallGirtZoneResult } from "./manualWallGirtReplay";
 
 export type EnclosureOrientation = "SIDE" | "END";
 export type EnclosureComponent = "MAIN_FRAME_COLUMN" | "WALL_GIRT" | "WALL_STUD" | "FACADE_POST" | "OPENING_JAMB" | "SHEET" | "BRACKET" | "FASTENER" | "TRIM";
 export type EnclosureSelectionStatus = EnclosureEvidenceStatus | "NOT_APPLICABLE";
+
+export interface ManualWallGirtConfiguration {
+  mode: "MANUAL" | "AUTO";
+  zones: ManualWallGirtReplayInput[];
+}
 
 export interface ColdEnclosureInput {
   geometry: {
@@ -34,6 +40,7 @@ export interface ColdEnclosureInput {
     status: "AUTO" | "UNKNOWN";
   };
   responsibility: ProjectInput["geometry"]["responsibility_factor"];
+  wallGirts?: ManualWallGirtConfiguration;
   enclosureOverrides?: Record<string, unknown>;
 }
 
@@ -68,7 +75,13 @@ export interface EnclosureSectionResult {
   provenance: EnclosureProvenance[];
 }
 
-export type WallGirtResult = EnclosureSectionResult & { kind: "WALL_GIRT"; sideWalls: EnclosureLineItem[]; endWalls: EnclosureLineItem[] };
+export type WallGirtResult = EnclosureSectionResult & {
+  kind: "WALL_GIRT";
+  sideWalls: EnclosureLineItem[];
+  endWalls: EnclosureLineItem[];
+  manualZones: ManualWallGirtZoneResult[];
+  knownMass_kg: number;
+};
 export type WallStudResult = EnclosureSectionResult & { kind: "WALL_STUD" };
 export type FacadePostResult = EnclosureSectionResult & { kind: "FACADE_POST" };
 export type OpeningFramingResult = EnclosureSectionResult & { kind: "OPENING_FRAMING" };
@@ -109,4 +122,3 @@ export interface ColdEnclosureFixture {
   expected: Record<string, unknown>;
   evidenceLevel: EnclosureFixtureClass;
 }
-

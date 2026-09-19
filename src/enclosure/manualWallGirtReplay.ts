@@ -49,6 +49,15 @@ export interface ManualWallGirtReplayResult {
   diagnostics: EnclosureDiagnostic[];
 }
 
+const SOURCE_PROVENANCE: EnclosureProvenance = {
+  status: "LEGACY_PROVEN",
+  sourceWorkbook: "Калькулятор ограждайки v1.5.xlsx",
+  sourceSheet: "Лист1; несушки",
+  note: "Ограниченный manual replay доказанных формул стеновых ригелей и кронштейнов.",
+};
+
+const SUPPORTED_SECTION_TYPES: readonly ManualWallGirtSectionType[] = ["]", "[]", "][", "[-]"];
+
 function isPairedOrComposite(sectionType: ManualWallGirtSectionType): boolean {
   return sectionType === "[]" || sectionType === "][" || sectionType === "[-]";
 }
@@ -76,25 +85,43 @@ export function replayManualWallGirt(input: ManualWallGirtReplayInput): ManualWa
     return {
       status: "UNSUPPORTED",
       zone: null,
-      diagnostics: [enclosureDiagnostic("ENCLOSURE_PROFILE_SELECTION_NOT_SUPPORTED", "Автоматический выбор профиля не входит в ручной replay.", "WALL_GIRT")],
+      diagnostics: [enclosureDiagnostic("ENCLOSURE_AUTO_GIRT_SELECTION_NOT_IMPLEMENTED", "Автоматический выбор профиля не входит в ручной replay.", "WALL_GIRT")],
     };
   }
   if ((input.openingCount ?? 0) !== 0) {
     return {
       status: "UNSUPPORTED",
       zone: null,
-      diagnostics: [enclosureDiagnostic("ENCLOSURE_OPENINGS_NOT_SUPPORTED", "Replay допускает только gross wall zone без проёмов.", "WALL_GIRT", { openingCount: input.openingCount })],
+      diagnostics: [enclosureDiagnostic("ENCLOSURE_OPENINGS_UNSUPPORTED", "Replay допускает только gross wall zone без проёмов.", "WALL_GIRT", { openingCount: input.openingCount })],
     };
   }
   if (input.plusStands === true) {
     return {
       status: "UNSUPPORTED",
       zone: null,
-      diagnostics: [enclosureDiagnostic("ENCLOSURE_PLUS_STUDS_NOT_SUPPORTED", "Правило +стойки не входит в ограниченный manual replay.", "WALL_GIRT")],
+      diagnostics: [enclosureDiagnostic("ENCLOSURE_PLUS_STUDS_UNSUPPORTED", "Правило +стойки не входит в ограниченный manual replay.", "WALL_GIRT")],
     };
   }
-  if (!Number.isFinite(input.wallHeight_m) || input.wallHeight_m <= 0 || !Number.isFinite(input.zoneLength_m) || input.zoneLength_m <= 0 || !Number.isFinite(input.girtStep_m) || input.girtStep_m <= 0 || !Number.isFinite(input.structuralPostStep_m) || input.structuralPostStep_m <= 0 || !Number.isFinite(input.profile.sectionMass_kg_m) || input.profile.sectionMass_kg_m < 0 || input.profile.profileId.trim() === "") {
-    return invalid("Manual wall-girt replay requires positive geometry/steps and an explicit profile with non-negative section mass.");
+  if (!SUPPORTED_SECTION_TYPES.includes(input.sectionType)) {
+    return {
+      status: "INVALID",
+      zone: null,
+      diagnostics: [enclosureDiagnostic("ENCLOSURE_SECTION_TYPE_UNSUPPORTED", "Тип сечения отсутствует в доказанном manual replay.", "WALL_GIRT", { sectionType: input.sectionType })],
+    };
+  }
+  if (input.profile.profileId.trim() === "") {
+    return {
+      status: "INVALID",
+      zone: null,
+      diagnostics: [enclosureDiagnostic("ENCLOSURE_PROFILE_NOT_FOUND", "Manual replay требует явно заданный профиль.", "WALL_GIRT")],
+    };
+  }
+  if (!Number.isFinite(input.wallHeight_m) || input.wallHeight_m <= 0 || !Number.isFinite(input.zoneLength_m) || input.zoneLength_m <= 0 || !Number.isFinite(input.girtStep_m) || input.girtStep_m <= 0 || !Number.isFinite(input.structuralPostStep_m) || input.structuralPostStep_m <= 0 || !Number.isFinite(input.profile.sectionMass_kg_m) || input.profile.sectionMass_kg_m < 0) {
+    return {
+      status: "INVALID",
+      zone: null,
+      diagnostics: [enclosureDiagnostic("ENCLOSURE_INVALID_MANUAL_GIRT_INPUT", "Manual wall-girt replay requires positive geometry/steps and a non-negative section mass.", "WALL_GIRT")],
+    };
   }
 
   // Лист1!F49/F50:
@@ -109,7 +136,7 @@ export function replayManualWallGirt(input: ManualWallGirtReplayInput): ManualWa
   const profileLength_m = rows * input.zoneLength_m;
   const profileMass_kg = profileLength_m * input.profile.sectionMass_kg_m;
   const bracketMass_kg = bracketCount * bracketUnitMass_kg;
-  const provenance = [...(input.profile.provenance ?? [])];
+  const provenance = input.profile.provenance?.length ? [...input.profile.provenance] : [SOURCE_PROVENANCE];
 
   return {
     status: "PROVEN",

@@ -33,9 +33,9 @@ describe("manual wall-girt replay", () => {
   });
 
   it.each([
-    ["openings", { openingCount: 1 }, "ENCLOSURE_OPENINGS_NOT_SUPPORTED"],
-    ["plus studs", { plusStands: true }, "ENCLOSURE_PLUS_STUDS_NOT_SUPPORTED"],
-    ["automatic selection", { selectionMode: "AUTO" }, "ENCLOSURE_PROFILE_SELECTION_NOT_SUPPORTED"],
+    ["openings", { openingCount: 1 }, "ENCLOSURE_OPENINGS_UNSUPPORTED"],
+    ["plus studs", { plusStands: true }, "ENCLOSURE_PLUS_STUDS_UNSUPPORTED"],
+    ["automatic selection", { selectionMode: "AUTO" }, "ENCLOSURE_AUTO_GIRT_SELECTION_NOT_IMPLEMENTED"],
   ] as const)("rejects unsupported %s branches", (_label, overrides, code) => {
     const result = replay("]", overrides);
     expect(result.status).toBe("UNSUPPORTED");
@@ -46,6 +46,6 @@ describe("manual wall-girt replay", () => {
   it("does not fabricate a result for invalid dimensions", () => {
     const result = replay("]", { girtStep_m: 0 });
     expect(result.status).toBe("INVALID");
-    expect(result.diagnostics[0]?.code).toBe("ENCLOSURE_INPUT_INVALID");
+    expect(result.diagnostics[0]?.code).toBe("ENCLOSURE_INVALID_MANUAL_GIRT_INPUT");
   });
 });

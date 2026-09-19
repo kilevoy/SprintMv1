@@ -1,6 +1,8 @@
 import { enclosureDiagnostic, type EnclosureDiagnostic } from "./diagnostics";
+import { replayManualWallGirt } from "./manualWallGirtReplay";
 import type { EnclosureProvenance } from "./provenance";
 import type { ColdEnclosureInput, ColdEnclosureResult, EnclosureSectionResult, EnclosureStructuralContext, WallGirtResult } from "./types";
+import type { ManualWallGirtZoneResult } from "./manualWallGirtReplay";
 
 const UNKNOWN_PROVENANCE: EnclosureProvenance = { status: "UNKNOWN", note: "Правило холодного ограждения ещё не импортировано из доказанного источника." };
 
@@ -9,20 +11,61 @@ function section(kind: string, diagnostic: EnclosureDiagnostic): EnclosureSectio
 }
 
 function emptyWallGirts(diagnostic: EnclosureDiagnostic): WallGirtResult {
-  return { kind: "WALL_GIRT", status: "UNKNOWN", items: [], sideWalls: [], endWalls: [], diagnostics: [diagnostic], provenance: [UNKNOWN_PROVENANCE] };
+  return { kind: "WALL_GIRT", status: "UNKNOWN", items: [], sideWalls: [], endWalls: [], manualZones: [], knownMass_kg: 0, diagnostics: [diagnostic], provenance: [UNKNOWN_PROVENANCE] };
 }
 
-/** Zero-engineering skeleton: no enclosure quantity is fabricated. */
+function manualWallGirts(input: ColdEnclosureInput): WallGirtResult {
+  const configuration = input.wallGirts;
+  if (!configuration) {
+    return emptyWallGirts(enclosureDiagnostic("ENCLOSURE_WALL_GIRT_NOT_PROVEN", "Подбор стеновых ригелей не реализован без явной manual-конфигурации.", "WALL_GIRT"));
+  }
+  if (configuration.mode === "AUTO") {
+    const diagnostic = enclosureDiagnostic("ENCLOSURE_AUTO_GIRT_SELECTION_NOT_IMPLEMENTED", "Автоматический подбор стеновых ригелей пока не реализован.", "WALL_GIRT");
+    return emptyWallGirts(diagnostic);
+  }
+  if (configuration.zones.length === 0) {
+    const diagnostic = enclosureDiagnostic("ENCLOSURE_INVALID_MANUAL_GIRT_INPUT", "Manual-конфигурация должна содержать хотя бы одну явную зону.", "WALL_GIRT");
+    return emptyWallGirts(diagnostic);
+  }
+
+  const projectOpeningCount = input.openings.reduce((total, opening) => total + opening.quantity, 0);
+  const manualZones: ManualWallGirtZoneResult[] = [];
+  const diagnostics: EnclosureDiagnostic[] = [];
+  for (const zone of configuration.zones) {
+    const replayInput = projectOpeningCount > 0 ? { ...zone, openingCount: Math.max(zone.openingCount ?? 0, projectOpeningCount) } : zone;
+    const replay = replayManualWallGirt(replayInput);
+    if (replay.zone) manualZones.push(replay.zone);
+    diagnostics.push(...replay.diagnostics);
+  }
+
+  const knownMass_kg = manualZones.reduce((total, zone) => total + zone.totalKnownMass_kg, 0);
+  const provenance = manualZones.flatMap((zone) => zone.provenance);
+  return {
+    kind: "WALL_GIRT",
+    status: manualZones.length > 0 ? "PARTIAL" : "UNKNOWN",
+    items: [],
+    sideWalls: [],
+    endWalls: [],
+    manualZones,
+    knownMass_kg,
+    diagnostics,
+    provenance: provenance.length > 0 ? provenance : [UNKNOWN_PROVENANCE],
+  };
+}
+
+/** Calculates only explicitly configured, source-proven enclosure branches. */
 export function calculateColdEnclosure(input: ColdEnclosureInput, structuralContext: EnclosureStructuralContext | null = null): { status: "success"; result: ColdEnclosureResult } {
-  const diagnostics: EnclosureDiagnostic[] = [
-    enclosureDiagnostic("ENCLOSURE_WALL_GIRT_NOT_PROVEN", "Подбор стеновых ригелей не реализован без source-backed правила.", "WALL_GIRT"),
-    enclosureDiagnostic("ENCLOSURE_STUD_RULE_NOT_PROVEN", "Правила стеновых стоек и фасадных стоек не доказаны.", "WALL_STUD/FACADE_POST"),
-    enclosureDiagnostic("ENCLOSURE_OPENING_FRAMING_NOT_PROVEN", "Обрамление проёмов холодной оболочки не реализовано.", "OPENING_FRAMING"),
-    enclosureDiagnostic("ENCLOSURE_SOURCE_EVIDENCE_MISSING", "Каталоги листов, кронштейнов, крепежа и доборных элементов отсутствуют в доказанном enclosure source set.", "SHEET/BRACKET/FASTENER/TRIM"),
-  ];
-  const [wallGirtDiagnostic, studDiagnostic, openingDiagnostic, sourceDiagnostic] = diagnostics;
+  const wallGirts = manualWallGirts(input);
+  const studDiagnostic = enclosureDiagnostic("ENCLOSURE_STUD_RULE_NOT_PROVEN", "Правила стеновых стоек и фасадных стоек не доказаны.", "WALL_STUD/FACADE_POST");
+  const openingDiagnostic = enclosureDiagnostic("ENCLOSURE_OPENING_FRAMING_NOT_PROVEN", "Обрамление проёмов холодной оболочки не реализовано.", "OPENING_FRAMING");
+  const sourceDiagnostic = enclosureDiagnostic("ENCLOSURE_SOURCE_EVIDENCE_MISSING", "Каталоги листов, кронштейнов, крепежа и доборных элементов отсутствуют в доказанном enclosure source set.", "SHEET/BRACKET/FASTENER/TRIM");
+  const diagnostics: EnclosureDiagnostic[] = [...wallGirts.diagnostics, studDiagnostic, openingDiagnostic, sourceDiagnostic];
+  const hasKnownWallGirtMass = wallGirts.manualZones.length > 0;
+  const unknownMassComponents = hasKnownWallGirtMass
+    ? ["wallGirtExtraMembers", "wallStuds", "facadePosts", "openingFraming", "wallSheet", "roofSheet", "brackets", "fasteners", "trims"]
+    : ["wallGirts", "wallStuds", "facadePosts", "openingFraming", "wallSheet", "roofSheet", "brackets", "fasteners", "trims"];
   const result: ColdEnclosureResult = {
-    wallGirts: emptyWallGirts(wallGirtDiagnostic!),
+    wallGirts,
     wallStuds: { kind: "WALL_STUD", ...section("WALL_STUD", studDiagnostic!) },
     facadePosts: { kind: "FACADE_POST", ...section("FACADE_POST", studDiagnostic!) },
     openingFraming: { kind: "OPENING_FRAMING", ...section("OPENING_FRAMING", openingDiagnostic!) },
@@ -32,10 +75,9 @@ export function calculateColdEnclosure(input: ColdEnclosureInput, structuralCont
     fasteners: { kind: "FASTENER", ...section("FASTENER", sourceDiagnostic!) },
     trims: { kind: "TRIM", ...section("TRIM", sourceDiagnostic!) },
     diagnostics,
-    provenance: [UNKNOWN_PROVENANCE],
-    totals: { knownMass_kg: 0, unknownMassComponents: ["wallGirts", "wallStuds", "facadePosts", "openingFraming", "wallSheet", "roofSheet", "brackets", "fasteners", "trims"], knownCost: null, unknownCostComponents: ["all enclosure components"] },
+    provenance: wallGirts.provenance.length > 0 && hasKnownWallGirtMass ? wallGirts.provenance : [UNKNOWN_PROVENANCE],
+    totals: { knownMass_kg: wallGirts.knownMass_kg, unknownMassComponents, knownCost: null, unknownCostComponents: ["all enclosure components"] },
   };
-  void input;
   void structuralContext;
   return { status: "success", result };
 }

@@ -30,4 +30,5 @@ export type {
   TrimResult,
   WallGirtResult,
   WallStudResult,
+  ManualWallGirtConfiguration,
 } from "./types";

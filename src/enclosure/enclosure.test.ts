@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { calculateColdEnclosure, projectInputToColdEnclosureInput } from "./index";
+import { calculateColdEnclosure, projectInputToColdEnclosureInput, replayManualWallGirt } from "./index";
 import type { ProjectInput } from "../project";
+import type { ManualWallGirtReplayInput } from "./manualWallGirtReplay";
 
 const project: ProjectInput = {
   climate: { mode: "CITY_LOOKUP", country: "RU", city: "Роза", normative_system: "SP_20" },
@@ -62,3 +63,68 @@ describe("Cold Enclosure skeleton", () => {
   });
 });
 
+describe("Cold Enclosure manual wall-girt integration", () => {
+  const noOpeningProject = { ...project, openings: [] };
+  const zone: ManualWallGirtReplayInput = {
+    wall: "SIDE" as const,
+    zoneType: "CORNER" as const,
+    wallHeight_m: 9.3,
+    zoneLength_m: 12,
+    girtStep_m: 1.37,
+    structuralPostStep_m: 6,
+    sectionType: "]" as const,
+    profile: { profileId: "]ПП 145x45x1,5", sectionMass_kg_m: 2.6716 },
+  };
+
+  function input(zones: ManualWallGirtReplayInput[] = [zone], mode: "MANUAL" | "AUTO" = "MANUAL") {
+    return { ...projectInputToColdEnclosureInput(noOpeningProject), wallGirts: { mode, zones } };
+  }
+
+  it("delegates a valid corner zone to manualWallGirtReplay", () => {
+    const result = calculateColdEnclosure(input()).result;
+    const expected = replayManualWallGirt(zone).zone;
+    expect(result.wallGirts.manualZones).toEqual([expected]);
+    expect(result.wallGirts.status).toBe("PARTIAL");
+    expect(result.wallGirts.provenance[0]?.status).toBe("LEGACY_PROVEN");
+  });
+
+  it("retains a valid typical zone transparently", () => {
+    const typical = { ...zone, zoneType: "TYPICAL" as const, girtStep_m: 1.38 };
+    const result = calculateColdEnclosure(input([typical])).result;
+    expect(result.wallGirts.manualZones[0]).toMatchObject({ wall: "SIDE", zoneType: "TYPICAL", rows: 8, profileLength_m: 96 });
+  });
+
+  it.each([
+    ["]", 2.6716, 8],
+    ["[]", 5.3432, 7],
+    ["][", 5.3432, 7],
+    ["[-]", 7.3285, 7],
+  ] as const)("supports section %s without duplicating formulas", (sectionType, mass, rows) => {
+    const result = calculateColdEnclosure(input([{ ...zone, sectionType, profile: { profileId: `${sectionType} profile`, sectionMass_kg_m: mass } }])).result;
+    expect(result.wallGirts.manualZones[0]).toMatchObject({ sectionType, rows });
+  });
+
+  it("aggregates known mass for multiple explicit zones only", () => {
+    const second = { ...zone, wall: "END" as const, zoneType: "TYPICAL" as const, zoneLength_m: 6 };
+    const result = calculateColdEnclosure(input([zone, second])).result;
+    const expected = [replayManualWallGirt(zone).zone!, replayManualWallGirt(second).zone!];
+    expect(result.wallGirts.manualZones).toEqual(expected);
+    expect(result.wallGirts.knownMass_kg).toBeCloseTo(expected[0]!.totalKnownMass_kg + expected[1]!.totalKnownMass_kg, 10);
+    expect(result.totals.knownMass_kg).toBe(result.wallGirts.knownMass_kg);
+    expect(result.totals.unknownMassComponents).toContain("wallGirtExtraMembers");
+  });
+
+  it("rejects project openings instead of silently replaying a gross zone", () => {
+    const result = calculateColdEnclosure({ ...projectInputToColdEnclosureInput(project), wallGirts: { mode: "MANUAL", zones: [zone] } }).result;
+    expect(result.wallGirts.manualZones).toEqual([]);
+    expect(result.diagnostics.map((item) => item.code)).toContain("ENCLOSURE_OPENINGS_UNSUPPORTED");
+  });
+
+  it("returns typed diagnostics for plus studs and AUTO", () => {
+    const plusStuds = calculateColdEnclosure(input([{ ...zone, plusStands: true }])).result;
+    expect(plusStuds.diagnostics.map((item) => item.code)).toContain("ENCLOSURE_PLUS_STUDS_UNSUPPORTED");
+    const automatic = calculateColdEnclosure(input([zone], "AUTO")).result;
+    expect(automatic.diagnostics.map((item) => item.code)).toContain("ENCLOSURE_AUTO_GIRT_SELECTION_NOT_IMPLEMENTED");
+    expect(automatic.wallGirts.manualZones).toEqual([]);
+  });
+});
