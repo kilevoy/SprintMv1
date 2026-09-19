@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0.0",
+  "runtime_imported": false,
+  "purpose": "Evidence-only index for the ordered 632-row girt catalog",
+  "source_record": "girtBearingCatalog.json",
+  "source_commit": "7920b45979ed25e608310be6996ee63dfe680a5a",
+  "row_count": 632,
+  "ordering": "source array order, one-based sourceRowIndex represented by chunk ranges",
+  "chunks": [
+    {"file": "girt-catalog-observed-01.json", "source_row_start": 1, "source_row_end": 79},
+    {"file": "girt-catalog-observed-02.json", "source_row_start": 80, "source_row_end": 158},
+    {"file": "girt-catalog-observed-03.json", "source_row_start": 159, "source_row_end": 237},
+    {"file": "girt-catalog-observed-04.json", "source_row_start": 238, "source_row_end": 316},
+    {"file": "girt-catalog-observed-05.json", "source_row_start": 317, "source_row_end": 395},
+    {"file": "girt-catalog-observed-06.json", "source_row_start": 396, "source_row_end": 474},
+    {"file": "girt-catalog-observed-07.json", "source_row_start": 475, "source_row_end": 553},
+    {"file": "girt-catalog-observed-08.json", "source_row_start": 554, "source_row_end": 632}
+  ]
+}
