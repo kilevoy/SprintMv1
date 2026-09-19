@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0.0",
+  "mode": "VALIDATION_READ_ONLY_EXCEL_ORACLE",
+  "source_workbook": "Таблица по подбору сечений теплых ангаров пролетами 9м, 12м, 15м, 18м, 21м, 24м версия 1,5.xlsx",
+  "oracle_method": "fresh disposable workbook copy + CalculateFullRebuild",
+  "notes": [
+    "D68/D69 are compared only when the Excel oracle returned numeric values.",
+    "The 6.21 m source case returned Excel error values in the active output chain; it is not a parity candidate.",
+    "Existing 22318/22316/22329 controls remain authoritative reference cases and are recorded in project audits, not duplicated here."
+  ],
+  "scenarios": [
+    {
+      "id": "rosa-09-h3-r08", "city": "Роза", "span_m": 9, "length_m": 18, "height_m": 3.0, "responsibility": 0.8,
+      "source": {"d8": 6, "frame_step_m": 6, "beam": "ПГС245/20х80х1,5", "column": "ПГС245/20х80х1,5", "purlin": "2ПС 195х45х1,5", "purlin_step_mm": 1215, "frame_mass_kg": 353.56, "d68": 0, "d69": 27.89704506172839, "d52": "6х2", "d53": "8х2", "d54": "6х2", "d55": "7х2", "fittings_kg": 170},
+      "core1": {"status": "success", "frame_step_m": 6, "beam": "ПГС245/20х80х2", "column": "ПГС245/20х80х1,5", "purlin": "2ПС 195х45х1,5", "purlin_step_mm": 1215, "frame_mass_kg": 390.2, "d68": 0, "d69": 28.801736419753084, "branch": "ROW14", "fittings_kg": 170},
+      "classification": "UNEXPECTED_DIVERGENCE", "first_divergence": "beam profile"
+    },
+    {
+      "id": "rosa-12-h3-r08", "city": "Роза", "span_m": 12, "length_m": 18, "height_m": 3.0, "responsibility": 0.8,
+      "source": {"d8": 6, "frame_step_m": 6, "beam": "ПГС245/20х80х2", "column": "ПГС300/20х80х1,5", "purlin": "2ПС 195х45х1,5", "purlin_step_mm": 1215, "frame_mass_kg": 487, "d68": 0, "d69": 28.488006944444447, "d52": "7х2", "d53": "9х2", "d54": "7х2", "d55": "9х2", "fittings_kg": 227},
+      "core1": {"status": "success", "frame_step_m": 6, "beam": "ПГС300/20х80х2,5", "column": "ПГС245/20х80х2", "purlin": "2ПС 195х45х1,5", "purlin_step_mm": 1215, "frame_mass_kg": 577, "d68": 0, "d69": 30.15467361111111, "branch": "ROW14", "fittings_kg": 227},
+      "classification": "UNEXPECTED_DIVERGENCE", "first_divergence": "beam profile"
+    },
+    {
+      "id": "rosa-15-h3-r08", "city": "Роза", "span_m": 15, "length_m": 18, "height_m": 3.0, "responsibility": 0.8,
+      "source": {"d8": 6, "frame_step_m": 6, "beam": "ПГС300/20х80х2,5", "column": "ПГС245/20х80х2", "purlin": "2ПС 200х45х1,5", "purlin_step_mm": 1250, "frame_mass_kg": 715, "d68": 0, "d69": 27.521427777777777, "d52": "9х2", "d53": "9х2", "d54": "8х2", "d55": "10х2", "fittings_kg": 244},
+      "core1": {"status": "success", "frame_step_m": 6, "beam": "ПГС300/20х80х3", "column": "ПГС245/20х80х2,5", "purlin": "2ПС 200х45х1,5", "purlin_step_mm": 1250, "frame_mass_kg": 820, "d68": 0, "d69": 29.076983333333335, "branch": "ROW14", "fittings_kg": 244},
+      "classification": "UNEXPECTED_DIVERGENCE", "first_divergence": "beam profile"
+    },
+    {
+      "id": "rosa-18-h3-r08", "city": "Роза", "span_m": 18, "length_m": 18, "height_m": 3.0, "responsibility": 0.8,
+      "source": {"d8": 6, "frame_step_m": 6, "beam": "ПГС300/20х80х3", "column": "ПГС300/20х80х2,5", "purlin": "2ПС 245х65х1,5", "purlin_step_mm": 1840, "frame_mass_kg": 940, "d68": 0, "d69": 26.735672839506172, "d52": "10х2", "d53": "10х2", "d54": "8х2", "d55": "10х2", "fittings_kg": 270},
+      "core1": {"status": "success", "frame_step_m": 6, "beam": "ПГС300/20х80х3", "column": "ПГС300/20х80х2,5", "purlin": "2ПС 245х65х1,5", "purlin_step_mm": 1840, "frame_mass_kg": 940, "d68": 0, "d69": 26.735672839506172, "branch": "ROW14", "fittings_kg": 270},
+      "classification": "FULL_PARITY", "first_divergence": null
+    },
+    {
+      "id": "rosa-21-h3-r08", "city": "Роза", "span_m": 21, "length_m": 21, "height_m": 3.0, "responsibility": 0.8,
+      "source": {"d8": 5, "frame_step_m": 5, "beam": "ПГС300/20х80х3", "column": "ПГС245/20х80х2,5", "purlin": "2ПС 200х65х1,5", "purlin_step_mm": 2150, "frame_mass_kg": 1066, "d68": 0, "d69": 26.936517006802724, "d52": "11х2", "d53": "11х2", "d54": "9х2", "d55": "12х2", "fittings_kg": 325},
+      "core1": {"status": "success", "frame_step_m": 5, "beam": "ПГС300/20х80х3", "column": "ПГС245/20х80х2,5", "purlin": "2ПС 200х65х1,5", "purlin_step_mm": 2150, "frame_mass_kg": 1066, "d68": 0, "d69": 26.7748843537415, "branch": "ROW14", "fittings_kg": 325},
+      "classification": "UNEXPECTED_DIVERGENCE", "first_divergence": "structural summary mass"
+    },
+    {
+      "id": "rosa-24-h3-r08", "city": "Роза", "span_m": 24, "length_m": 18, "height_m": 3.0, "responsibility": 0.8,
+      "source": {"d8": 5, "frame_step_m": 5, "beam": "ПГС300/20х80х3", "column": "ПГС300/20х80х2", "purlin": "2ПС 195х45х1,5", "purlin_step_mm": 1715, "frame_mass_kg": 1415.598896, "d68": 0, "d69": 31.935706743827165, "d52": "8х2", "d53": "9х2", "d54": "9х2", "d55": "11х2", "fittings_kg": 536},
+      "core1": {"status": "success", "frame_step_m": 5, "beam": "ПГС300/20х80х3", "column": "ПГС300/20х80х2", "purlin": "2ПС 195х45х1,5", "purlin_step_mm": 1720, "frame_mass_kg": 1415.598896, "d68": 0, "d69": 29.814503040123462, "branch": null, "fittings_kg": 233},
+      "classification": "UNEXPECTED_DIVERGENCE", "first_divergence": "purlin step"
+    },
+    {
+      "id": "surgut-18-h381-r10", "city": "Сургут", "span_m": 18, "length_m": 18, "height_m": 3.81, "responsibility": 1.0,
+      "source": {"d8": 4, "frame_step_m": 4, "beam": "ПГС300/20х80х3", "column": "ПГС300/20х80х3", "purlin": "2ПС 195х45х1,5", "purlin_step_mm": 1900, "frame_mass_kg": 1025, "d68": 0, "d69": 33.63222839506173, "d52": "10х2", "d53": "11х2", "d54": "7х2", "d55": "10х2", "fittings_kg": 268},
+      "core1": {"status": "success", "frame_step_m": 4, "beam": "ПГС300/20х80х3", "column": "ПГС300/20х80х3", "purlin": "2ПС 195х45х1,5", "purlin_step_mm": 1900, "frame_mass_kg": 1025, "d68": 0, "d69": 33.63222839506173, "branch": "ROW14", "fittings_kg": 268},
+      "classification": "FULL_PARITY", "first_divergence": null
+    },
+    {
+      "id": "surgut-18-h501-r10", "city": "Сургут", "span_m": 18, "length_m": 18, "height_m": 5.01, "responsibility": 1.0,
+      "source": {"d8": 3.5, "frame_step_m": 3.5, "beam": "ПГС300/20х80х3", "column": "ПГС245/20х80х2,5", "purlin": "2ПС 145х45х1,5", "purlin_step_mm": 1700, "frame_mass_kg": 1010, "d68": 0, "d69": 37.48231481481482, "d52": "10х2", "d53": "9х2", "d54": "7х2", "d55": "10х2", "fittings_kg": 258},
+      "core1": {"status": "success", "frame_step_m": 3.5, "beam": "ПГС300/20х80х3", "column": "ПГС245/20х80х2,5", "purlin": "2ПС 145х45х1,5", "purlin_step_mm": 1700, "frame_mass_kg": 1010, "d68": 0, "d69": 37.48231481481482, "branch": "ROW14", "fittings_kg": 258},
+      "classification": "FULL_PARITY", "first_divergence": null
+    },
+    {
+      "id": "surgut-18-h621-r10", "city": "Сургут", "span_m": 18, "length_m": 18, "height_m": 6.21, "responsibility": 1.0,
+      "source": {"d8": "#VALUE!", "d69": "#VALUE!"},
+      "core1": {"status": "unknown_domain", "code": "UNKNOWN_DOMAIN"},
+      "classification": "CORE1_UNKNOWN_DOMAIN", "first_divergence": "domain gate / source active error"
+    }
+  ]
+}
