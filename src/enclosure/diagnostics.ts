@@ -6,7 +6,11 @@ export type EnclosureDiagnosticCode =
   | "ENCLOSURE_WALL_GIRT_NOT_PROVEN"
   | "ENCLOSURE_OPENING_FRAMING_NOT_PROVEN"
   | "ENCLOSURE_STUD_RULE_NOT_PROVEN"
-  | "ENCLOSURE_INPUT_INVALID";
+  | "ENCLOSURE_INPUT_INVALID"
+  | "ENCLOSURE_MANUAL_REPLAY_ONLY"
+  | "ENCLOSURE_OPENINGS_NOT_SUPPORTED"
+  | "ENCLOSURE_PLUS_STUDS_NOT_SUPPORTED"
+  | "ENCLOSURE_PROFILE_SELECTION_NOT_SUPPORTED";
 
 export interface EnclosureDiagnostic {
   code: EnclosureDiagnosticCode;
@@ -25,4 +29,3 @@ export function enclosureDiagnostic(
 ): EnclosureDiagnostic {
   return { code, severity: "unsupported", message, component, ...(details ? { details } : {}) };
 }
-
