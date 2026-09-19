@@ -10,20 +10,21 @@
 `CORE1_SUPPORTED_DOMAIN.md` и `CORE1_FREEZE.md`. Runtime не зависит от
 создаваемого machine-readable файла; он является только артефактом аудита.
 
-## Status summary
+## Status summary (post-corrective-pass)
 
 | Status | Result | Evidence / reason |
 |---|---|---|
-| `UI_PROJECTINPUT_MAPPING` | `PARTIAL` | Existing controls map explicitly, but UI hides literal decimal spans and presents limited 24 m alongside normal families. |
-| `PROJECTINPUT_CORE1_MAPPING` | `PARTIAL` | Scalar mapping is explicit and tested; gates require an explicit unresolved boundary policy, and rich openings are lossy when projected to legacy fields. |
-| `FRAME_STEP_UI_SEMANTICS` | `NEEDS_FIX` | D9 manual override is explicit and effective step is shown, but calculated D8 and frame count are not separately visible. |
+| `UI_PROJECTINPUT_MAPPING` | `PROVEN_WITH_BOUNDED_PARTIALS` | Literal spans are now editable; unsupported/partial branches remain typed and visible. |
+| `PROJECTINPUT_CORE1_MAPPING` | `PROVEN_WITH_BOUNDED_PARTIALS` | Scalar mapping is explicit and tested; gates and rich openings remain explicitly bounded by typed adapter diagnostics. |
+| `FRAME_STEP_UI_SEMANTICS` | `CORRECT` | D8 automatic mode, D9 manual override, effective step and calculated frame count are separately visible. |
 | `ROOF_PURLIN_UI_SEMANTICS` | `CORRECT` | `Марка настила` is a deck grade and its help text correctly states the purlin-step limitation role; enclosure purlin is not treated as wall material. |
-| `OPENINGS_UI_CONTRACT` | `PARTIAL` | Gate classification policy is intentionally blocked; window projection is limited to one compatible legacy shape. |
-| `ENCLOSURE_FIELDS_SEPARATED_FROM_CORE1` | `PARTIAL` | `wall_system` is explicitly Core 2-only, while `enclosure_purlin` is a Core 1 purlin flag despite its enclosure wording. |
-| `SUPPORTED_DOMAIN_UX` | `NEEDS_FIX` | Unsupported/partial domain is not sufficiently prominent for 24 m, manual D9, and nonzero opening parity. |
+| `OPENINGS_UI_CONTRACT` | `EXPLICITLY_BOUNDED` | Gate classification remains diagnostic-only; incompatible windows are not merged; enhanced window results show provenance. |
+| `ENCLOSURE_FIELDS_SEPARATED_FROM_CORE1` | `YES` | Wall system is presented as future EnclosureCore input; the similarly named enclosure purlin remains explicitly labelled as Core 1. |
+| `SUPPORTED_DOMAIN_UX` | `CORRECT` | 24 m partial structural parity is visible; legacy errors and unknown domain remain typed and visible. |
 
-Priority counts: **P0 = 0, P1 = 5, P2 = 5, P3 = 4**. These are contract
-findings, not automatic production-code defects.
+Corrective-pass priority counts: **P0 = 0, P1 = 0, P2 = 2, P3 = 4**. The
+remaining P2 items are non-blocking presentation refinements, not engineering
+mapping defects.
 
 ## UI control inventory
 
@@ -94,10 +95,9 @@ incompatible windows.
 | `FRAME_COUNT_VISIBLE` | `NO`: frame count exists in Core1 summary/context but is not presented in the result card. |
 | Effective rule | `D9 manual override` when present, otherwise `D8 automatic`; no UI evidence justifies another rule. |
 
-Classification: `FRAME_STEP_UI_SEMANTICS = NEEDS_FIX` because the UI does not
-separate automatic D8, manual D9, effective step, and frame count for audit or
-user interpretation. This is not evidence that the underlying Core1 resolver
-is wrong.
+Classification after corrective pass: `FRAME_STEP_UI_SEMANTICS = CORRECT`.
+The UI now separates automatic D8, manual D9, effective step, and frame count.
+This is not evidence that the underlying Core1 resolver changed; it did not.
 
 ## Openings and enclosure boundary
 
@@ -115,15 +115,12 @@ remains `PARTIAL`/golden-oracle dependent.
 
 ## Supported-domain UX
 
-The Core1 contract supports literal positive spans up to 24 m and maps them to
-families, while the current select exposes only six canonical values. This is a
-UI limitation (`ARBITRARY_SPAN_DOMAIN_GAP`), not a reason to round literal
-input in Core1. More importantly, 24 m is displayed as a normal option although
-the frozen contract is limited: automatic low-height selection/D8/profile and
-some purlin/D68 controls are proven, while D69 is partial and upper heights,
-manual D9, ROW15 and canonical connections remain unknown. Legacy errors and
-`UNKNOWN_DOMAIN` must remain visible rather than being converted into a normal
-success.
+The UI now accepts a literal positive span up to 24 m and states that Core1
+routes it to a family without rounding. For successful 24 m calculations it
+shows `CORE1_24M_STRUCTURAL_PARITY_PARTIAL`: automatic frame selection/D8 and
+the proven low-height path remain useful, while D69, upper heights, manual D9,
+ROW15 and canonical connections remain bounded. Legacy errors and
+`UNKNOWN_DOMAIN` remain visible rather than becoming normal success.
 
 ## Default provenance
 
@@ -136,28 +133,25 @@ also a UI convenience. These should not be treated as engineering provenance.
 
 ## Priority register
 
-### P1
+### Corrective-pass disposition
 
-- `UI_SPAN_LITERAL_DECIMAL_NOT_EXPOSED`: the UI select hides literal spans that
-  ProjectInput/Core1 preserve.
-- `UI_24M_LIMITED_DOMAIN_NOT_PROMINENT`: 24 m has partial downstream parity but
-  is presented with the same affordance as fully frozen 9–21 m.
-- `UI_D8_NOT_SEPARATE_FROM_EFFECTIVE`: automatic D8 is not shown separately
-  from effective `Шаг рам`.
-- `UI_FRAME_COUNT_NOT_VISIBLE`: frame count is not shown in the result UI.
-- `UI_GATE_CONTRACT_PARTIAL`: no wall side and no proven width/height policy;
-  gate calculation is correctly blocked, but the control contract is partial.
+- Fixed P1 `UI_SPAN_LITERAL_DECIMAL_NOT_EXPOSED`: span is a numeric literal input.
+- Fixed P1 `UI_24M_LIMITED_DOMAIN_NOT_PROMINENT`: successful 24 m has a typed
+  partial-status notice; no number was changed.
+- Fixed P1 `UI_D8_NOT_SEPARATE_FROM_EFFECTIVE`: D8 automatic and D9 manual are
+  separate controls and the result identifies the effective source.
+- Fixed P1 `UI_FRAME_COUNT_NOT_VISIBLE`: calculated frame count is visible.
+- Bounded P1 `UI_GATE_CONTRACT_PARTIAL`: no automatic width/height inference was
+  added; the existing typed `CORE1_GATE_CLASSIFICATION_UNVERIFIED` remains the
+  explicit contract boundary.
 
-### P2
+### Remaining P2
 
-- Geometry controls allow zero in HTML while Core1 rejects non-positive values.
-- Manual 6 m override is a convenience default with no universal parity claim.
-- Gate/door dimension-only edits do not mark the result stale; this is safe for
-  current blocked gate projection but can become misleading when gate policy is
-  closed.
-- Opening examples look like defaults but are not legacy-derived defaults.
-- Result cards omit explicit provenance/status for several partial enhanced
-  outputs.
+- Gate/door dimension-only stale-state behavior remains deferred because gate
+  classification is intentionally not inferred and door dimensions are not a
+  Core1 scalar input.
+- More granular provenance badges for future non-Core1 commercial/enclosure
+  outputs remain deferred; enhanced window output is now explicitly labelled.
 
 ### P3
 
@@ -169,19 +163,18 @@ also a UI convenience. These should not be treated as engineering provenance.
 ## Final classification
 
 ```text
-UI_PROJECTINPUT_MAPPING = PARTIAL
-PROJECTINPUT_CORE1_MAPPING = PARTIAL
-FRAME_STEP_UI_SEMANTICS = NEEDS_FIX
+UI_PROJECTINPUT_MAPPING = PROVEN_WITH_BOUNDED_PARTIALS
+PROJECTINPUT_CORE1_MAPPING = PROVEN_WITH_BOUNDED_PARTIALS
+FRAME_STEP_UI_SEMANTICS = CORRECT
 ROOF_PURLIN_UI_SEMANTICS = CORRECT
-OPENINGS_UI_CONTRACT = PARTIAL
-ENCLOSURE_FIELDS_SEPARATED_FROM_CORE1 = PARTIAL
-SUPPORTED_DOMAIN_UX = NEEDS_FIX
+OPENINGS_UI_CONTRACT = EXPLICITLY_BOUNDED
+ENCLOSURE_FIELDS_SEPARATED_FROM_CORE1 = YES
+SUPPORTED_DOMAIN_UX = CORRECT
 P0_COUNT = 0
-P1_COUNT = 5
-P2_COUNT = 5
+P1_COUNT = 0
+P2_COUNT = 2
 P3_COUNT = 4
-SAFE_TO_FREEZE_UI_INPUT_CONTRACT = NO
-NEXT_ACTION = clarify D8/effective-step/frame-count presentation and limited-domain/opening diagnostics before freezing the UI contract
+SAFE_TO_FREEZE_UI_INPUT_CONTRACT = YES
+NEXT_ACTION = COLD_ENCLOSURE_REVERSE_ENGINEERING
 PRODUCTION_CODE_CHANGED = NO
 ```
-

@@ -49,7 +49,7 @@ describe("Sprint M calculator UI", () => {
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Загрузить пример 12 м" }));
     await waitFor(() => expect(fixtureSpy).toHaveBeenCalledWith("baseline_12m"));
-    expect(screen.getByLabelText("Пролёт, м")).toHaveValue("12");
+    expect(screen.getByLabelText("Пролёт, м")).toHaveValue(12);
     fixtureSpy.mockRestore();
   });
 
@@ -158,5 +158,28 @@ describe("Sprint M calculator UI", () => {
     fireEvent.click(screen.getByRole("button", { name: "Рассчитать" }));
     await waitFor(() => expect(screen.getByText("2ПС 200")).toBeInTheDocument());
     expect(screen.getByText(/С44-1000-0,7 · шаг 1 200 мм/)).toBeInTheDocument();
+  });
+
+  it("separates automatic D8, manual D9, effective step, and frame count", async () => {
+    render(<App />);
+    expect(screen.getByText("Расчётный шаг D8 определяется Core 1 после расчёта.")).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText("Задать вручную (D9)"));
+    expect(screen.getByLabelText("Ручной шаг D9, м")).toHaveValue(6);
+    calculateMock.mockImplementation(async (input) => ({ ...successResult, result: { ...successResult.result, scenario: input } }));
+    fireEvent.click(screen.getByRole("button", { name: "Рассчитать" }));
+    await waitFor(() => expect(screen.getByText("Эффективный шаг рам")).toBeInTheDocument());
+    expect(screen.getByText("D9 · ручной override")).toBeInTheDocument();
+    expect(screen.getByText("Количество рам")).toBeInTheDocument();
+  });
+
+  it("surfaces the bounded 24m structural parity status without changing the result", async () => {
+    calculateMock.mockResolvedValue({
+      ...successResult,
+      result: { ...successResult.result, scenario: { ...successResult.result.scenario, span_m: 24, building_length_m: 18, frame_step_override_m: null } },
+    });
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Рассчитать" }));
+    await waitFor(() => expect(screen.getByText("CORE1_24M_STRUCTURAL_PARITY_PARTIAL")).toBeInTheDocument());
+    expect(screen.getByText(/итоговый структурный показатель D69 имеет частично восстановленную legacy-ветку/)).toBeInTheDocument();
   });
 });
