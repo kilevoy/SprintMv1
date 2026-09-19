@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0.0",
+  "id": "24m_structural_intermediate_snapshot",
+  "status": "FAILED_ACTIVE_EXCEL_SNAPSHOT_UNAVAILABLE",
+  "scenario": {
+    "city": "Роза",
+    "span_m": 24,
+    "building_length_m": 18,
+    "building_height_m": 3,
+    "responsibility_factor": 0.8,
+    "frame_step_mode": "automatic",
+    "frame_step_override_m": null,
+    "roof_covering": "С-П 150",
+    "roof_deck_grade": "С44-1000-0,7",
+    "d9": null,
+    "openings": 0
+  },
+  "source_workbook": {
+    "path": "E:\\SprintMv1_reference\\22329\\22329_SOURCE_SELECTION.xlsx",
+    "sha256": "0271b96c6fe725d3e50ad7891401958322a5ae97866bb0bf8cb190bc4bbeff3f",
+    "calculation_mode_required": "Microsoft Excel COM CalculateFullRebuild",
+    "active_recalculation_captured": false
+  },
+  "area_m2": 432,
+  "known_active_values": {
+    "O7": 26.979706743827165,
+    "O14": 26.979706743827165,
+    "Z14": 26.979706743827165,
+    "Z15": 26.979706743827165,
+    "purlin_T28": 4.956,
+    "D68": 0,
+    "D69": 31.935706743827165,
+    "frame_mass_kg": 1415.598896,
+    "D8": 5
+  },
+  "core1_values": {
+    "structural_base_kg_per_m2": 24.858503040123463,
+    "purlin_kg_per_m2": 4.956,
+    "D68_equivalent_kg_per_m2": 0,
+    "D69": 29.814503040123462,
+    "frame_mass_kg": 1415.598896,
+    "D8": 5
+  },
+  "known_delta": {
+    "kg_per_m2": 2.121203703703702,
+    "absolute_mass_kg": 916.3599999999993,
+    "absolute_mass_kg_rounded": 916.36,
+    "status": "aggregate_delta_only"
+  },
+  "unresolved_active_nodes": [
+    "подбор!D7:T7",
+    "подбор!D14:T14",
+    "24м!KM19:LA19",
+    "24м!WO19:WZ19",
+    "24м!JV15:KK19",
+    "24м!VX15:WM19"
+  ],
+  "note": "This fixture intentionally does not substitute stale cached #N/A values for active recalculated intermediates and does not embed the XLSX."
+}

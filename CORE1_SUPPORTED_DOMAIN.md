@@ -1,5 +1,44 @@
 # Core 1 v1 — поддерживаемая область
 
+## Release freeze contract — 9–21 m plus limited 24 m
+
+This section is the release boundary for the current Core1 checkpoint. It
+uses the stricter statuses requested by the supported-domain freeze:
+`PROVEN`, `PARTIAL`, `UNKNOWN`, `LEGACY_ERROR`, and `SOURCE_SUSPICIOUS`.
+
+| Family | Geometry | Height | Automatic D8 | Manual D9 | Frame profile | Frame count | Purlin | Connections | D69 | Boundary / remaining uncertainty |
+|---:|---|---|---|---|---|---|---|---|---|---|
+| 9 m | PROVEN | PROVEN within `<=6.2` | PROVEN | UNKNOWN outside tested automatic contract | PROVEN | PROVEN | PROVEN in supported scenarios | PROVEN generic model | PARTIAL by scenario, not a universal claim | non-zero openings/rare branches need golden oracles |
+| 12 m | PROVEN | PROVEN within `<=6.2` | PROVEN | UNKNOWN outside tested automatic contract | PROVEN | PROVEN | PROVEN; baseline fixture | PROVEN generic model | PROVEN for baseline and covered controls | wider commercial/opening combinations remain separate |
+| 15 m | PROVEN | PROVEN within `<=6.2` | PROVEN | UNKNOWN outside tested automatic contract | PROVEN | PROVEN | PROVEN in supported scenarios | PROVEN generic model | PARTIAL by scenario, not a universal claim | additional real-project golden cases useful |
+| 18 m | PROVEN | PROVEN through `6.20`; `6.21` is legacy error | PROVEN | UNKNOWN | PROVEN at boundaries | PROVEN at boundaries | PROVEN in supported scenarios | PROVEN where branch snapshot exists | PROVEN for the audited controls | `6.21` → `UNKNOWN_DOMAIN`, matching Excel error state |
+| 21 m | PROVEN | PROVEN through `6.20`; `6.21` is legacy error | PROVEN | UNKNOWN | PROVEN at boundaries | PROVEN at boundaries | PROVEN in supported scenarios | PROVEN where branch snapshot exists | PROVEN for the audited controls | `6.21` → `UNKNOWN_DOMAIN`, matching Excel error state |
+| 24 m | PROVEN geometrically | PARTIAL: automatic low-height only | PROVEN in active low-height controls | UNKNOWN | PROVEN in active low-height controls | PARTIAL | PROVEN for the active purlin control | UNKNOWN for canonical connection replay | PARTIAL | O7/Z14 aggregate parity requires fresh Excel intermediate snapshot |
+
+### Limited 24 m contract
+
+```text
+24M_AUTO_LOW_HEIGHT_FRAME_SELECTION = PROVEN
+24M_AUTO_LOW_HEIGHT_D8 = PROVEN
+24M_AUTO_LOW_HEIGHT_FRAME_PROFILE = PROVEN
+24M_AUTO_LOW_HEIGHT_PURLIN_CONTROL = PROVEN
+24M_AUTO_LOW_HEIGHT_D68 = PROVEN in the zero-opening control
+24M_AUTO_LOW_HEIGHT_D69 = PARTIAL
+24M_UPPER_HEIGHTS = UNKNOWN
+24M_MANUAL_D9 = UNKNOWN
+24M_ROW15 = UNKNOWN
+24M_STRUCTURAL_AGGREGATE = BLOCKED_BY_FRESH_EXCEL_RECALC
+```
+
+The current 24 m code must not be interpreted as universal D69 parity. The
+default active fixture is numeric and proven for its exact inputs; the
+`С-П 150` boundary branch still has a `2.121203703703702 kg/m²` structural
+aggregate difference. The unresolved absolute equivalent is `916.36 kg` for
+the audited 24 × 18 m geometry.
+
+`22326` remains `SOURCE_SUSPICIOUS / COMPATIBILITY_CASE` and is not allowed
+to expand the proven domain.
+
 Этот документ задаёт границу первой реализации. Статусы относятся к режиму строгой совместимости с исходной книгой, а не к инженерной допустимости проекта вообще.
 
 ## Статусы
