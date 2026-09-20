@@ -16,6 +16,7 @@ class TestDataSource implements Core1DataSource {
 const source = new TestDataSource(resolve(import.meta.dirname, "../.."));
 
 const project22329: ProjectInput = {
+  countryCode: "RU",
   climate: { mode: "CITY_LOOKUP", country: "RU", city: "Увильды", normative_system: "SP_20" },
   geometry: { span_m: 12, building_length_m: 26, building_height_m: 4, responsibility_factor: 1.0, frame_step_override_m: null },
   envelope: { roof_covering: "С-П 150", roof_deck_grade: "С44-1000-0,7", wall_system: "Сэндвич-панель 200 мм" },

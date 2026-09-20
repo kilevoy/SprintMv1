@@ -97,8 +97,8 @@ export function projectInputToCore1Input(project: ProjectInput, options: Core1In
   if ("diagnostic" in windowProjectionResult) return { status: "unsupported", input: null, diagnostics: [windowProjectionResult.diagnostic] };
 
   const climate = project.climate.mode === "MANUAL"
-    ? { mode: "MANUAL" as const, country: project.climate.country, normative_system: project.climate.normative_system, snow_region: project.climate.snow_region, snow_load: project.climate.snow_load, wind_region: project.climate.wind_region, wind_load: project.climate.wind_load, seismicity: project.climate.seismicity || null, ...(project.climate.source_note ? { source_note: project.climate.source_note } : {}) }
-    : { mode: "CITY_LOOKUP" as const, country: project.climate.country, city: project.climate.city.trim(), normative_system: project.climate.normative_system };
+    ? { mode: "MANUAL" as const, country: project.countryCode, normative_system: project.climate.normative_system, snow_region: project.climate.snow_region, snow_load: project.climate.snow_load, wind_region: project.climate.wind_region, wind_load: project.climate.wind_load, seismicity: project.climate.seismicity || null, ...(project.climate.source_note ? { source_note: project.climate.source_note } : {}) }
+    : { mode: "CITY_LOOKUP" as const, country: project.countryCode, city: project.climate.city.trim(), normative_system: project.climate.normative_system };
   const input: Core1Input = {
     span_m: project.geometry.span_m,
     building_length_m: project.geometry.building_length_m,

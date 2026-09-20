@@ -72,6 +72,8 @@ export interface SecondarySteelResult {
   bolts: SecondarySteelBolt[];
   M16_quantity: number;
   M16_quantity_unit: "pcs";
+  /** Raw legacy companion value from вывод!E56; semantics are intentionally not inferred. */
+  M16_legacy_value?: string | null;
   fittings_weight_kg: number;
   fittings_weight_unit: "kg";
   trace: SecondarySteelTrace;

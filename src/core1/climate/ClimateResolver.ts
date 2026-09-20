@@ -4,8 +4,6 @@ import type { DatasetRecord } from "../data";
 import type { ClimateDatasetView, ClimateResolveResult } from "./types";
 
 const LOAD_UNITS = "kN/m²";
-const PROVEN_LOOKUP_KEYS = new Set(["RU|Роза|SP_20", "RU|Сургут|SP_20", "RU|Березовский|SP_20", "RU|Увильды|SP_20"]);
-
 /** Exact workbook-proven tuples whose normative branch is not represented by
  * the generic sparse-row columns. Keep this map explicit: no fuzzy city
  * matching or nearest-city fallback is permitted. */
@@ -133,8 +131,8 @@ function applyProvenTuple(input: Extract<ClimateInput, { mode: "CITY_LOOKUP" }>,
 }
 
 /**
- * Exact local lookup for presentation only. This intentionally does not widen
- * the proven Core 1 calculation contract below the PROVEN_LOOKUP_KEYS gate.
+ * Exact local lookup for presentation and calculation. The support boundary is
+ * the source-backed row and downstream legacy branch, not a city-name list.
  */
 export function previewClimate(input: Extract<ClimateInput, { mode: "CITY_LOOKUP" }>, dataset?: ClimateDatasetView): ClimateResolveResult {
   if (!dataset) return unknownData(input, "Для предпросмотра не загружен climate dataset.", { city: input.city });
@@ -169,17 +167,18 @@ export function resolveClimate(input: ClimateInput, dataset?: ClimateDatasetView
     };
   }
 
-  const preview = previewClimate(input, dataset);
-  if (preview.status !== "success") return preview;
-  const lookupKey = `${input.country}|${input.city}|${input.normative_system}`;
-  if (!PROVEN_LOOKUP_KEYS.has(lookupKey)) {
-    return unknownData(input, "Для выбранной страны и нормативной ветки нет доказанного lookup-набора.", {
+  // The authoritative sparse dataset currently contains only the RU / SP_20
+  // city lookup branch. This is a source/normative-domain gate, not a city
+  // whitelist; other branches must continue to fail safely.
+  if (input.country !== "RU" || input.normative_system !== "SP_20") {
+    return unknownData(input, "Для выбранной страны и нормативной ветки нет source-backed lookup-набора.", {
       country: input.country,
-      city: input.city,
       normative_system: input.normative_system,
-      proven_lookup: [...PROVEN_LOOKUP_KEYS],
+      supported_city_lookup_domain: "RU|SP_20",
     });
   }
 
+  const preview = previewClimate(input, dataset);
+  if (preview.status !== "success") return preview;
   return preview;
 }

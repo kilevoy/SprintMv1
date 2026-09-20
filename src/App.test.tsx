@@ -144,6 +144,7 @@ describe("Sprint M calculator UI", () => {
     expect(screen.getByText("Используется для ограничения допустимого шага прогонов.")).toBeInTheDocument();
     const wall = screen.getByLabelText("Стены");
     expect(wall).toHaveValue("Сэндвич-панель 200 мм");
+    await screen.findByText("Климатические данные загружены");
     fireEvent.click(screen.getByRole("button", { name: "Рассчитать" }));
     await waitFor(() => expect(calculateMock).toHaveBeenCalledTimes(1));
     const firstInput = calculateMock.mock.calls[0]?.[0];

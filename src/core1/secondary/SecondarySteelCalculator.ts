@@ -164,6 +164,7 @@ export const calculateSecondarySteel: SecondarySteelCalculatorFn = (
     bolts: boltPatterns,
     M16_quantity: m16,
     M16_quantity_unit: "pcs",
+    M16_legacy_value: text(valueAt(bolts, "E56")),
     fittings_weight_kg: fittings,
     fittings_weight_unit: "kg",
     trace: {

@@ -4,6 +4,7 @@ import type { ProjectInput } from "./types";
 
 function project(overrides: Partial<ProjectInput> = {}): ProjectInput {
   return {
+    countryCode: "RU",
     climate: { mode: "CITY_LOOKUP", country: "RU", city: "Роза", normative_system: "SP_20" },
     geometry: { span_m: 12, building_length_m: 18, building_height_m: 3, responsibility_factor: 0.8, frame_step_override_m: null },
     envelope: { roof_covering: "С-П 200", roof_deck_grade: "С44-1000-0,7", wall_system: "Сэндвич-панель 200 мм" },
@@ -15,6 +16,12 @@ function project(overrides: Partial<ProjectInput> = {}): ProjectInput {
 }
 
 describe("projectInputToCore1Input", () => {
+  it("uses the explicit ProjectInput country as the Core1 climate country", () => {
+    const result = projectInputToCore1Input(project({ countryCode: "KZ", climate: { mode: "CITY_LOOKUP", country: "RU", city: "Туркестан", normative_system: "SP_20" } }));
+    expect(result.status).toBe("success");
+    if (result.status === "success") expect(result.input.climate).toMatchObject({ country: "KZ", city: "Туркестан" });
+  });
+
   it("aggregates gate quantities only with an explicit, externally verified boundary dimension", () => {
     const value = project({ openings: [
       { id: "gate-a", kind: "gate", width_mm: 4000, height_mm: 4200, quantity: 2 },

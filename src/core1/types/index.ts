@@ -28,4 +28,21 @@ export type {
   LegacyErrorKind,
 } from "./diagnostic";
 export { LEGACY_ERROR_TO_EXCEL } from "./diagnostic";
-export type { Core1Bolt, Core1ClimateResult, Core1Component, Core1Result } from "./result";
+export type {
+  Core1Bolt,
+  Core1CanonicalConnections,
+  Core1CanonicalResult,
+  Core1ClimateResult,
+  Core1Component,
+  Core1ComponentMasses,
+  Core1ExcelOutput,
+  Core1ExcelOutputRow,
+  Core1ExcelOutputSection,
+  Core1FrameGrid,
+  Core1LegacyCompatibility,
+  Core1OpeningCompatibility,
+  Core1PurlinSelection,
+  Core1Result,
+  Core1SectionSelection,
+  Core1SelectedSections,
+} from "./result";

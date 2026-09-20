@@ -6,23 +6,17 @@ import { previewClimate } from "./core1/climate";
 import { calculateCore1 } from "./core1/engine";
 import type { Core1EngineResult } from "./core1/engine";
 import type { Core1ClimateResult, Core1Diagnostic, Core1Input, CountryCode, RoofCovering, RoofDeckGrade } from "./core1/types";
-import { createOpeningId, projectInputToCore1Input } from "./project";
+import { createDefaultProjectInput, createOpeningId, projectInputToCore1Input } from "./project";
 import type { ProjectInput, ProjectOpening, WindowOpening } from "./project";
+import EngineeringPreviewPage from "./EngineeringPreviewPage";
 
 const spans = [9, 12, 15, 18, 21, 24] as const;
 const roofCoverings: RoofCovering[] = ["наше 100 мм", "наше 150 мм", "наше 200 мм", "наше 250 мм", "наше 150 мм с 1 слоем гвл", "наше 150 мм с 2 слоем гвл", "наше 200 мм с 1 слоем гвл", "наше 200 мм с 2 слоем гвл", "наше 250 мм с 1 слоем гвл", "наше 250 мм с 2 слоем гвл", "С-П 50", "С-П 80", "С-П 100", "С-П 120", "С-П 150", "С-П 200", "С-П 250", "малоуклонная кровля с подв. п.", "малоуклонная кровля без подв. п.", "профлист"];
 const deckGrades: RoofDeckGrade[] = ["С44-1000-0,5", "С44-1000-0,7", "Н60-845-0,7", "Н60-845-0,8"];
 const glazingOptions = ["2ой стеклопакет", "1ой стеклопакет", "светопрозрачный профлист"];
-const wallSystems = ["Сэндвич-панель 200 мм"] as const;
+const wallSystems = [createDefaultProjectInput().envelope.wall_system] as const;
 
-const defaultProjectInput: ProjectInput = {
-  climate: { mode: "CITY_LOOKUP", country: "RU", city: "Роза", normative_system: "SP_20" },
-  geometry: { span_m: 12, building_length_m: 18, building_height_m: 3, responsibility_factor: 0.8, frame_step_override_m: null },
-  envelope: { roof_covering: "С-П 200", roof_deck_grade: "С44-1000-0,7", wall_system: wallSystems[0] },
-  openings: [],
-  special_conditions: { snow_retention_purlin: "нет", enclosure_purlin: "нет", horizontal_bracing_override: null },
-  other: { selection_mode: "стандарт", building_roof_type: "двускатное", purlin_max_step_override_mm: null, purlin_min_step_mm: 0, terrain_type: "В", window_scheme_factor: 1.0, window_utilization_limit: 0.85 },
-};
+const defaultProjectInput = createDefaultProjectInput();
 
 function numberValue(value: string, fallback = 0): number {
   const parsed = Number(value.replace(",", "."));
@@ -51,10 +45,14 @@ function sameCity(left: string, right: string): boolean {
   return left.trim().toLocaleLowerCase("ru-RU") === right.trim().toLocaleLowerCase("ru-RU");
 }
 
-function fromFixture(input: Core1Input): ProjectInput {
+function fromFixture(rawInput: unknown): ProjectInput {
+  const input = rawInput && typeof rawInput === "object" && "input" in rawInput && rawInput.input && typeof rawInput.input === "object" && "span_m" in rawInput.input
+    ? rawInput.input as Core1Input
+    : rawInput as Core1Input;
   const climate = input.climate;
   return {
     ...defaultProjectInput,
+    countryCode: climate?.country ?? input.country ?? "RU",
     climate: climate?.mode === "MANUAL"
       ? { mode: "MANUAL", country: climate.country, normative_system: climate.normative_system, snow_region: String(climate.snow_region ?? ""), snow_load: climate.snow_load ?? 0, wind_region: String(climate.wind_region ?? ""), wind_load: climate.wind_load ?? 0, seismicity: String(climate.seismicity ?? ""), source_note: climate.source_note ?? "" }
       : { mode: "CITY_LOOKUP", country: climate?.country ?? input.country ?? "RU", city: climate?.city ?? input.city ?? "Роза", normative_system: climate?.normative_system ?? input.normative_system ?? "SP_20" },
@@ -136,6 +134,8 @@ function ClimatePreviewCard({ climate, status, onManual }: { climate: Core1Clima
 }
 
 export default function App() {
+  const pathname = typeof window === "undefined" ? "" : window.location.pathname.replace(/\/+$/, "");
+  if (pathname.endsWith("/engineering-preview")) return <EngineeringPreviewPage />;
   const repository = useMemo(() => new BrowserCore1DataRepository(new BrowserDataSource()), []);
   const [projectInput, setProjectInput] = useState<ProjectInput>(defaultProjectInput);
   const [cityQuery, setCityQuery] = useState(defaultProjectInput.climate.mode === "CITY_LOOKUP" ? defaultProjectInput.climate.city : "");
@@ -183,9 +183,9 @@ export default function App() {
   const updateClimate = (patch: Partial<ProjectInput["climate"]>, affectsCore1 = true) => mutateProject((current) => {
     const mode = patch.mode ?? current.climate.mode;
     const cityPatch = "city" in patch ? patch.city : undefined;
-    if (mode === "CITY_LOOKUP") return { ...current, climate: { mode: "CITY_LOOKUP", country: patch.country ?? current.climate.country, city: cityPatch ?? cityQuery, normative_system: patch.normative_system ?? current.climate.normative_system } };
+    if (mode === "CITY_LOOKUP") { const country = patch.country ?? current.countryCode; return { ...current, countryCode: country, climate: { mode: "CITY_LOOKUP", country, city: cityPatch ?? cityQuery, normative_system: patch.normative_system ?? current.climate.normative_system } }; }
     const manualBase = current.climate.mode === "MANUAL" ? current.climate : { mode: "MANUAL" as const, country: current.climate.country, normative_system: current.climate.normative_system, snow_region: "", snow_load: 0, wind_region: "", wind_load: 0, seismicity: "", source_note: "" };
-    return { ...current, climate: { ...manualBase, ...patch, mode: "MANUAL" } as ProjectInput["climate"] };
+    return { ...current, countryCode: patch.country ?? current.countryCode, climate: { ...manualBase, ...patch, mode: "MANUAL" } as ProjectInput["climate"] };
   }, affectsCore1);
   const updateGeometry = (patch: Partial<ProjectInput["geometry"]>) => mutateProject((current) => ({ ...current, geometry: { ...current.geometry, ...patch } }));
   const updateEnvelope = (patch: Partial<ProjectInput["envelope"]>) => mutateProject((current) => ({ ...current, envelope: { ...current.envelope, ...patch } }), !Object.prototype.hasOwnProperty.call(patch, "wall_system"));

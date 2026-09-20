@@ -69,6 +69,23 @@ function datasetLoadFailureResult(error: unknown): Core1EngineResult {
   };
 }
 
+function legacyRow(
+  order: number,
+  label: string,
+  value1: string | number | null,
+  value2: string | number | null,
+  value3: string | number | null,
+  unit: string | null,
+  sourceCell: string | null,
+  status: "CALCULATED" | "INPUT_ECHO" | "LEGACY_COMPATIBILITY" | "BLANK",
+) {
+  return { kind: "DATA" as const, order, label, value1, value2, value3, unit, source_cell: sourceCell, status };
+}
+
+function blankLegacyRow(order: number, label: string, sourceCell: string | null = null) {
+  return legacyRow(order, label, null, null, null, null, sourceCell, "BLANK");
+}
+
 /**
  * Orchestration boundary for Core 1 v1. Supported scenarios execute the
  * proven module chain through StructuralSummary and return a full result;
@@ -398,11 +415,136 @@ export async function calculateCore1(
     if (summaryResolution.status !== "success") {
       return { status: "invalid_input", code: "INVALID_INPUT", result: null, context: finalContext, diagnostics: [...domain.diagnostics, ...summaryResolution.diagnostics] };
     }
+    const frame = frameResolution.frame;
+    const purlin = purlinResolution.purlin;
+    const secondary = secondaryResolution.secondary;
+    const openings = openingResolution.openingMass;
     const windowOutput = windowResult
       ? [{ lower_girt_profile: windowResult.lower_girt_profile, lower_girt_steel: windowResult.lower_girt_steel, lower_girt_utilization: windowResult.lower_girt_utilization, upper_girt_profile: windowResult.upper_girt_profile, upper_girt_steel: windowResult.upper_girt_steel, upper_girt_utilization: windowResult.upper_girt_utilization, mass_kg: windowResult.window_girts_weight_kg }]
       : [];
+    const effectiveFrameStepM = frame.frame_step_m;
+    const bayCount = Math.ceil(value.building_length_m / effectiveFrameStepM);
+    const frameCount = bayCount + 1;
+    const beams = { name: "Балки", profile: frame.beam_profile, steel: frame.beam_steel, source_cell: "вывод!D33:E33", status: "ok", utilization: frame.beam_utilization };
+    const columns = { name: "Колонны", profile: frame.column_profile, steel: frame.column_steel, source_cell: "вывод!D34:E34", status: "ok", utilization: frame.column_utilization };
+    const roofPurlins = { name: "Прогоны", profile: purlin.purlin_profile, steel: purlin.purlin_steel, assignment: purlin.purlin_assignment, utilization: null, stepMm: purlin.purlin_step_mm, massKgPerM2: purlin.purlin_kg_per_m2, massKg: purlin.purlin_weight_kg, source_cell: "вывод!D35:E35; Подбор прогонов 2!P28:V28", status: "ok" };
+    const plates = secondary.plates;
+    const selectedSections = {
+      beams,
+      columns,
+      roofPurlins,
+      ties: secondary.ties,
+      suspensions: secondary.suspensions,
+      spacers: secondary.spacers,
+      horizontalBracing: secondary.horizontal_bracing,
+      verticalBracing: secondary.vertical_bracing,
+      facadePosts: secondary.gable_posts,
+      portalBracing: secondary.portal_bracing,
+      secondaryBeams: secondary.secondary_beams,
+      secondaryColumns: secondary.secondary_columns,
+      eaveRidgePlate: plates[0] ?? { name: "Пластина карниз, конек", profile: null, steel: null, source_cell: "вывод!D48:E48", status: "missing" },
+      basePlate: plates[1] ?? { name: "Пластина опора", profile: null, steel: null, source_cell: "вывод!D49:E49", status: "missing" },
+      windowGirts: windowOutput,
+    };
+    const publicBolts = secondary.bolts.map((bolt) => ({ name: bolt.name, pattern: bolt.pattern, source_cell: bolt.source_cell, quantity: bolt.quantity ?? null }));
+    const knownMassParts = [frame.frame_mass_kg, purlin.purlin_weight_kg, secondary.fittings_weight_kg, openings.opening_mass_kg];
+    const knownMassKg = knownMassParts.every((mass): mass is number => typeof mass === "number" && Number.isFinite(mass))
+      ? knownMassParts.reduce((sum, mass) => sum + mass, 0)
+      : null;
+    const canonical = {
+      frameGrid: {
+        automaticFrameStepM: legacyFrameStep?.automaticFrameStepM ?? null,
+        manualFrameStepOverrideM: value.frame_step_override_m ?? null,
+        effectiveFrameStepM,
+        bayCount,
+        frameCount,
+      },
+      selectedSections,
+      connections: { bolts: publicBolts, m16Quantity: secondary.M16_quantity, m16LegacyValue: secondary.M16_legacy_value ?? null, fittingsMassKg: secondary.fittings_weight_kg },
+      componentMasses: {
+        mainFrameMassKg: frame.frame_mass_kg ?? null,
+        purlinMassKg: purlin.purlin_weight_kg,
+        fittingsMassKg: secondary.fittings_weight_kg,
+        windowGirtsMassKg: windowResult?.window_girts_weight_kg ?? null,
+        openingMassKg: openings.opening_mass_kg,
+        openingComponentsKg: { gateLe6m: openings.gate_le_6m_mass_kg, gateGt6m: openings.gate_gt_6m_mass_kg, doors: openings.door_mass_kg, windows: openings.window_mass_kg },
+        knownMassKg,
+        unknownComponents: ["ties", "suspensions", "spacers", "bracing", "facade_posts", "plates", "bolt_mass", "unresolved_secondary_component_masses"],
+        isComplete: false as const,
+      },
+      openingCompatibility: {
+        inputEcho: { gatesLe6mCount: value.gates_le_6m_count, gatesGt6mCount: value.gates_gt_6m_count, doorsCount: value.doors_count, windows: windowsInput },
+        derivedMassesKg: { gateLe6m: openings.gate_le_6m_mass_kg, gateGt6m: openings.gate_gt_6m_mass_kg, doors: openings.door_mass_kg, windows: openings.window_mass_kg, total: openings.opening_mass_kg },
+        specificMassKgPerM2: openings.opening_mass_kg_per_m2,
+        totalMassT: openings.opening_mass_t,
+      },
+      diagnostics: [...domain.diagnostics],
+      provenance: {
+        modules: ["ClimateResolver", "LegacyClimateDeriver", "LegacyFrameBranchResolver", "LegacyFrameStepResolver", "FrameSelector", "PurlinCalculator", "SecondarySteelCalculator", "OpeningMassCalculator", "StructuralSummary"],
+        legacyOutputProjection: "calculateCore1.ts / exact ordered legacy labels and source cells",
+      },
+      legacyCompatibility: {
+        D8: legacyFrameStep?.automaticFrameStepM ?? null,
+        D68: openings.opening_mass_kg_per_m2,
+        D69: summaryResolution.summary.kg_per_m2,
+        units: { D8: "m" as const, D68: "kg/m²" as const, D69: "kg/m²" as const },
+        D69_classification: "LEGACY_COMPATIBILITY_VALUE / REGRESSION_CHECKPOINT" as const,
+      },
+    };
+    const excelOutput = {
+      sections: [
+        {
+          id: "SELECTED_SECTIONS" as const,
+          title: "Подбор сечений",
+          rows: [
+            legacyRow(1, "Балки", frame.beam_profile, frame.beam_steel, frame.beam_utilization, "%", "вывод!D33:F33", "CALCULATED"),
+            legacyRow(2, "Колонны", frame.column_profile, frame.column_steel, frame.column_utilization, "%", "вывод!D34:F34", "CALCULATED"),
+            legacyRow(3, "Прогоны", purlin.purlin_profile, purlin.purlin_steel, null, null, "вывод!D35:F35", "CALCULATED"),
+            legacyRow(4, "Затяжки", secondary.ties.profile, secondary.ties.steel, null, null, "вывод!D36:F36", "CALCULATED"),
+            legacyRow(5, "Подвески", secondary.suspensions.profile, secondary.suspensions.steel, null, null, "вывод!D37:F37", "CALCULATED"),
+            legacyRow(6, "Распорки", secondary.spacers.profile, secondary.spacers.steel, null, null, "вывод!D38:F38", "CALCULATED"),
+            legacyRow(7, "Связи горизонтальные", secondary.horizontal_bracing[0]?.profile ?? null, secondary.horizontal_bracing[0]?.steel ?? null, null, null, "вывод!D39:F39", "CALCULATED"),
+            legacyRow(8, "Связи вертикальные", secondary.vertical_bracing[0]?.profile ?? null, secondary.vertical_bracing[0]?.steel ?? null, null, null, "вывод!D40:F40", "CALCULATED"),
+            legacyRow(9, "Стойки фахверка", secondary.gable_posts.profile, secondary.gable_posts.steel, null, null, "вывод!D41:F41", "CALCULATED"),
+            legacyRow(10, "Пластина карниз, конек", plates[0]?.profile ?? null, plates[0]?.steel ?? null, null, null, "вывод!D48:F48", "CALCULATED"),
+            legacyRow(11, "Пластина опора", plates[1]?.profile ?? null, plates[1]?.steel ?? null, null, null, "вывод!D49:F49", "CALCULATED"),
+          ],
+        },
+        {
+          id: "BOLTS" as const,
+          title: "Болты (по распоряжению №40)",
+          rows: [
+            ...publicBolts.map((bolt, index) => legacyRow(index + 1, bolt.name, bolt.pattern, bolt.quantity, null, bolt.quantity === null ? null : "pcs", `вывод!D${52 + index}:E${52 + index}`, "CALCULATED" as const)),
+            legacyRow(5, "Затяжка, для крепления уголка к карнизной фасонке, M16", secondary.M16_quantity, secondary.M16_legacy_value ?? null, null, "pcs", "вывод!D56:E56", "CALCULATED"),
+          ],
+        },
+        {
+          id: "FITTINGS" as const,
+          title: "Фасонки",
+          rows: [legacyRow(1, "Вес фасонок, кг", secondary.fittings_weight_kg, null, null, "kg", "вывод!D57", "CALCULATED")],
+        },
+        {
+          id: "OPENINGS" as const,
+          title: "Проёмы",
+          rows: [
+            legacyRow(1, "Ворота до 6 м", value.gates_le_6m_count, openings.gate_le_6m_mass_kg, null, "pcs / kg", "вывод!D60", "CALCULATED"),
+            legacyRow(2, "Ворота свыше 6 м", value.gates_gt_6m_count, openings.gate_gt_6m_mass_kg, null, "pcs / kg", "вывод!D61", "CALCULATED"),
+            legacyRow(3, "Двери", value.doors_count, openings.door_mass_kg, null, "pcs / kg", "вывод!D62", "CALCULATED"),
+            blankLegacyRow(4, "Окна", "вывод!D63"),
+            legacyRow(5, "Высота окон (м)", windowsInput.window_height_m, null, null, "m", "Лист1!B7", "INPUT_ECHO"),
+            legacyRow(6, "Длина ленты (м)", windowsInput.window_strip_length_m, null, null, "m", "Лист1!B8", "INPUT_ECHO"),
+            legacyRow(7, "Количество отдельных окон", windowsInput.separate_window_count, null, null, "pcs", "Лист1!B9", "INPUT_ECHO"),
+            legacyRow(8, "Конструкция окна", windowsInput.glazing_construction, null, null, null, "Лист1!B10", "INPUT_ECHO"),
+            legacyRow(9, "МЕ окон, ворот, дверей", openings.opening_mass_kg_per_m2, null, null, "kg/m²", "вывод!D68", "LEGACY_COMPATIBILITY"),
+            legacyRow(10, "Общая МЕ", summaryResolution.summary.kg_per_m2, null, null, "kg/m²", "вывод!D69", "LEGACY_COMPATIBILITY"),
+          ],
+        },
+      ],
+    };
     const result = {
       scenario: value,
+      canonical,
+      excelOutput,
       climate: context.climate,
       frame_step_m: frameResolution.frame.frame_step_m,
       beam_profile: frameResolution.frame.beam_profile,

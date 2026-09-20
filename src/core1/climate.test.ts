@@ -71,14 +71,15 @@ describe("ClimateResolver", () => {
     }
   });
 
-  it("previews an exact local city without widening the proven calculation gate", async () => {
+  it("resolves an exact source-backed city without a city-name whitelist", async () => {
     const input = { mode: "CITY_LOOKUP" as const, country: "RU" as const, city: "Челябинск", normative_system: "SP_20" as const };
     const dataset = await climateDataset();
     const preview = previewClimate(input, dataset);
     expect(preview.status).toBe("success");
     if (preview.status === "success") expect(preview.climate).toMatchObject({ city: "Челябинск", source: "CITY_LOOKUP" });
     const calculation = resolveClimate(input, dataset);
-    expect(calculation.status).toBe("unknown_climate_data");
+    expect(calculation.status).toBe("success");
+    if (calculation.status === "success") expect(calculation.climate).toMatchObject({ city: "Челябинск", snow_region: "III", snow_load: 1.2, wind_region: "II", wind_load: 0.3 });
   });
 
   it("preserves manual RU climate and does not consult lookup data", () => {

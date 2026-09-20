@@ -4,6 +4,7 @@ import type { ProjectInput } from "../project";
 import type { ManualWallGirtReplayInput } from "./manualWallGirtReplay";
 
 const project: ProjectInput = {
+  countryCode: "RU",
   climate: { mode: "CITY_LOOKUP", country: "RU", city: "Роза", normative_system: "SP_20" },
   geometry: { span_m: 10.4, building_length_m: 25.7, building_height_m: 4, responsibility_factor: 1.0, frame_step_override_m: null },
   envelope: { roof_covering: "С-П 200", roof_deck_grade: "С44-1000-0,7", wall_system: "Сэндвич-панель 200 мм" },

@@ -7,6 +7,8 @@
   "required": ["scenario", "compatibility_diagnostics"],
   "properties": {
     "scenario": {"$ref": "Core1Input.schema.json"},
+    "canonical": {"type": "object", "additionalProperties": true},
+    "excelOutput": {"type": "object", "additionalProperties": true},
     "climate": {
       "type": ["object", "null"],
       "additionalProperties": false,
@@ -70,6 +72,7 @@
     "openings_weight_kg_per_m2": {"type": ["number", "null"], "description": "kg/m²"},
     "openings_weight_t": {"type": ["number", "null"], "description": "t"},
     "openings_weight_kg": {"type": ["number", "null"], "description": "kg"},
+    "openings": {"type": ["object", "null"], "additionalProperties": true},
     "kg_per_m2": {"type": ["number", "null"], "description": "kg/m²"},
     "engineering_loads": {"type": ["object", "null"]},
     "compatibility_diagnostics": {

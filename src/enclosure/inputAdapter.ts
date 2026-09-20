@@ -30,13 +30,35 @@ export function projectInputToColdEnclosureInput(
       cladding: options.cladding ?? "UNKNOWN",
       ...(options.insulation ? { insulation: options.insulation } : {}),
     },
-    roofSystem: { covering: project.envelope.roof_covering, deck_grade: project.envelope.roof_deck_grade },
+    roofSystem: {
+      covering: project.envelope.roof_covering,
+      deck_grade: project.envelope.roof_deck_grade,
+    },
     openings: project.openings.map((opening) => ({ ...opening })),
     frameGrid: structuralContext
-      ? { effectiveFrameStep_m: structuralContext.effectiveFrameStep_m, frameCount: structuralContext.frameCount, framePositions_m: structuralContext.framePositions_m ?? null, status: "AUTO" }
-      : { effectiveFrameStep_m: null, frameCount: null, framePositions_m: null, status: "UNKNOWN" },
+      ? {
+          effectiveFrameStep_m: structuralContext.effectiveFrameStep_m,
+          frameCount: structuralContext.frameCount,
+          framePositions_m: structuralContext.framePositions_m ?? null,
+          status: "AUTO",
+        }
+      : {
+          effectiveFrameStep_m: null,
+          frameCount: null,
+          framePositions_m: null,
+          status: "UNKNOWN",
+        },
     responsibility: project.geometry.responsibility_factor,
-    ...(options.enclosureOverrides ? { enclosureOverrides: { ...options.enclosureOverrides } } : {}),
+    ...(project.enclosure?.wall_girts.length
+      ? {
+          wallGirts: {
+            mode: "MANUAL" as const,
+            zones: project.enclosure.wall_girts.map((zone) => ({ ...zone })),
+          },
+        }
+      : {}),
+    ...(options.enclosureOverrides
+      ? { enclosureOverrides: { ...options.enclosureOverrides } }
+      : {}),
   };
 }
-
