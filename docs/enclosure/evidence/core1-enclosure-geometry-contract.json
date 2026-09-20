@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0.0",
+  "audit": "CORE1_ENCLOSURE_SUPPORT_GRID_AND_ROOF_GEOMETRY_AUDIT",
+  "production_changes": false,
+  "primary_evidence": {
+    "frame_count_formulas": [
+      {"source":"9-21m frame sheets","formula":"CEILING(length/step)-1","meaning":"intermediate quantity","status":"PROVEN"},
+      {"source":"9-21m frame sheets","formula":"CEILING(length/step)+1","meaning":"frame count","status":"PROVEN"},
+      {"source":"24m frame sheet","formula":"CEILING(length/step)+1","meaning":"frame count","status":"PROVEN"}
+    ],
+    "frame_position_formulas": [],
+    "facade_post": {
+      "profile_source":"вывод!D41",
+      "steel_source":"вывод!E41",
+      "profile_formula":"IF(D4>21,IF(E8>E9,подбор!AI15,подбор!AI14),IF(D6<3,кв. 120х4,кв. 160х4))",
+      "count_formula": null,
+      "step_formula": null,
+      "positions_formula": null,
+      "openings_dependency": "UNKNOWN"
+    },
+    "roof_geometry": {
+      "slope_formula": null,
+      "ridge_rise_formula": null,
+      "ridge_height_formula": null,
+      "building_height_datum": "PARTIAL",
+      "eave_offset_primary": false
+    }
+  },
+  "real_projects": [
+    {"id":"22318","span_m":15,"length_m":24,"building_height_m":5,"effective_frame_step_m":4,"bayCount":6,"frameCount":7,"positionsM":null,"bayLengthsM":null},
+    {"id":"22316","span_m":18,"length_m":30,"building_height_m":5,"effective_frame_step_m":4.5,"bayCount":7,"frameCount":8,"positionsM":null,"bayLengthsM":null},
+    {"id":"22329","span_m":12,"length_m":26,"building_height_m":4,"effective_frame_step_m":6,"bayCount":5,"frameCount":6,"positionsM":null,"bayLengthsM":null}
+  ],
+  "legacy_vs_engineering": {
+    "legacy_scalar_support_step": "PARTIAL",
+    "engineering_positions_required": true,
+    "selector_change_now": false
+  },
+  "contract_extension": {
+    "required": true,
+    "fields": [
+      "frameGrid.positionsM",
+      "frameGrid.bayLengthsM",
+      "facadePostGrid.status",
+      "facadePostGrid.count",
+      "facadePostGrid.positionsM",
+      "facadePostGrid.bayLengthsM"
+    ],
+    "status": "PROVISIONAL_PENDING_PRIMARY_EVIDENCE"
+  },
+  "final_status": {
+    "FRAME_POSITIONING_RULE":"UNKNOWN",
+    "CORE1_MAIN_FRAME_POSITIONS_PROVEN":"NO",
+    "CORE1_MAIN_FRAME_GRID_EXTENSION_REQUIRED":"YES",
+    "FACADE_POST_PROFILE_PROVEN":"YES",
+    "FACADE_POST_COUNT_PROVEN":"NO",
+    "FACADE_POST_STEP_PROVEN":"NO",
+    "FACADE_POST_POSITIONS_PROVEN":"NO",
+    "END_B13_SOURCE":"UNKNOWN",
+    "CORE1_END_SUPPORT_GRID_EXTENSION_REQUIRED":"YES",
+    "PRIMARY_ROOF_SLOPE_RULE":"NO",
+    "BUILDING_HEIGHT_DATUM":"PARTIAL",
+    "RIDGE_RISE_FORMULA":"NO",
+    "RIDGE_HEIGHT_FORMULA":"NO",
+    "EAVE_OFFSET_PRIMARY_EVIDENCE":"NO",
+    "EAVE_OFFSET_RELEVANT_TO_WALL_HEIGHT":"UNKNOWN",
+    "SIDE_LENGTH_MAPPING":"PARTIAL",
+    "SIDE_HEIGHT_MAPPING":"PARTIAL",
+    "SIDE_SUPPORT_MAPPING":"PARTIAL",
+    "END_LENGTH_MAPPING":"PARTIAL",
+    "END_HEIGHT_MAPPING":"NO",
+    "END_SUPPORT_MAPPING":"NO",
+    "LEGACY_AUTO_SCALAR_SUPPORT_STEP_VALID":"PARTIAL",
+    "ENGINEERING_SUPPORT_GRID_REQUIRES_POSITIONS":"YES",
+    "SAFE_TO_IMPLEMENT_SIDE_WALL_GEOMETRY_RESOLVER":"NO",
+    "SAFE_TO_IMPLEMENT_END_WALL_GEOMETRY_RESOLVER":"NO",
+    "CORE1_CONTRACT_EXTENSION_REQUIRED":"YES"
+  }
+}

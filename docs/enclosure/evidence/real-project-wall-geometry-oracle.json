@@ -1,0 +1,47 @@
+{
+  "audit": "REAL_PROJECT_WALL_GEOMETRY_ORACLE",
+  "mode": "READ_ONLY",
+  "status": "PARTIAL_PRIMARY_ORACLE_AVAILABLE",
+  "production_code_changed": false,
+  "xlsx_changed": false,
+  "projects": [
+    {"id":"22318","span_m":15,"length_m":24,"building_height_m":5,"roof_type":"двускатное","effective_frame_step_m":4,"frame_count":7,"axis_positions":"UNKNOWN"},
+    {"id":"22316","span_m":18,"length_m":30,"building_height_m":5,"roof_type":"двускатное","effective_frame_step_m":4.5,"frame_count":8,"axis_positions":"UNKNOWN"},
+    {"id":"22329","span_m":12,"length_m":26,"building_height_m":4,"roof_type":"двускатное","effective_frame_step_m":6,"frame_count":6,"axis_positions":"UNKNOWN"},
+    {"id":"489593-2025","location":"Чита","span_m":18,"length_m":30,"building_height_m":4.7,"height_datum":"bottom_of_projecting_structures","effective_frame_step_m":6,"frame_count":6,"axis_positions":[0,6,12,18,24,30],"end_major_grid_m":[0,6,12,18],"roof_slope_deg":15,"ridge_levels_m":[7.210,7.337],"complete_support_grid":"NOT_PROVEN"}
+  ],
+  "statuses": {
+    "FRAME_POSITIONING_RULE": "NOT_PROVEN",
+    "SIDE_SUPPORT_GRID_PROVEN": "NO",
+    "SIDE_B13_MEANING": "UNKNOWN_PHYSICAL_MAPPING",
+    "END_SUPPORT_GRID_PROVEN": "NO",
+    "END_B13_MEANING": "UNKNOWN",
+    "BUILDING_HEIGHT_DATUM": "NOT_PROVEN",
+    "SIDE_HEIGHT_MAPPING": "NO",
+    "PRIMARY_ROOF_SLOPE_RULE": "NOT_PROVEN",
+    "RIDGE_HEIGHT_MAPPING": "NO",
+    "B11_AUTOMATIC_MAPPING": "NO",
+    "B12_AUTOMATIC_MAPPING": "NO",
+    "B13_AUTOMATIC_MAPPING": "NO",
+    "SAFE_TO_IMPLEMENT_SIDE_RESOLVER": "NO",
+    "SAFE_TO_IMPLEMENT_END_RESOLVER": "NO",
+    "SAFE_TO_START_PROJECTINPUT_AUTO_WIRING": "NO",
+    "REAL_PROJECT_489593_SIDE_GRID": "PROVEN",
+    "REAL_PROJECT_489593_END_MAJOR_GRID": "PROVEN",
+    "REAL_PROJECT_489593_BUILDING_HEIGHT_DATUM": "PROVEN",
+    "REAL_PROJECT_489593_ROOF_SLOPE": "PROVEN_PROJECT_SPECIFIC",
+    "REAL_PROJECT_489593_RIDGE_LEVELS": "DRAWN_LEVELS_ONLY",
+    "GENERAL_FRAME_POSITIONING_RULE": "NOT_PROVEN",
+    "GENERAL_END_SUPPORT_GRID_RULE": "NOT_PROVEN",
+    "GENERAL_ROOF_SLOPE_RULE": "NOT_PROVEN",
+    "SAFE_TO_IMPLEMENT_PROJECT_489593_GEOMETRY": "NO"
+  },
+  "missing_primary_sources": [
+    "dimensioned longitudinal plans with frame axes",
+    "dimensioned gable/end elevations with vertical supports",
+    "sections/elevations with eave and ridge datums",
+    "same-project roof slope source",
+    "orientation-specific B11/B12/B13 recalculation evidence",
+    "facade-post schedule where not shown on drawings"
+  ]
+}

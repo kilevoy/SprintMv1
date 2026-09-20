@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0.0",
+  "audit": "ENCLOSURE_WALL_GEOMETRY_RESOLVER_AUDIT",
+  "production_changes": false,
+  "orientations": {
+    "SIDE": {
+      "wall_length_source": "ProjectInput.geometry.building_length_m",
+      "wall_length_status": "PARTIAL",
+      "wall_height_source": "ProjectInput.geometry.building_height_m candidate; legacy B12 is not equivalent",
+      "wall_height_status": "PARTIAL",
+      "support_step_source": "Core1.canonical.frameGrid.effectiveFrameStepM candidate",
+      "support_step_status": "PARTIAL",
+      "zone_inputs": {"corner":"PARTIAL","typical":"PARTIAL"}
+    },
+    "END": {
+      "wall_length_source": "ProjectInput.geometry.span_m candidate",
+      "wall_length_status": "PARTIAL",
+      "wall_height_source": "ridge height source not available",
+      "wall_height_status": "NO",
+      "support_step_source": "facade/gable post grid not exposed",
+      "support_step_status": "NO",
+      "zone_inputs": {"corner":"NO","typical":"NO"}
+    }
+  },
+  "legacy_cells": [
+    {"cell":"Лист1!B11","meaning":"manual wall calculation length","orientation":"UNKNOWN","status":"PARTIAL"},
+    {"cell":"Лист1!B12","meaning":"single manual wall calculation height","orientation":"UNKNOWN","status":"PARTIAL"},
+    {"cell":"Лист1!B13","meaning":"manual post/support step","orientation":"UNKNOWN","status":"PARTIAL"},
+    {"cell":"Расчет Угловая!C8","meaning":"corner zone length","formula":"2*IF(B7/B13<0.5,0,CEILING(B7/B13,1)*B13)","status":"PROVEN"},
+    {"cell":"Расчет Рядовая!B7","meaning":"typical wall length before C8 subtraction","formula":"Лист1!B11-Расчет Угловая!C8","status":"PROVEN"},
+    {"cell":"Расчет Рядовая!C8","meaning":"typical zone length","formula":"B7","status":"PROVEN"}
+  ],
+  "real_projects": [
+    {"project":"22318","span_m":15,"length_m":24,"building_height_m":5,"effective_frame_step_m":4,"roof_type":"двускатное","frame_count":7,"last_bay":"uniform nominal ratio 6"},
+    {"project":"22316","span_m":18,"length_m":30,"building_height_m":5,"effective_frame_step_m":4.5,"roof_type":"двускатное","frame_count":8,"last_bay":"shortened bay implied by ceiling count; positions unavailable"},
+    {"project":"22329","span_m":12,"length_m":26,"building_height_m":4,"effective_frame_step_m":6,"roof_type":"двускатное","frame_count":6,"last_bay":"shortened bay implied by ceiling count; positions unavailable"}
+  ],
+  "research_comparison": [
+    {"rule":"span/length/height/framePitch/roofSlope geometry separation","classification":"CORROBORATED"},
+    {"rule":"frame count = ceiling(length/frame step)+1","classification":"CORROBORATED"},
+    {"rule":"default roof slope 15 deg <=21m, 6 deg >21m","classification":"RESEARCH_ONLY"},
+    {"rule":"single-slope high-side height is manual in research examples","classification":"RESEARCH_ONLY"},
+    {"rule":"height - 0.07 column geometry","classification":"NOT_APPLICABLE"}
+  ],
+  "contract": {
+    "wallCalculationLength_m": "required",
+    "wallCalculationHeight_m": "required; orientation-specific",
+    "support": {"mode":"UNIFORM_STEP | POSITIONS | UNKNOWN","step_m":"provisional","positions_m":"required when grid is non-uniform"},
+    "roof": {"type":"двускатное | односкатное","ridgeHeight_m":"not proven"},
+    "status":"PARTIAL"
+  },
+  "final_status": {
+    "SIDE_WALL_LENGTH_MAPPING":"PARTIAL",
+    "END_WALL_LENGTH_MAPPING":"PARTIAL",
+    "BUILDING_HEIGHT_SEMANTICS":"PARTIAL",
+    "SIDE_WALL_HEIGHT_MAPPING":"PARTIAL",
+    "ROOF_SLOPE_RULE":"RESEARCH_ONLY",
+    "END_RIDGE_HEIGHT_MAPPING":"NO",
+    "SIDE_B13_TO_FRAME_GRID":"PARTIAL",
+    "END_B13_TO_FRAME_GRID":"NO",
+    "CORE1_END_WALL_SUPPORT_GRID_AVAILABLE":"NO",
+    "CORE1_CONTRACT_EXTENSION_REQUIRED":"YES",
+    "UNIFORM_SIDE_SUPPORT_STEP":"PARTIAL",
+    "WALL_GEOMETRY_RESOLVER_CONTRACT_PROVEN":"PARTIAL",
+    "SAFE_TO_IMPLEMENT_SIDE_RESOLVER":"NO",
+    "SAFE_TO_IMPLEMENT_END_RESOLVER":"NO",
+    "SAFE_TO_START_PROJECTINPUT_AUTO_WIRING":"NO"
+  }
+}
