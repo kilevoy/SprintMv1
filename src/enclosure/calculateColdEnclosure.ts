@@ -1,7 +1,8 @@
 import { enclosureDiagnostic, type EnclosureDiagnostic } from "./diagnostics";
 import { replayManualWallGirt } from "./manualWallGirtReplay";
+import { selectAutoWallGirt, toManualWallGirtReplayInput, type AutoWallGirtRuntimeInput } from "./autoWallGirtSelector";
 import type { EnclosureProvenance } from "./provenance";
-import type { ColdEnclosureInput, ColdEnclosureResult, EnclosureSectionResult, EnclosureStructuralContext, WallGirtResult } from "./types";
+import type { ColdEnclosureInput, ColdEnclosureResult, EnclosureSectionResult, EnclosureStructuralContext, WallGirtResult, AutoWallGirtZoneResult } from "./types";
 import type { ManualWallGirtZoneResult } from "./manualWallGirtReplay";
 
 const UNKNOWN_PROVENANCE: EnclosureProvenance = { status: "UNKNOWN", note: "Правило холодного ограждения ещё не импортировано из доказанного источника." };
@@ -11,7 +12,7 @@ function section(kind: string, diagnostic: EnclosureDiagnostic): EnclosureSectio
 }
 
 function emptyWallGirts(diagnostic: EnclosureDiagnostic): WallGirtResult {
-  return { kind: "WALL_GIRT", status: "UNKNOWN", items: [], sideWalls: [], endWalls: [], manualZones: [], knownMass_kg: 0, diagnostics: [diagnostic], provenance: [UNKNOWN_PROVENANCE] };
+  return { kind: "WALL_GIRT", status: "UNKNOWN", items: [], sideWalls: [], endWalls: [], manualZones: [], autoZones: [], knownMass_kg: 0, diagnostics: [diagnostic], provenance: [UNKNOWN_PROVENANCE] };
 }
 
 function manualWallGirts(input: ColdEnclosureInput): WallGirtResult {
@@ -19,10 +20,7 @@ function manualWallGirts(input: ColdEnclosureInput): WallGirtResult {
   if (!configuration) {
     return emptyWallGirts(enclosureDiagnostic("ENCLOSURE_WALL_GIRT_NOT_PROVEN", "Подбор стеновых ригелей не реализован без явной manual-конфигурации.", "WALL_GIRT"));
   }
-  if (configuration.mode === "AUTO") {
-    const diagnostic = enclosureDiagnostic("ENCLOSURE_AUTO_GIRT_SELECTION_NOT_IMPLEMENTED", "Автоматический подбор стеновых ригелей пока не реализован.", "WALL_GIRT");
-    return emptyWallGirts(diagnostic);
-  }
+  if (configuration.mode === "AUTO") return autoWallGirts(input, configuration.zones);
   if (configuration.zones.length === 0) {
     const diagnostic = enclosureDiagnostic("ENCLOSURE_INVALID_MANUAL_GIRT_INPUT", "Manual-конфигурация должна содержать хотя бы одну явную зону.", "WALL_GIRT");
     return emptyWallGirts(diagnostic);
@@ -47,6 +45,57 @@ function manualWallGirts(input: ColdEnclosureInput): WallGirtResult {
     sideWalls: [],
     endWalls: [],
     manualZones,
+    autoZones: [],
+    knownMass_kg,
+    diagnostics,
+    provenance: provenance.length > 0 ? provenance : [UNKNOWN_PROVENANCE],
+  };
+}
+
+function autoWallGirts(input: ColdEnclosureInput, zones: AutoWallGirtRuntimeInput[]): WallGirtResult {
+  if (zones.length === 0) {
+    return emptyWallGirts(enclosureDiagnostic("ENCLOSURE_AUTO_SOURCE_INPUT_MISSING", "AUTO-конфигурация должна содержать хотя бы одну явную зону.", "WALL_GIRT"));
+  }
+  const projectOpeningCount = input.openings.reduce((total, opening) => total + opening.quantity, 0);
+  if (projectOpeningCount > 0) {
+    return emptyWallGirts(enclosureDiagnostic("ENCLOSURE_OPENINGS_UNSUPPORTED", "Restricted AUTO не поддерживает проёмы.", "WALL_GIRT", { openingCount: projectOpeningCount }));
+  }
+
+  const autoZones: AutoWallGirtZoneResult[] = [];
+  const diagnostics: EnclosureDiagnostic[] = [];
+  for (const zone of zones) {
+    if (zone.withoutStuds !== true) {
+      diagnostics.push(enclosureDiagnostic("ENCLOSURE_AUTO_PLUS_STUDS_UNSUPPORTED", "Restricted AUTO поддерживает только ветку без стоек.", "WALL_GIRT"));
+      continue;
+    }
+    if (zone.normativeSystem !== "SP_20") {
+      diagnostics.push(enclosureDiagnostic("ENCLOSURE_AUTO_DOMAIN_UNSUPPORTED", "Restricted AUTO доказан только для SP20.", "WALL_GIRT", { normativeSystem: zone.normativeSystem }));
+      continue;
+    }
+    const selection = selectAutoWallGirt(zone);
+    if (selection.status === "INVALID") {
+      diagnostics.push(enclosureDiagnostic("ENCLOSURE_AUTO_SOURCE_INPUT_MISSING", selection.diagnostics.join("; "), "WALL_GIRT"));
+      continue;
+    }
+    if (selection.status !== "LEGACY_PROVEN" || !selection.selected) {
+      diagnostics.push(enclosureDiagnostic("ENCLOSURE_AUTO_NO_VALID_CANDIDATE", selection.diagnostics.join("; ") || "Нет кандидата, удовлетворяющего legacy JW.", "WALL_GIRT"));
+      continue;
+    }
+    const replay = replayManualWallGirt(toManualWallGirtReplayInput(zone, selection.selected));
+    diagnostics.push(...replay.diagnostics);
+    if (replay.zone) autoZones.push({ selection: selection.selected, replay: replay.zone });
+  }
+
+  const knownMass_kg = autoZones.reduce((total, zone) => total + zone.replay.totalKnownMass_kg, 0);
+  const provenance = autoZones.flatMap((zone) => [zone.selection.provenance, ...zone.replay.provenance]);
+  return {
+    kind: "WALL_GIRT",
+    status: autoZones.length > 0 ? "PARTIAL" : "UNKNOWN",
+    items: [],
+    sideWalls: [],
+    endWalls: [],
+    manualZones: [],
+    autoZones,
     knownMass_kg,
     diagnostics,
     provenance: provenance.length > 0 ? provenance : [UNKNOWN_PROVENANCE],
@@ -60,7 +109,7 @@ export function calculateColdEnclosure(input: ColdEnclosureInput, structuralCont
   const openingDiagnostic = enclosureDiagnostic("ENCLOSURE_OPENING_FRAMING_NOT_PROVEN", "Обрамление проёмов холодной оболочки не реализовано.", "OPENING_FRAMING");
   const sourceDiagnostic = enclosureDiagnostic("ENCLOSURE_SOURCE_EVIDENCE_MISSING", "Каталоги листов, кронштейнов, крепежа и доборных элементов отсутствуют в доказанном enclosure source set.", "SHEET/BRACKET/FASTENER/TRIM");
   const diagnostics: EnclosureDiagnostic[] = [...wallGirts.diagnostics, studDiagnostic, openingDiagnostic, sourceDiagnostic];
-  const hasKnownWallGirtMass = wallGirts.manualZones.length > 0;
+  const hasKnownWallGirtMass = wallGirts.manualZones.length > 0 || wallGirts.autoZones.length > 0;
   const unknownMassComponents = hasKnownWallGirtMass
     ? ["wallGirtExtraMembers", "wallStuds", "facadePosts", "openingFraming", "wallSheet", "roofSheet", "brackets", "fasteners", "trims"]
     : ["wallGirts", "wallStuds", "facadePosts", "openingFraming", "wallSheet", "roofSheet", "brackets", "fasteners", "trims"];

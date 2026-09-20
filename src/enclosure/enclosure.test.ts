@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { calculateColdEnclosure, projectInputToColdEnclosureInput, replayManualWallGirt } from "./index";
 import type { ProjectInput } from "../project";
 import type { ManualWallGirtReplayInput } from "./manualWallGirtReplay";
+import type { AutoWallGirtRuntimeInput } from "./autoWallGirtSelector";
 
 const project: ProjectInput = {
   countryCode: "RU",
@@ -77,9 +78,36 @@ describe("Cold Enclosure manual wall-girt integration", () => {
     profile: { profileId: "]ПП 145x45x1,5", sectionMass_kg_m: 2.6716 },
   };
 
-  function input(zones: ManualWallGirtReplayInput[] = [zone], mode: "MANUAL" | "AUTO" = "MANUAL") {
-    return { ...projectInputToColdEnclosureInput(noOpeningProject), wallGirts: { mode, zones } };
+  function input(zones: ManualWallGirtReplayInput[] = [zone]) {
+    return { ...projectInputToColdEnclosureInput(noOpeningProject), wallGirts: { mode: "MANUAL" as const, zones } };
   }
+
+  const autoZone: AutoWallGirtRuntimeInput = {
+    zoneType: "CORNER",
+    wall: "SIDE",
+    buildingLength_m: 24,
+    wallCalculationLength_m: 24,
+    wallCalculationHeight_m: 9.3,
+    postStep_m: 6,
+    buildingHeight_m: 10.5,
+    w0_kPa: 0.3,
+    terrain: "В",
+    responsibility: 0.8,
+    insulationThickness_mm: 0,
+    utilizationOverride: 0,
+    profileFamily: "all",
+    sectionType: "all",
+    material: "all",
+    minProfileHeight_mm: 145,
+    maxProfileHeight_mm: 145,
+    minThickness_mm: 0,
+    maxThickness_mm: 100,
+    minStep_mm: 0,
+    maxStep_mm: 1500,
+    manualStepMode: "none",
+    withoutStuds: true,
+    normativeSystem: "SP_20",
+  };
 
   it("delegates a valid corner zone to manualWallGirtReplay", () => {
     const result = calculateColdEnclosure(input()).result;
@@ -124,8 +152,69 @@ describe("Cold Enclosure manual wall-girt integration", () => {
   it("returns typed diagnostics for plus studs and AUTO", () => {
     const plusStuds = calculateColdEnclosure(input([{ ...zone, plusStands: true }])).result;
     expect(plusStuds.diagnostics.map((item) => item.code)).toContain("ENCLOSURE_PLUS_STUDS_UNSUPPORTED");
-    const automatic = calculateColdEnclosure(input([zone], "AUTO")).result;
-    expect(automatic.diagnostics.map((item) => item.code)).toContain("ENCLOSURE_AUTO_GIRT_SELECTION_NOT_IMPLEMENTED");
+    const automatic = calculateColdEnclosure({ ...projectInputToColdEnclosureInput(noOpeningProject), wallGirts: { mode: "AUTO", zones: [autoZone] } }).result;
+    expect(automatic.wallGirts.autoZones[0]?.selection.sourceRow).toBe(161);
     expect(automatic.wallGirts.manualZones).toEqual([]);
+  });
+});
+
+describe("Cold Enclosure explicit AUTO wall-girt integration", () => {
+  const autoZone: AutoWallGirtRuntimeInput = {
+    zoneType: "CORNER",
+    wall: "SIDE",
+    buildingLength_m: 24,
+    wallCalculationLength_m: 24,
+    wallCalculationHeight_m: 9.3,
+    postStep_m: 6,
+    buildingHeight_m: 10.5,
+    w0_kPa: 0.3,
+    terrain: "В",
+    responsibility: 0.8,
+    insulationThickness_mm: 0,
+    utilizationOverride: 0,
+    profileFamily: "all",
+    sectionType: "all",
+    material: "all",
+    minProfileHeight_mm: 145,
+    maxProfileHeight_mm: 145,
+    minThickness_mm: 0,
+    maxThickness_mm: 100,
+    minStep_mm: 0,
+    maxStep_mm: 1500,
+    manualStepMode: "none",
+    withoutStuds: true,
+    normativeSystem: "SP_20",
+  };
+
+  const input = (zones: AutoWallGirtRuntimeInput[] = [autoZone], openings: ProjectInput["openings"] = []) => ({
+    ...projectInputToColdEnclosureInput({ ...project, openings }),
+    wallGirts: { mode: "AUTO" as const, zones },
+  });
+
+  it("selects the corner golden and exposes selection plus replay", () => {
+    const result = calculateColdEnclosure(input()).result;
+    expect(result.wallGirts.autoZones[0]).toMatchObject({ selection: { sourceRow: 161, step_mm: 1370, branch: "NO_STUD" }, replay: { rows: 7, girtStep_m: 1.37, zoneLength_m: 12 } });
+    expect(result.wallGirts.knownMass_kg).toBe(result.wallGirts.autoZones[0]?.replay.totalKnownMass_kg);
+    expect(result.totals.unknownMassComponents).toContain("wallStuds");
+  });
+
+  it("selects the typical golden without changing the manual replay path", () => {
+    const result = calculateColdEnclosure(input([{ ...autoZone, zoneType: "TYPICAL" }])).result;
+    expect(result.wallGirts.autoZones[0]).toMatchObject({ selection: { sourceRow: 46, step_mm: 1380 }, replay: { zoneType: "TYPICAL" } });
+  });
+
+  it("rejects openings before selecting or replaying AUTO zones", () => {
+    const result = calculateColdEnclosure(input([autoZone], [{ id: "window-1", kind: "window", width_mm: 1500, height_mm: 1200, quantity: 1, window_type: 1, glazing_construction: "2ой стеклопакет" }])).result;
+    expect(result.wallGirts.autoZones).toEqual([]);
+    expect(result.diagnostics.map((item) => item.code)).toContain("ENCLOSURE_OPENINGS_UNSUPPORTED");
+  });
+
+  it("is deterministic for identical explicit AUTO input", () => {
+    expect(calculateColdEnclosure(input())).toEqual(calculateColdEnclosure(input()));
+  });
+
+  it("does not start AUTO from the ProjectInput adapter", () => {
+    const projected = projectInputToColdEnclosureInput({ ...project, openings: [] });
+    expect(projected.wallGirts).toBeUndefined();
   });
 });

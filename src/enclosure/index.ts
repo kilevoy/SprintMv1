@@ -1,6 +1,7 @@
 export { calculateColdEnclosure } from "./calculateColdEnclosure";
 export { projectInputToColdEnclosureInput } from "./inputAdapter";
 export { replayManualWallGirt } from "./manualWallGirtReplay";
+export { replaySelectedAutoWallGirt, selectAutoWallGirt, toManualWallGirtReplayInput } from "./autoWallGirtSelector";
 export type { ColdEnclosureAdapterOptions } from "./inputAdapter";
 export type {
   ManualWallGirtProfile,
@@ -10,6 +11,14 @@ export type {
   ManualWallGirtZoneResult,
   ManualWallGirtZoneType,
 } from "./manualWallGirtReplay";
+export type {
+  AutoWallGirtFilter,
+  AutoWallGirtRuntimeInput,
+  AutoWallGirtSelectedCandidate,
+  AutoWallGirtSelectionResult,
+  AutoWallGirtTerrain,
+  AutoWallGirtZoneType,
+} from "./autoWallGirtSelector";
 export type { EnclosureDiagnostic, EnclosureDiagnosticCode } from "./diagnostics";
 export type { EnclosureEvidenceStatus, EnclosureProvenance } from "./provenance";
 export type {
@@ -31,4 +40,6 @@ export type {
   WallGirtResult,
   WallStudResult,
   ManualWallGirtConfiguration,
+  WallGirtConfiguration,
+  AutoWallGirtZoneResult,
 } from "./types";

@@ -3,14 +3,30 @@ import type { ProjectClimate, ProjectInput, ProjectOpening } from "../project/ty
 import type { EnclosureDiagnostic } from "./diagnostics";
 import type { EnclosureProvenance, EnclosureEvidenceStatus } from "./provenance";
 import type { ManualWallGirtReplayInput, ManualWallGirtZoneResult } from "./manualWallGirtReplay";
+import type { AutoWallGirtRuntimeInput, AutoWallGirtSelectedCandidate } from "./autoWallGirtSelector";
 
 export type EnclosureOrientation = "SIDE" | "END";
 export type EnclosureComponent = "MAIN_FRAME_COLUMN" | "WALL_GIRT" | "WALL_STUD" | "FACADE_POST" | "OPENING_JAMB" | "SHEET" | "BRACKET" | "FASTENER" | "TRIM";
 export type EnclosureSelectionStatus = EnclosureEvidenceStatus | "NOT_APPLICABLE";
 
+export type WallGirtConfiguration =
+  | {
+      mode: "MANUAL";
+      zones: ManualWallGirtReplayInput[];
+    }
+  | {
+      mode: "AUTO";
+      zones: AutoWallGirtRuntimeInput[];
+    };
+
 export interface ManualWallGirtConfiguration {
-  mode: "MANUAL" | "AUTO";
+  mode: "MANUAL";
   zones: ManualWallGirtReplayInput[];
+}
+
+export interface AutoWallGirtZoneResult {
+  selection: AutoWallGirtSelectedCandidate;
+  replay: ManualWallGirtZoneResult;
 }
 
 export interface ColdEnclosureInput {
@@ -40,7 +56,7 @@ export interface ColdEnclosureInput {
     status: "AUTO" | "UNKNOWN";
   };
   responsibility: ProjectInput["geometry"]["responsibility_factor"];
-  wallGirts?: ManualWallGirtConfiguration;
+  wallGirts?: WallGirtConfiguration;
   enclosureOverrides?: Record<string, unknown>;
 }
 
@@ -80,6 +96,7 @@ export type WallGirtResult = EnclosureSectionResult & {
   sideWalls: EnclosureLineItem[];
   endWalls: EnclosureLineItem[];
   manualZones: ManualWallGirtZoneResult[];
+  autoZones: AutoWallGirtZoneResult[];
   knownMass_kg: number;
 };
 export type WallStudResult = EnclosureSectionResult & { kind: "WALL_STUD" };
