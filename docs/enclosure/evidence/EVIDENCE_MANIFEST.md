@@ -10,8 +10,8 @@ ready for runtime implementation.
 | Automatic wall-girt selection | `PARTIAL` | NO | candidate grid and objective still separate |
 | Section mass semantics | `PROVEN observed formulas` | preserve `S` vs `T` | `несушки!S:T` |
 | Capacity numeric rules | `PROVEN observed formulas` | no semantic renaming | `несушки!N2,N4,Q:R` |
-| `+ стойки` / `Без стоек` completeness | `PARTIAL` | NO | selector/weight branch found; full row set not closed |
-| Upper/lower extra girts | `PARTIAL` | NO | `TN/TO` identified in selector objective |
+| `+ стойки` / `Без стоек` completeness | `PROVEN branch arithmetic / UNKNOWN physical output` | NO static import; NO auto selector | `PLUS_STUD_SOURCE_AUDIT.md`, `Лист1!V107:W107`, rows 639:870 |
+| TN/TO named mass fields | `PROVEN objective role / UNKNOWN physical aggregation` | objective replay only; NO extra-girt runtime | `TN_TO_SOURCE_AUDIT.md`, `TN_TO_RULES.md` |
 | Opening interaction | `UNKNOWN` | NO | absent from primary workbook |
 | Window/jamb/strip framing | `NOT_PRESENT in primary workbook` | NO | requires another authoritative source |
 | Bracket price | `UNKNOWN` | NO | price source not audited |
