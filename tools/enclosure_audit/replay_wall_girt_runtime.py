@@ -12,7 +12,7 @@ import math
 from pathlib import Path
 
 import openpyxl
-from openpyxl.utils import get_column_letter
+from openpyxl.utils import column_index_from_string
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -84,7 +84,7 @@ def validation_sample() -> tuple[int, int, int]:
     """Compare calculated utilization/JW with cached Excel values after replay."""
     sample = [7, 8, 335, 336, 499, 507, 609, 614, 620, 625]
     sheets = {"corner": "Расчет Угловая", "typical": "Расчет Рядовая"}
-    wb = openpyxl.load_workbook(AUTHORITATIVE_XLSX, data_only=True, read_only=True)
+    wb = openpyxl.load_workbook(AUTHORITATIVE_XLSX, data_only=True, read_only=False)
     utilization_mismatches = 0
     jw_mismatches = 0
     checked = 0
@@ -95,7 +95,7 @@ def validation_sample() -> tuple[int, int, int]:
             fields = rows[source_row]
             for offset, step_mm in enumerate(range(500, 3001, 10)):
                 util = utilization_for_row_step(fields, branch, step_mm)
-                cached_util = ws.cell(source_row, 30 + offset).value  # AD:JT
+                cached_util = ws.cell(source_row, column_index_from_string("AD") + offset).value
                 if abs(util - float(cached_util)) > 1e-9:
                     utilization_mismatches += 1
                 expected_jw = int(
@@ -109,7 +109,7 @@ def validation_sample() -> tuple[int, int, int]:
                     and CONTRACT["min_profile_height_mm"] <= number(fields["N"]["cached_value"]) <= CONTRACT["max_profile_height_mm"]
                     and util <= 1
                 )
-                cached_jw = ws.cell(source_row, 227 + offset).value  # JW:TM
+                cached_jw = ws.cell(source_row, column_index_from_string("JW") + offset).value
                 if expected_jw != int(cached_jw):
                     jw_mismatches += 1
                 checked += 1
