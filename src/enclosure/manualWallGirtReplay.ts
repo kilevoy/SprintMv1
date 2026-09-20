@@ -129,8 +129,12 @@ export function replayManualWallGirt(input: ManualWallGirtReplayInput): ManualWa
   const baseRows = Math.ceil(input.wallHeight_m / input.girtStep_m);
   const rows = baseRows + (isPairedOrComposite(input.sectionType) ? 0 : 1);
 
-  // Лист1!G50: CEILING.MATH(rows * ROUND(zoneLength / supportStep, 1), 1).
-  const bracketCount = Math.ceil(rows * excelRoundPositive(input.zoneLength_m / input.structuralPostStep_m, 1));
+  // Лист1!G49 (corner): F49 * E24 / B13. Excel preserves the numeric
+  // result; it does not round or ceiling the corner quantity.
+  // Лист1!G50 (typical): CEILING.MATH(F50 * ROUND(E29 / B13, 1), 1).
+  const bracketCount = input.zoneType === "CORNER"
+    ? rows * input.zoneLength_m / input.structuralPostStep_m
+    : Math.ceil(rows * excelRoundPositive(input.zoneLength_m / input.structuralPostStep_m, 1));
   // Расчет Угловая!AA7: paired/composite sections use 1.5 kg, single uses 0.75 kg.
   const bracketUnitMass_kg = isPairedOrComposite(input.sectionType) ? 1.5 : 0.75;
   const profileLength_m = rows * input.zoneLength_m;

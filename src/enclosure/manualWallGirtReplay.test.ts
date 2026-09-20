@@ -32,6 +32,15 @@ describe("manual wall-girt replay", () => {
     expect(result.zone).toMatchObject({ zoneType: "TYPICAL", rows: 8, profileLength_m: 96 });
   });
 
+  it("preserves the source distinction between corner and typical bracket formulas", () => {
+    const corner = replay("[]", { structuralPostStep_m: 4.5 });
+    const typical = replay("[]", { zoneType: "TYPICAL", structuralPostStep_m: 4.5 });
+
+    expect(corner.zone?.bracketCount).toBeCloseTo(7 * 12 / 4.5, 10);
+    expect(typical.zone?.bracketCount).toBe(19);
+    expect(corner.zone?.bracketCount).not.toBe(typical.zone?.bracketCount);
+  });
+
   it.each([
     ["openings", { openingCount: 1 }, "ENCLOSURE_OPENINGS_UNSUPPORTED"],
     ["plus studs", { plusStands: true }, "ENCLOSURE_PLUS_STUDS_UNSUPPORTED"],
