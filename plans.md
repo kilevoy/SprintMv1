@@ -127,3 +127,31 @@ Progress is tracked by evidence-backed milestones, not by a percentage.
 - `D48:E49` and `D56:E56` in `bolts_plates_fittings.csv`: `PROVEN_STATIC`.
 - `D52:E52`, `D53:D55`, and `D57`: `DEPRECATED_PROJECT_CACHE`; canonical automatic 9–21 m calculation uses `LegacyConnectionResolver` and the versioned full lookup matrix.
 - Do not delete or replace cached rows until the resolver passes the reference regression matrix.
+
+## Current enclosure AUTO selector milestone
+
+1. **E1 — Restricted selector core** `[x]`
+   - Implement the pure `AutoWallGirtRuntimeInput` selector from the extracted
+     no-stud dataset and proven wind/capacity/JW/objective formulas.
+2. **E2 — Manual replay handoff** `[x]`
+   - Convert the selected candidate to the existing manual replay input; do not
+     duplicate quantity or bracket formulas.
+3. **E3 — Project wiring** `[ ]`
+   - Requires proven side/end wall-height, B11, B13, insulation and filter
+     mappings. ProjectInput and UI remain intentionally disconnected.
+
+### Assumptions and stop rules
+
+- `SP_20` and `R=TRUE`/no-stud are the only supported production selector state.
+- B12 is not globally mapped to building height; side/end geometry remains a
+  future resolver responsibility.
+- Stop before wiring if any source-to-ProjectInput mapping is inferred rather
+  than proven.
+
+### Validation gates
+
+- `npm test`
+- `npm run typecheck`
+- `npm run build`
+- `py -m pytest core1/tests/test_static_data_integrity.py`
+- `git diff --check`

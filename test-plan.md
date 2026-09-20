@@ -39,6 +39,20 @@
 5. `git diff --check`
 6. `git status`
 
+## Restricted AUTO wall-girt selector gates
+
+- Corner golden: source row 161, step 1370 mm, objective 233.41455363.
+- Typical golden: source row 46, step 1380 mm, objective 188.57523862.
+- Ten additional candidate rows across both branches compare utilization and JW
+  over all 251 steps with zero mismatches.
+- Candidate source order is preserved; no sorting or minimum-mass heuristic is
+  permitted.
+- `R=FALSE`/plus-stud and non-SP20 states remain excluded.
+- Selected candidate is passed to `replayManualWallGirt()`; manual quantity,
+  profile-length and bracket rules are not duplicated.
+- No ProjectInput, UI, Core1 or orientation-height mapping is changed in this
+  phase.
+
 ## UI refinement checks
 
 - City query, exact selection, keyboard selection, blur, invalidation, and manual CTA.

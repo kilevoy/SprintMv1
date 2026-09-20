@@ -4,6 +4,24 @@
 
 Generic legacy connection model implemented for automatic 9–21 m; supported-domain regression expansion next
 
+### Active enclosure AUTO phase
+
+Pure restricted no-stud wall-girt selector implemented. It consumes an explicit
+runtime contract and is not wired to ProjectInput/Core1/UI. Golden corner and
+typical parity are passing; geometry and insulation mapping remain blockers for
+project wiring.
+
+Next: run the full validation gates, then preserve the implementation report
+and stop before any ProjectInput adapter work.
+
+Decisions:
+
+- `B12` is a single manual wall-calculation input; no global building-height or
+  ridge-height mapping is allowed.
+- `B13` is only partially comparable to effective frame step.
+- Existing `replayManualWallGirt()` remains the sole quantity/mass/bracket
+  calculation path.
+
 ## Status
 
 `UNKNOWN_DOMAIN_GEOMETRY_GAP = CLOSED`. `ARBITRARY_SPAN_DOMAIN_GAP = CLOSED` (generic literal-span validation and family mapping). `PURLIN_DECK_GAP = CLOSED`. `WRONG_SNOW_FIELD = CLOSED`. `CANDIDATE_ORDER_ERROR = CLOSED`. `FRAME_LENGTH_ERROR = CLOSED`. `22318 = REAL_PROJECT_REFERENCE`. `22316 = REAL_PROJECT_REFERENCE`. `22329 = REAL_PROJECT_REFERENCE`. `22326 = SOURCE_SUSPICIOUS / COMPATIBILITY_CASE`. The three normative references reach exact source D69 parity and now exact generic connection/BOM parity for D52/E52/D53/D54/D55/D57. 22326 remains a compatibility case and is not a normative structural-score oracle.
