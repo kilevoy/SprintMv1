@@ -2,6 +2,8 @@ export { calculateColdEnclosure } from "./calculateColdEnclosure";
 export { projectInputToColdEnclosureInput } from "./inputAdapter";
 export { replayManualWallGirt } from "./manualWallGirtReplay";
 export { replaySelectedAutoWallGirt, selectAutoWallGirt, toManualWallGirtReplayInput } from "./autoWallGirtSelector";
+export { resolveWallGeometry } from "./wallGeometryResolver";
+export type { ResolvedWallGeometry, WallGeometryResolution, WallGeometryResolverInput } from "./wallGeometryResolver";
 export type { ColdEnclosureAdapterOptions } from "./inputAdapter";
 export type {
   ManualWallGirtProfile,
