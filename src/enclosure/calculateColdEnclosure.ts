@@ -105,10 +105,20 @@ function autoWallGirts(input: ColdEnclosureInput, zones: AutoWallGirtRuntimeInpu
 /** Calculates only explicitly configured, source-proven enclosure branches. */
 export function calculateColdEnclosure(input: ColdEnclosureInput, structuralContext: EnclosureStructuralContext | null = null): { status: "success"; result: ColdEnclosureResult } {
   const wallGirts = manualWallGirts(input);
+  const envelopeSystemDiagnostic = input.wallSystem.envelopeSystem === "PROFILED_SHEET_COLD"
+    ? null
+    : enclosureDiagnostic(
+      "ENCLOSURE_ENVELOPE_SYSTEM_UNSUPPORTED",
+      input.wallSystem.envelopeSystem === "SANDWICH_PANEL"
+        ? "Sandwich-панельная оболочка типизирована, но отдельный SandwichEnclosureCore ещё не реализован; расчёт холодного ограждения не подменяет её автоматически."
+        : "Историческая INSI built-up оболочка доступна только для legacy parity/replay и не рассчитывается как холодное ограждение.",
+      "ENVELOPE_SYSTEM",
+      { envelopeSystem: input.wallSystem.envelopeSystem },
+    );
   const studDiagnostic = enclosureDiagnostic("ENCLOSURE_STUD_RULE_NOT_PROVEN", "Правила стеновых стоек и фасадных стоек не доказаны.", "WALL_STUD/FACADE_POST");
   const openingDiagnostic = enclosureDiagnostic("ENCLOSURE_OPENING_FRAMING_NOT_PROVEN", "Обрамление проёмов холодной оболочки не реализовано.", "OPENING_FRAMING");
   const sourceDiagnostic = enclosureDiagnostic("ENCLOSURE_SOURCE_EVIDENCE_MISSING", "Каталоги листов, кронштейнов, крепежа и доборных элементов отсутствуют в доказанном enclosure source set.", "SHEET/BRACKET/FASTENER/TRIM");
-  const diagnostics: EnclosureDiagnostic[] = [...wallGirts.diagnostics, studDiagnostic, openingDiagnostic, sourceDiagnostic];
+  const diagnostics: EnclosureDiagnostic[] = [...(envelopeSystemDiagnostic ? [envelopeSystemDiagnostic] : []), ...wallGirts.diagnostics, studDiagnostic, openingDiagnostic, sourceDiagnostic];
   const hasKnownWallGirtMass = wallGirts.manualZones.length > 0 || wallGirts.autoZones.length > 0;
   const unknownMassComponents = hasKnownWallGirtMass
     ? ["wallGirtExtraMembers", "wallStuds", "facadePosts", "openingFraming", "wallSheet", "roofSheet", "brackets", "fasteners", "trims"]

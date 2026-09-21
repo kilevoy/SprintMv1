@@ -1,8 +1,10 @@
 import type { ProjectInput, ProjectOpening } from "./types";
+import type { RoofCovering } from "../core1/types";
+import { classifyRoofCoveringEnvelopeSystem, isProjectEnvelopeSystem, isSupplyScope, validateEnvelopeSystemRoofCovering } from "./envelopeSemantics";
 
 export interface SprintMProjectFile {
   format: "SPRINT_M_PROJECT";
-  version: 1;
+  version: 2;
   savedAt?: string;
   project: ProjectInput;
 }
@@ -14,7 +16,7 @@ export type ProjectFileParseResult =
 export function serializeProjectFile(project: ProjectInput, savedAt = new Date()): SprintMProjectFile {
   return {
     format: "SPRINT_M_PROJECT",
-    version: 1,
+    version: 2,
     savedAt: savedAt.toISOString(),
     project: JSON.parse(JSON.stringify(project)) as ProjectInput,
   };
@@ -70,13 +72,14 @@ function isWallGirt(value: unknown): boolean {
 }
 
 function validateProject(value: unknown): value is ProjectInput {
-  if (!isRecord(value) || !isCountry(value.countryCode) || !isRecord(value.climate) || !isRecord(value.geometry) || !isRecord(value.envelope) || !Array.isArray(value.openings) || !isRecord(value.special_conditions) || !isRecord(value.other)) return false;
+  if (!isRecord(value) || !isCountry(value.countryCode) || !isRecord(value.climate) || !isRecord(value.geometry) || !isRecord(value.envelope) || !isRecord(value.supply) || !Array.isArray(value.openings) || !isRecord(value.special_conditions) || !isRecord(value.other)) return false;
   const climate = value.climate;
   if (!((climate.mode === "CITY_LOOKUP" && typeof climate.city === "string") || (climate.mode === "MANUAL" && isFiniteNumber(climate.snow_load) && isFiniteNumber(climate.wind_load) && typeof climate.snow_region === "string" && typeof climate.wind_region === "string"))) return false;
   if (!isCountry(climate.country) || climate.country !== value.countryCode || !["SP_20", "SP_RK_EN"].includes(climate.normative_system as string)) return false;
   const geometry = value.geometry;
   if (!isFiniteNumber(geometry.span_m) || geometry.span_m <= 0 || !isFiniteNumber(geometry.building_length_m) || geometry.building_length_m <= 0 || !isFiniteNumber(geometry.building_height_m) || geometry.building_height_m <= 0 || ![0.8, 1].includes(geometry.responsibility_factor as number) || (geometry.frame_step_override_m !== null && (!isFiniteNumber(geometry.frame_step_override_m) || geometry.frame_step_override_m <= 0))) return false;
-  if (typeof value.envelope.roof_covering !== "string" || typeof value.envelope.roof_deck_grade !== "string" || typeof value.envelope.wall_system !== "string") return false;
+  if (!isProjectEnvelopeSystem(value.envelope.system) || !validateEnvelopeSystemRoofCovering(value.envelope.system, value.envelope.roof_covering as RoofCovering).valid || typeof value.envelope.roof_deck_grade !== "string" || typeof value.envelope.wall_system !== "string") return false;
+  if (!isSupplyScope(value.supply.scope) && value.supply.scope !== null) return false;
   if (!value.openings.every(isOpening)) return false;
   const special = value.special_conditions;
   if (!["есть", "нет"].includes(special.snow_retention_purlin as string) || !["есть", "нет"].includes(special.enclosure_purlin as string) || !(special.horizontal_bracing_override === null || special.horizontal_bracing_override === "+")) return false;
@@ -84,6 +87,18 @@ function validateProject(value: unknown): value is ProjectInput {
   if (!["стандарт", "подбор"].includes(other.selection_mode as string) || !["двускатное", "односкатное"].includes(other.building_roof_type as string) || (other.purlin_max_step_override_mm !== null && !isFiniteNumber(other.purlin_max_step_override_mm)) || !isFiniteNumber(other.purlin_min_step_mm) || !isFiniteNumber(other.window_scheme_factor) || !isFiniteNumber(other.window_utilization_limit) || typeof other.terrain_type !== "string") return false;
   if (value.enclosure !== undefined && (!isRecord(value.enclosure) || !Array.isArray(value.enclosure.wall_girts) || !value.enclosure.wall_girts.every(isWallGirt))) return false;
   return true;
+}
+
+function migrateV1Project(value: unknown): ProjectInput | null {
+  if (!isRecord(value) || !isRecord(value.envelope)) return null;
+  // Some callers labelled an already-extended ProjectInput as v1 while the
+  // file envelope was still v1. Preserve it when it satisfies the v2 schema.
+  if ("system" in value.envelope && "supply" in value) return validateProject(value) ? value : null;
+  if ("system" in value.envelope || "supply" in value) return null;
+  const covering = value.envelope.roof_covering;
+  if (typeof covering !== "string") return null;
+  const migrated = { ...value, envelope: { ...value.envelope, system: classifyRoofCoveringEnvelopeSystem(covering as RoofCovering) }, supply: { scope: null } };
+  return validateProject(migrated) ? migrated : null;
 }
 
 export function parseSprintMProjectFile(text: string): ProjectFileParseResult {
@@ -94,7 +109,11 @@ export function parseSprintMProjectFile(text: string): ProjectFileParseResult {
     return { ok: false, message: "Не удалось загрузить расчёт: некорректный JSON-файл." };
   }
   if (!isRecord(parsed) || parsed.format !== "SPRINT_M_PROJECT") return { ok: false, message: "Файл не является расчётом Sprint-M." };
-  if (parsed.version !== 1) return { ok: false, message: `Версия файла расчёта не поддерживается: файл v${String(parsed.version)}, приложение поддерживает v1.` };
-  if (!validateProject(parsed.project)) return { ok: false, message: "Не удалось загрузить расчёт: ProjectInput не соответствует контракту." };
-  return { ok: true, file: { format: "SPRINT_M_PROJECT", version: 1, ...(typeof parsed.savedAt === "string" ? { savedAt: parsed.savedAt } : {}), project: parsed.project } };
+  if (parsed.version === 1) {
+    const project = migrateV1Project(parsed.project);
+    if (!project) return { ok: false, message: "Не удалось загрузить расчёт: ProjectInput не соответствует контракту v1." };
+    return { ok: true, file: { format: "SPRINT_M_PROJECT", version: 2, ...(typeof parsed.savedAt === "string" ? { savedAt: parsed.savedAt } : {}), project } };
+  }
+  if (parsed.version !== 2 || !validateProject(parsed.project)) return { ok: false, message: `Версия файла расчёта не поддерживается или ProjectInput не соответствует контракту: файл v${String(parsed.version)}.` };
+  return { ok: true, file: { format: "SPRINT_M_PROJECT", version: 2, ...(typeof parsed.savedAt === "string" ? { savedAt: parsed.savedAt } : {}), project: parsed.project } };
 }

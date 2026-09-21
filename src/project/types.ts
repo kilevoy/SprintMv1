@@ -31,6 +31,17 @@ export interface ProjectClimateManual {
 
 export type ProjectClimate = ProjectClimateLookup | ProjectClimateManual;
 
+/** Supported modern envelope systems plus the explicit historical-only system. */
+export type ProjectEnvelopeSystem =
+  | "PROFILED_SHEET_COLD"
+  | "SANDWICH_PANEL";
+
+export type LegacyEnvelopeSystem = "INSI_BUILT_UP_PANEL_LEGACY";
+
+export type EnvelopeSystem = ProjectEnvelopeSystem | LegacyEnvelopeSystem;
+
+export type SupplyScope = "FRAME_ONLY" | "FULL_BUILDING";
+
 export interface ProjectGeometry {
   span_m: SpanM;
   building_length_m: number;
@@ -40,9 +51,16 @@ export interface ProjectGeometry {
 }
 
 export interface ProjectEnvelope {
+  /** Product-domain meaning; kept separate from the legacy D20 compatibility value. */
+  system: EnvelopeSystem;
   roof_covering: RoofCovering;
   roof_deck_grade: RoofDeckGrade;
   wall_system: string;
+}
+
+export interface ProjectSupply {
+  /** null means a v1 file had no proven commercial-scope value. */
+  scope: SupplyScope | null;
 }
 
 export interface GateOpening {
@@ -111,6 +129,7 @@ export interface ProjectInput {
   climate: ProjectClimate;
   geometry: ProjectGeometry;
   envelope: ProjectEnvelope;
+  supply: ProjectSupply;
   openings: ProjectOpening[];
   special_conditions: ProjectSpecialConditions;
   other: ProjectOtherFields;

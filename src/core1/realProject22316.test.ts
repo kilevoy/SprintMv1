@@ -19,7 +19,8 @@ const project22316: ProjectInput = {
   countryCode: "RU",
   climate: { mode: "CITY_LOOKUP", country: "RU", city: "Березовский", normative_system: "SP_20" },
   geometry: { span_m: 18, building_length_m: 30, building_height_m: 5, responsibility_factor: 1.0, frame_step_override_m: null },
-  envelope: { roof_covering: "С-П 150", roof_deck_grade: "С44-1000-0,7", wall_system: "Сэндвич-панель 200 мм" },
+  envelope: { system: "SANDWICH_PANEL", roof_covering: "С-П 150", roof_deck_grade: "С44-1000-0,7", wall_system: "Сэндвич-панель 200 мм" },
+  supply: { scope: null },
   openings: [
     { id: "gate-22316", kind: "gate", width_mm: 3000, height_mm: 3000, quantity: 1 },
     { id: "door-22316", kind: "door", width_mm: 1000, height_mm: 2000, quantity: 1 },

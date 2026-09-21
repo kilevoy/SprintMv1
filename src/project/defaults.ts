@@ -18,10 +18,12 @@ export function createDefaultProjectInput(): ProjectInput {
       frame_step_override_m: null,
     },
     envelope: {
+      system: "SANDWICH_PANEL",
       roof_covering: "С-П 200",
       roof_deck_grade: "С44-1000-0,7",
       wall_system: "Сэндвич-панель 200 мм",
     },
+    supply: { scope: null },
     openings: [],
     special_conditions: {
       snow_retention_purlin: "нет",

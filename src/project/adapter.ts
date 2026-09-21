@@ -1,17 +1,20 @@
 import { createCore1Diagnostic } from "../core1/diagnostics";
 import type { Core1Diagnostic, Core1Input } from "../core1/types";
 import type { ProjectInput, ProjectOpening, WindowOpening, StripWindowOpening } from "./types";
+import { validateEnvelopeSystemRoofCovering, validateNewProjectEnvelopeSystem } from "./envelopeSemantics";
 
 export interface Core1InputAdapterOptions {
   /** Workbook evidence has not yet established whether the 6 m gate boundary is width or height. */
   gate_boundary_dimension?: "width_mm" | "height_mm";
+  /** Historical imports may explicitly bypass the new-project legacy guard. */
+  project_mode?: "NEW_PROJECT" | "LEGACY_REPLAY";
 }
 
 export type ProjectInputAdapterResult =
   | { status: "success"; input: Core1Input; diagnostics: Core1Diagnostic[] }
   | { status: "unsupported"; input: null; diagnostics: Core1Diagnostic[] };
 
-function diagnostic(code: "CORE1_OPENINGS_NOT_REPRESENTABLE" | "CORE1_GATE_CLASSIFICATION_UNVERIFIED", message: string, details: Record<string, unknown>): Core1Diagnostic {
+function diagnostic(code: "CORE1_OPENINGS_NOT_REPRESENTABLE" | "CORE1_GATE_CLASSIFICATION_UNVERIFIED" | "UNSUPPORTED_LEGACY_ENVELOPE" | "INVALID_ENVELOPE_ROOFCOVERING", message: string, details: Record<string, unknown>): Core1Diagnostic {
   return createCore1Diagnostic({
     code,
     severity: "unsupported",
@@ -20,6 +23,19 @@ function diagnostic(code: "CORE1_OPENINGS_NOT_REPRESENTABLE" | "CORE1_GATE_CLASS
     message,
     source: ["PROJECT_INPUT_ARCHITECTURE.md", "CORE1_OPENING_MASS_AUDIT.md", "вывод!D60:D67"],
     affected_outputs: ["openings_weight_kg", "openings_weight_kg_per_m2", "kg_per_m2"],
+    details,
+  });
+}
+
+function envelopeDiagnostic(code: "UNSUPPORTED_LEGACY_ENVELOPE" | "INVALID_ENVELOPE_ROOFCOVERING", message: string, details: Record<string, unknown>): Core1Diagnostic {
+  return createCore1Diagnostic({
+    code,
+    severity: "unsupported",
+    classification: "unsupported",
+    module: "ProjectEnvelopeSemantics",
+    message,
+    source: ["src/project/envelopeSemantics.ts", "ENVELOPE_PRODUCT_SCOPE_AND_LEGACY_D20_AUDIT.md"],
+    affected_outputs: ["project_envelope", "roof_covering"],
     details,
   });
 }
@@ -79,6 +95,12 @@ function windowProjection(openings: ProjectOpening[]): { enabled: boolean; windo
 
 /** Converts the single ProjectInput model to the compatibility-only Core1Input contract. */
 export function projectInputToCore1Input(project: ProjectInput, options: Core1InputAdapterOptions = {}): ProjectInputAdapterResult {
+  const semanticValidation = validateEnvelopeSystemRoofCovering(project.envelope.system, project.envelope.roof_covering);
+  if (!semanticValidation.valid) return { status: "unsupported", input: null, diagnostics: [envelopeDiagnostic(semanticValidation.diagnostic.code, semanticValidation.diagnostic.message, semanticValidation.diagnostic.details)] };
+  if ((options.project_mode ?? "NEW_PROJECT") === "NEW_PROJECT") {
+    const newProjectValidation = validateNewProjectEnvelopeSystem(project.envelope.system);
+    if (!newProjectValidation.valid) return { status: "unsupported", input: null, diagnostics: [envelopeDiagnostic(newProjectValidation.diagnostic.code, newProjectValidation.diagnostic.message, newProjectValidation.diagnostic.details)] };
+  }
   const openingDiagnostics = validateOpenings(project.openings);
   if (openingDiagnostics.length > 0) return { status: "unsupported", input: null, diagnostics: openingDiagnostics };
 

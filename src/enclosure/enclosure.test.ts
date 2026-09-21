@@ -8,7 +8,8 @@ const project: ProjectInput = {
   countryCode: "RU",
   climate: { mode: "CITY_LOOKUP", country: "RU", city: "Роза", normative_system: "SP_20" },
   geometry: { span_m: 10.4, building_length_m: 25.7, building_height_m: 4, responsibility_factor: 1.0, frame_step_override_m: null },
-  envelope: { roof_covering: "С-П 200", roof_deck_grade: "С44-1000-0,7", wall_system: "Сэндвич-панель 200 мм" },
+  envelope: { system: "SANDWICH_PANEL", roof_covering: "С-П 200", roof_deck_grade: "С44-1000-0,7", wall_system: "Сэндвич-панель 200 мм" },
+  supply: { scope: null },
   openings: [
     { id: "gate-1", kind: "gate", width_mm: 4000, height_mm: 4200, quantity: 1 },
     { id: "window-1", kind: "window", width_mm: 1200, height_mm: 1500, quantity: 2, window_type: 1, glazing_construction: "2ой стеклопакет" },

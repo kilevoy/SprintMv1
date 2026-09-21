@@ -27,7 +27,8 @@ export function projectInputToColdEnclosureInput(
     canonicalClimate: options.canonicalClimate ?? null,
     wallSystem: {
       system: project.envelope.wall_system,
-      cladding: options.cladding ?? "UNKNOWN",
+      envelopeSystem: project.envelope.system,
+      cladding: options.cladding ?? (project.envelope.system === "PROFILED_SHEET_COLD" ? "COLD_PROFNASTIL" : project.envelope.system === "SANDWICH_PANEL" ? "INSULATED_SANDWICH" : "UNKNOWN"),
       ...(options.insulation ? { insulation: options.insulation } : {}),
     },
     roofSystem: {

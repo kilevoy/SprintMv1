@@ -7,7 +7,8 @@ function project(overrides: Partial<ProjectInput> = {}): ProjectInput {
     countryCode: "RU",
     climate: { mode: "CITY_LOOKUP", country: "RU", city: "Роза", normative_system: "SP_20" },
     geometry: { span_m: 12, building_length_m: 18, building_height_m: 3, responsibility_factor: 0.8, frame_step_override_m: null },
-    envelope: { roof_covering: "С-П 200", roof_deck_grade: "С44-1000-0,7", wall_system: "Сэндвич-панель 200 мм" },
+    envelope: { system: "SANDWICH_PANEL", roof_covering: "С-П 200", roof_deck_grade: "С44-1000-0,7", wall_system: "Сэндвич-панель 200 мм" },
+    supply: { scope: null },
     openings: [],
     special_conditions: { snow_retention_purlin: "нет", enclosure_purlin: "нет", horizontal_bracing_override: null },
     other: { selection_mode: "стандарт", building_roof_type: "двускатное", purlin_max_step_override_mm: null, purlin_min_step_mm: 0, terrain_type: "В", window_scheme_factor: 1.0, window_utilization_limit: 0.85 },
@@ -79,5 +80,21 @@ describe("projectInputToCore1Input", () => {
     ] }));
     expect(result.status).toBe("unsupported");
     expect(result.diagnostics[0]?.code).toBe("CORE1_OPENINGS_NOT_REPRESENTABLE");
+  });
+
+  it("rejects legacy INSI for new projects but permits explicit replay mode", () => {
+    const legacy = project({ envelope: { system: "INSI_BUILT_UP_PANEL_LEGACY", roof_covering: "наше 150 мм", roof_deck_grade: "С44-1000-0,7", wall_system: "ИНСИ" } });
+    expect(projectInputToCore1Input(legacy).diagnostics[0]?.code).toBe("UNSUPPORTED_LEGACY_ENVELOPE");
+    expect(projectInputToCore1Input(legacy, { project_mode: "LEGACY_REPLAY" }).status).toBe("success");
+  });
+
+  it("does not project commercial supply scope into Core1Input", () => {
+    const frameOnly = project({ supply: { scope: "FRAME_ONLY" } });
+    const fullBuilding = project({ supply: { scope: "FULL_BUILDING" } });
+    const first = projectInputToCore1Input(frameOnly);
+    const second = projectInputToCore1Input(fullBuilding);
+    expect(first.status).toBe("success");
+    expect(second.status).toBe("success");
+    if (first.status === "success" && second.status === "success") expect(first.input).toEqual(second.input);
   });
 });

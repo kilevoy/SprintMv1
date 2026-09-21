@@ -1,5 +1,5 @@
 import type { Core1ClimateResult } from "../core1/types";
-import type { ProjectClimate, ProjectInput, ProjectOpening } from "../project/types";
+import type { EnvelopeSystem, ProjectClimate, ProjectInput, ProjectOpening } from "../project/types";
 import type { EnclosureDiagnostic } from "./diagnostics";
 import type { EnclosureProvenance, EnclosureEvidenceStatus } from "./provenance";
 import type { ManualWallGirtReplayInput, ManualWallGirtZoneResult } from "./manualWallGirtReplay";
@@ -41,6 +41,7 @@ export interface ColdEnclosureInput {
   canonicalClimate: Core1ClimateResult | null;
   wallSystem: {
     system: string;
+    envelopeSystem: EnvelopeSystem;
     cladding: "COLD_PROFNASTIL" | "INSULATED_SANDWICH" | "UNKNOWN";
     insulation?: { thickness_mm?: number; material?: string; status: "AUTO" | "LEGACY_MANUAL" | "ENGINEERING_OVERRIDE" | "UNKNOWN" };
   };

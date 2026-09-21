@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0.0",
+  "status": "PROPOSED_SEMANTIC_CONTRACT_ONLY",
+  "source_of_truth": [
+    "SPRINT M / ENVELOPE PRODUCT SCOPE + LEGACY D20 SEMANTIC CONTRACT AUDIT",
+    "src/core1/types/input.ts",
+    "src/project/types.ts",
+    "src/project/defaults.ts",
+    "src/project/adapter.ts",
+    "src/enclosure/types.ts",
+    "src/enclosure/inputAdapter.ts",
+    "src/enclosure/calculateColdEnclosure.ts"
+  ],
+  "production_changes": {
+    "typescript_changed": false,
+    "xlsx_changed": false,
+    "formulas_changed": false,
+    "commit_created": false,
+    "push_performed": false
+  },
+  "types": {
+    "ProjectEnvelopeSystem": [
+      "PROFILED_SHEET_COLD",
+      "SANDWICH_PANEL"
+    ],
+    "SupplyScope": [
+      "FRAME_ONLY",
+      "FULL_BUILDING"
+    ],
+    "LegacyEnvelopeSystem": [
+      "INSI_BUILT_UP_PANEL_LEGACY"
+    ]
+  },
+  "current_model": {
+    "project_input_envelope_fields": [
+      "roof_covering",
+      "roof_deck_grade",
+      "wall_system"
+    ],
+    "project_input_has_intended_envelope": false,
+    "project_input_has_supply_scope": false,
+    "wall_system_is_typed_product_enum": false,
+    "core1_roof_covering_is_compatibility_enum": true,
+    "enclosure_cladding_internal_enum": [
+      "COLD_PROFNASTIL",
+      "INSULATED_SANDWICH",
+      "UNKNOWN"
+    ],
+    "enclosure_cladding_derived_from_project_input": false
+  },
+  "legacy_mapping": {
+    "PROFILED_SHEET_COLD": {
+      "legacy_roof_covering_family": "профлист",
+      "new_project_allowed": true,
+      "historical_replay_allowed": true
+    },
+    "SANDWICH_PANEL": {
+      "legacy_roof_covering_family": "С-П <explicit thickness>",
+      "new_project_allowed": true,
+      "historical_replay_allowed": true,
+      "thickness_default_proven": false
+    },
+    "INSI_BUILT_UP_PANEL_LEGACY": {
+      "legacy_roof_covering_family": "наше ...",
+      "new_project_allowed": false,
+      "historical_replay_allowed": true,
+      "thermal_class": "INSULATED"
+    }
+  },
+  "new_project_guard": {
+    "diagnostic_code": "UNSUPPORTED_LEGACY_ENVELOPE",
+    "trigger": "new project selects a legacy наше ... covering",
+    "message": "INSI_BUILT_UP_PANEL_LEGACY is retained only for historical Excel parity/replay and is outside the supported product scope of new SprintMv1 projects.",
+    "must_preserve_legacy_roof_covering_enum": true
+  },
+  "calculation_supply_separation": {
+    "principle": "Design calculation follows intendedEnvelope; SupplyScope filters commercial/BOM output.",
+    "items": [
+      {"name": "main_frames", "status": "STRUCTURAL_ALWAYS"},
+      {"name": "roof_purlins", "status": "STRUCTURAL_ALWAYS"},
+      {"name": "wall_girts", "status": "STRUCTURAL_IF_ENVELOPE_REQUIRES"},
+      {"name": "facade_gable_posts", "status": "STRUCTURAL_IF_ENVELOPE_REQUIRES"},
+      {"name": "opening_framing", "status": "STRUCTURAL_IF_ENVELOPE_REQUIRES"},
+      {"name": "structural_brackets_connections", "status": "STRUCTURAL_IF_ENVELOPE_REQUIRES"},
+      {"name": "profiled_sheet", "status": "CLADDING_MATERIAL"},
+      {"name": "sandwich_panels", "status": "CLADDING_MATERIAL"},
+      {"name": "cladding_fasteners", "status": "CLADDING_MATERIAL"},
+      {"name": "trims", "status": "CLADDING_MATERIAL"}
+    ]
+  },
+  "scope_status": {
+    "PROFILED_SHEET_COLD": "SUPPORTED_PRODUCT_TARGET; STRUCTURAL_IMPLEMENTATION_PARTIAL",
+    "SANDWICH_PANEL": "SUPPORTED_PRODUCT_TARGET; STRUCTURAL_IMPLEMENTATION_PARTIAL",
+    "INSI_BUILT_UP_PANEL_LEGACY": "PARITY_ONLY",
+    "open_none_mode": "NOT_IN_CURRENT_PRODUCT_SCOPE"
+  },
+  "final_status": {
+    "LEGACY_NASHE_MEANING": "INSI_BUILT_UP_PANEL",
+    "LEGACY_NASHE_THERMAL_CLASS": "INSULATED",
+    "LEGACY_NASHE_NEW_PROJECT_SUPPORT": "NO",
+    "LEGACY_SP_MEANING": "SANDWICH_PANEL",
+    "LEGACY_SP_NEW_PROJECT_SUPPORT": "YES",
+    "LEGACY_PROFLIST_MEANING": "PROFILED_SHEET_COLD",
+    "LEGACY_PROFLIST_NEW_PROJECT_SUPPORT": "YES",
+    "DESIGN_ENVELOPE_AND_SUPPLY_SCOPE_SEPARATED": "YES",
+    "FRAME_ONLY_PROFILED_SHEET_REQUIRES_ENVELOPE_SUPPORT_CALC": "YES",
+    "FRAME_ONLY_SANDWICH_REQUIRES_ENVELOPE_SUPPORT_CALC": "YES",
+    "PROJECTINPUT_CURRENT_CONTRACT_SUFFICIENT": "NO",
+    "PROJECTINPUT_EXTENSION_REQUIRED": "YES",
+    "CORE1_ROOFCOVERING_ENUM_CHANGE_REQUIRED": "NO",
+    "CORE1_FORMULA_CHANGE_REQUIRED": "NO",
+    "COLD_ENCLOSURE_SCOPE": "SUPPORTED_PRODUCT_TARGET; STRUCTURAL_IMPLEMENTATION_PARTIAL",
+    "SANDWICH_ENCLOSURE_SCOPE": "SUPPORTED_PRODUCT_TARGET; STRUCTURAL_IMPLEMENTATION_PARTIAL",
+    "LEGACY_BUILT_UP_ENCLOSURE_SCOPE": "PARITY_ONLY",
+    "SAFE_TO_IMPLEMENT_PRODUCT_SCOPE_TYPES": "YES",
+    "SAFE_TO_CHANGE_PROJECT_DEFAULTS": "NO",
+    "SAFE_TO_CHANGE_UI": "NO",
+    "next_stage": "typed ProjectEnvelopeSystem/SupplyScope contract, legacy guard, then EnclosureCore wiring"
+  }
+}
