@@ -30,6 +30,13 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Copy Core1 runtime datasets
+        run: |
+          mkdir -p dist/core1
+          cp -R core1/data dist/core1/data
+          test -f dist/core1/data/manifest.json
+          test -f dist/core1/data/climate_lookup_sparse.csv
+          test -f dist/core1/data/climate_cities_sparse.csv
       - name: Add SPA fallback and engineering preview route
         run: |
           cp dist/index.html dist/404.html

@@ -11,6 +11,7 @@
 | TESTS_PASS | YES |
 | SPA_NESTED_ROUTE_FALLBACK | YES (`dist/404.html` copied from `dist/index.html`) |
 | ENGINEERING_PREVIEW_DIRECT_ROUTE_SAFE | YES |
+| CORE1_RUNTIME_DATASETS_PACKAGED | YES |
 | SAFE_TO_COMMIT | YES, deployment files only |
 | SAFE_TO_PUSH_MAIN | YES, after reviewing deployment-only staging |
 
@@ -25,6 +26,11 @@
 Node setup, `npm ci`, Vite build, SPA fallback creation, Pages configuration,
 artifact upload, and deployment. It runs on pushes to `main` and on manual
 dispatch, with `contents: read`, `pages: write`, and `id-token: write`.
+
+The workflow explicitly copies `core1/data` into `dist/core1/data` and fails
+the build if the manifest or either climate dataset is missing. This is
+required because these files are runtime inputs for the browser-side data
+repository and are not copied by Vite automatically.
 
 The application uses a manual pathname check (`/engineering-preview`) rather
 than React Router. Because GitHub Pages does not rewrite nested paths, the
