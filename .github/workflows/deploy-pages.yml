@@ -30,8 +30,11 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
-      - name: Add SPA fallback
-        run: cp dist/index.html dist/404.html
+      - name: Add SPA fallback and engineering preview route
+        run: |
+          cp dist/index.html dist/404.html
+          mkdir -p dist/engineering-preview
+          cp dist/index.html dist/engineering-preview/index.html
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload Pages artifact
