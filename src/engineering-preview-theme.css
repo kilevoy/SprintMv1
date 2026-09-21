@@ -197,6 +197,10 @@
 .preview-theme-dark .preview-enclosure strong { color: var(--preview-ink); }
 
 @media (max-width: 680px) {
+  .engineering-preview-shell .preview-layout { grid-template-columns: minmax(0, 1fr); }
+  .engineering-preview-shell .preview-topbar-actions { width: 100%; flex-wrap: wrap; justify-content: flex-start; }
+  .engineering-preview-shell .preview-input-panel,
+  .engineering-preview-shell .preview-result-panel { width: 100%; min-width: 0; }
   .engineering-preview-shell .preview-workspace { padding-top: 32px; }
-  .engineering-preview-shell .preview-intro h1 { font-size: 38px; }
+  .engineering-preview-shell .preview-intro h1 { font-size: 32px; overflow-wrap: anywhere; }
 }
