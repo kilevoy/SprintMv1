@@ -10,7 +10,9 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 type NormalizedFixture = (typeof normalized.fixtures)[number];
-type OpeningFixture = (typeof openings.fixtures)[keyof typeof openings.fixtures];
+type OpeningProject = (typeof openings.fixtures)[keyof typeof openings.fixtures];
+type OpeningRow = OpeningProject["windows"][number];
+type ActiveOpeningRow = OpeningRow & { active: true; width_m: { cell: string }; height_m: { cell: string }; area_m2: { cell: string; formula: string } };
 
 /** Test-only formula oracle; no standalone Core1 frame-count export exists. */
 function formulaParityFrameCount(lengthM: number, frameStepM: number): number {
@@ -132,19 +134,35 @@ describe("Claude fixture 10 normalized regression harness", () => {
   });
 
   it("preserves the source opening classification without connecting openings to Core1", () => {
-    const values = Object.values(openings.fixtures) as OpeningFixture[];
-    expect(values).toHaveLength(10);
-    expect(values.filter((fixture) => fixture.windows.count > 0)).toHaveLength(0);
-    expect(values.filter((fixture) => fixture.doors.count > 0)).toHaveLength(6);
-    expect(values.filter((fixture) => fixture.gates.count > 0)).toHaveLength(10);
-    for (const fixture of values) {
-      for (const opening of [fixture.windows, fixture.doors, fixture.gates]) {
-        if (opening.count === 0) {
-          const inactive = opening as { count: number; width_m?: number; height_m?: number; area_m2?: number };
-          expect(inactive.width_m ?? 0).toBe(0);
-          expect(inactive.height_m ?? 0).toBe(0);
-          expect(inactive.area_m2 ?? 0).toBe(0);
-        }
+    const projects = Object.values(openings.fixtures);
+    const rowsByKind = {
+      windows: projects.flatMap((fixture) => fixture.windows),
+      doors: projects.flatMap((fixture) => fixture.doors),
+      gates: projects.flatMap((fixture) => fixture.gates),
+    };
+    const allRows = [...rowsByKind.windows, ...rowsByKind.doors, ...rowsByKind.gates];
+    expect(projects).toHaveLength(10);
+    expect(allRows).toHaveLength(35);
+    expect(rowsByKind.windows).toHaveLength(15);
+    expect(rowsByKind.doors).toHaveLength(10);
+    expect(rowsByKind.gates).toHaveLength(10);
+    expect(rowsByKind.windows.filter((row) => row.active)).toHaveLength(0);
+    expect(rowsByKind.doors.filter((row) => row.active)).toHaveLength(6);
+    expect(rowsByKind.gates.filter((row) => row.active)).toHaveLength(10);
+    expect(allRows.filter((row) => !row.active)).toHaveLength(19);
+    for (const row of allRows as OpeningRow[]) {
+      expect(row.count.cell).toMatch(/^[A-Z]+\d+$/);
+      expect(typeof row.count.value).toBe("number");
+      if (row.active) {
+        const active = row as ActiveOpeningRow;
+        expect(active.width_m.cell).toMatch(/^[A-Z]+\d+$/);
+        expect(active.height_m.cell).toMatch(/^[A-Z]+\d+$/);
+        expect(active.area_m2.cell).toMatch(/^[A-Z]+\d+$/);
+        expect(active.area_m2.formula).toContain(row.count.cell);
+      } else {
+        expect("width_m" in row).toBe(false);
+        expect("height_m" in row).toBe(false);
+        expect("area_m2" in row).toBe(false);
       }
     }
     expect(openings.positionStatus).toBe("UNKNOWN");

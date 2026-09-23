@@ -5,15 +5,65 @@
   "sourceSchema": "1.2.0",
   "positionStatus": "UNKNOWN",
   "fixtures": {
-    "21484": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 4, "width_m": 1, "height_m": 2, "sourceCells": ["J155", "K155", "L155"] }, "gates": { "count": 2, "width_m": 5, "height_m": 5, "sourceCells": ["J156", "K156", "L156"] } },
-    "21501": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 4, "width_m": 1, "height_m": 2, "sourceCells": ["J155", "K155", "L155"] }, "gates": { "count": 2, "width_m": 5, "height_m": 5, "sourceCells": ["J156", "K156", "L156"] } },
-    "21627": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 3, "width_m": 2, "height_m": 2, "sourceCells": ["J155", "K155", "L155"] }, "gates": { "count": 3, "width_m": 4, "height_m": 4.5, "sourceCells": ["J156", "K156", "L156"] } },
-    "21628": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 3, "width_m": 2, "height_m": 2, "sourceCells": ["J155", "K155", "L155"] }, "gates": { "count": 3, "width_m": 4, "height_m": 4.5, "sourceCells": ["J156", "K156", "L156"] } },
-    "21629": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 3, "width_m": 2, "height_m": 2, "sourceCells": ["J155", "K155", "L155"] }, "gates": { "count": 3, "width_m": 4, "height_m": 4.5, "sourceCells": ["J156", "K156", "L156"] } },
-    "21639": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 0 }, "gates": { "count": 1, "width_m": 4, "height_m": 4, "sourceCells": ["J156", "K156", "L156"] } },
-    "21640": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 0 }, "gates": { "count": 1, "width_m": 4, "height_m": 4, "sourceCells": ["J156", "K156", "L156"] } },
-    "21873": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 0 }, "gates": { "count": 2, "width_m": 4.5, "height_m": 4.5, "sourceCells": ["J156", "K156", "L156"] } },
-    "21892": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 0 }, "gates": { "count": 2, "width_m": 4.5, "height_m": 4.5, "sourceCells": ["J156", "K156", "L156"] } },
-    "21998": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 1, "width_m": 1, "height_m": 2.1, "sourceCells": ["J155", "K155", "L155"] }, "gates": { "count": 1, "width_m": 4.1, "height_m": 4.5, "sourceCells": ["J156", "K156", "L156"] } }
+    "21484": {
+      "liveSheet": "12м",
+      "windows": [{ "row": 160, "active": false, "count": { "value": 0, "cell": "L160" } }],
+      "doors": [{ "row": 161, "active": true, "count": { "value": 4, "cell": "L161" }, "width_m": { "value": 1, "cell": "J161" }, "height_m": { "value": 2, "cell": "K161" }, "area_m2": { "value": 8, "cell": "M161", "formula": "J161*K161*L161" } }],
+      "gates": [{ "row": 162, "active": true, "count": { "value": 2, "cell": "L162" }, "width_m": { "value": 5, "cell": "J162" }, "height_m": { "value": 5, "cell": "K162" }, "area_m2": { "value": 50, "cell": "M162", "formula": "J162*K162*L162" } }]
+    },
+    "21501": {
+      "liveSheet": "12м",
+      "windows": [{ "row": 160, "active": false, "count": { "value": 0, "cell": "L160" } }],
+      "doors": [{ "row": 161, "active": true, "count": { "value": 4, "cell": "L161" }, "width_m": { "value": 1, "cell": "J161" }, "height_m": { "value": 2, "cell": "K161" }, "area_m2": { "value": 8, "cell": "M161", "formula": "J161*K161*L161" } }],
+      "gates": [{ "row": 162, "active": true, "count": { "value": 2, "cell": "L162" }, "width_m": { "value": 5, "cell": "J162" }, "height_m": { "value": 5, "cell": "K162" }, "area_m2": { "value": 50, "cell": "M162", "formula": "J162*K162*L162" } }]
+    },
+    "21627": {
+      "liveSheet": "12м",
+      "windows": [{ "row": 160, "active": false, "count": { "value": 0, "cell": "L160" } }, { "row": 161, "active": false, "count": { "value": 0, "cell": "L161" } }],
+      "doors": [{ "row": 162, "active": true, "count": { "value": 3, "cell": "L162" }, "width_m": { "value": 2, "cell": "J162" }, "height_m": { "value": 2, "cell": "K162" }, "area_m2": { "value": 12, "cell": "M162", "formula": "J162*K162*L162" } }],
+      "gates": [{ "row": 163, "active": true, "count": { "value": 3, "cell": "L163" }, "width_m": { "value": 4, "cell": "J163" }, "height_m": { "value": 4.5, "cell": "K163" }, "area_m2": { "value": 54, "cell": "M163", "formula": "J163*K163*L163" } }]
+    },
+    "21628": {
+      "liveSheet": "12м",
+      "windows": [{ "row": 160, "active": false, "count": { "value": 0, "cell": "L160" } }, { "row": 161, "active": false, "count": { "value": 0, "cell": "L161" } }],
+      "doors": [{ "row": 162, "active": true, "count": { "value": 3, "cell": "L162" }, "width_m": { "value": 2, "cell": "J162" }, "height_m": { "value": 2, "cell": "K162" }, "area_m2": { "value": 12, "cell": "M162", "formula": "J162*K162*L162" } }],
+      "gates": [{ "row": 163, "active": true, "count": { "value": 3, "cell": "L163" }, "width_m": { "value": 4, "cell": "J163" }, "height_m": { "value": 4.5, "cell": "K163" }, "area_m2": { "value": 54, "cell": "M163", "formula": "J163*K163*L163" } }]
+    },
+    "21629": {
+      "liveSheet": "12м",
+      "windows": [{ "row": 160, "active": false, "count": { "value": 0, "cell": "L160" } }, { "row": 161, "active": false, "count": { "value": 0, "cell": "L161" } }],
+      "doors": [{ "row": 162, "active": true, "count": { "value": 3, "cell": "L162" }, "width_m": { "value": 2, "cell": "J162" }, "height_m": { "value": 2, "cell": "K162" }, "area_m2": { "value": 12, "cell": "M162", "formula": "J162*K162*L162" } }],
+      "gates": [{ "row": 163, "active": true, "count": { "value": 3, "cell": "L163" }, "width_m": { "value": 4, "cell": "J163" }, "height_m": { "value": 4.5, "cell": "K163" }, "area_m2": { "value": 54, "cell": "M163", "formula": "J163*K163*L163" } }]
+    },
+    "21639": {
+      "liveSheet": "12м",
+      "windows": [{ "row": 160, "active": false, "count": { "value": 0, "cell": "L160" } }, { "row": 161, "active": false, "count": { "value": 0, "cell": "L161" } }],
+      "doors": [{ "row": 162, "active": false, "count": { "value": 0, "cell": "L162" } }],
+      "gates": [{ "row": 163, "active": true, "count": { "value": 1, "cell": "L163" }, "width_m": { "value": 4, "cell": "J163" }, "height_m": { "value": 4, "cell": "K163" }, "area_m2": { "value": 16, "cell": "M163", "formula": "J163*K163*L163" } }]
+    },
+    "21640": {
+      "liveSheet": "12м",
+      "windows": [{ "row": 160, "active": false, "count": { "value": 0, "cell": "L160" } }, { "row": 161, "active": false, "count": { "value": 0, "cell": "L161" } }],
+      "doors": [{ "row": 162, "active": false, "count": { "value": 0, "cell": "L162" } }],
+      "gates": [{ "row": 163, "active": true, "count": { "value": 1, "cell": "L163" }, "width_m": { "value": 4, "cell": "J163" }, "height_m": { "value": 4, "cell": "K163" }, "area_m2": { "value": 16, "cell": "M163", "formula": "J163*K163*L163" } }]
+    },
+    "21873": {
+      "liveSheet": "18",
+      "windows": [{ "row": 154, "active": false, "count": { "value": 0, "cell": "L154" } }],
+      "doors": [{ "row": 155, "active": false, "count": { "value": 0, "cell": "L155" } }],
+      "gates": [{ "row": 156, "active": true, "count": { "value": 2, "cell": "L156" }, "width_m": { "value": 4.5, "cell": "J156" }, "height_m": { "value": 4.5, "cell": "K156" }, "area_m2": { "value": 40.5, "cell": "M156", "formula": "L156*K156*J156" } }]
+    },
+    "21892": {
+      "liveSheet": "12м",
+      "windows": [{ "row": 161, "active": false, "count": { "value": 0, "cell": "L161" } }],
+      "doors": [{ "row": 162, "active": false, "count": { "value": 0, "cell": "L162" } }],
+      "gates": [{ "row": 163, "active": true, "count": { "value": 2, "cell": "L163" }, "width_m": { "value": 4.5, "cell": "J163" }, "height_m": { "value": 4.5, "cell": "K163" }, "area_m2": { "value": 40.5, "cell": "M163", "formula": "J163*K163*L163" } }]
+    },
+    "21998": {
+      "liveSheet": "18",
+      "windows": [{ "row": 154, "active": false, "count": { "value": 0, "cell": "L154" } }],
+      "doors": [{ "row": 155, "active": true, "count": { "value": 1, "cell": "L155" }, "width_m": { "value": 1, "cell": "J155" }, "height_m": { "value": 2.1, "cell": "K155" }, "area_m2": { "value": 2.1, "cell": "M155", "formula": "L155*K155*J155" } }],
+      "gates": [{ "row": 156, "active": true, "count": { "value": 1, "cell": "L156" }, "width_m": { "value": 4.1, "cell": "J156" }, "height_m": { "value": 4.5, "cell": "K156" }, "area_m2": { "value": 18.45, "cell": "M156", "formula": "L156*K156*J156" } }]
+    }
   }
 }
