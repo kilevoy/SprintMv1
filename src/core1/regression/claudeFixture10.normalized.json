@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0.0",
+  "source": {
+    "sourceRepo": "insicomet/SprintM",
+    "sourceCommit": "a24b92823c46b20157e26e0dccdb323a06e34727",
+    "sourceAuditSchema": "1.2.0"
+  },
+  "fixtures": [
+    { "sourceRepo": "insicomet/SprintM", "sourceCommit": "a24b92823c46b20157e26e0dccdb323a06e34727", "sourceSchema": "1.2.0", "projectId": "21484", "sourceFile": "21484.xlsx", "liveSheet": "12м", "span_m": 20, "length_m": 90, "height_m": 7, "manualFrameStep_m": 3.92, "expectedFrameCount": 24 },
+    { "sourceRepo": "insicomet/SprintM", "sourceCommit": "a24b92823c46b20157e26e0dccdb323a06e34727", "sourceSchema": "1.2.0", "projectId": "21501", "sourceFile": "21501.xlsx", "liveSheet": "12м", "span_m": 20, "length_m": 90, "height_m": 7, "manualFrameStep_m": 3.5, "expectedFrameCount": 27 },
+    { "sourceRepo": "insicomet/SprintM", "sourceCommit": "a24b92823c46b20157e26e0dccdb323a06e34727", "sourceSchema": "1.2.0", "projectId": "21627", "sourceFile": "21627.xlsx", "liveSheet": "12м", "span_m": 18, "length_m": 46, "height_m": 7, "manualFrameStep_m": 3.4, "expectedFrameCount": 15 },
+    { "sourceRepo": "insicomet/SprintM", "sourceCommit": "a24b92823c46b20157e26e0dccdb323a06e34727", "sourceSchema": "1.2.0", "projectId": "21628", "sourceFile": "21628.xlsx", "liveSheet": "12м", "span_m": 18, "length_m": 46, "height_m": 7, "manualFrameStep_m": 3.4, "expectedFrameCount": 15 },
+    { "sourceRepo": "insicomet/SprintM", "sourceCommit": "a24b92823c46b20157e26e0dccdb323a06e34727", "sourceSchema": "1.2.0", "projectId": "21629", "sourceFile": "21629.xlsx", "liveSheet": "12м", "span_m": 18, "length_m": 46, "height_m": 7, "manualFrameStep_m": 3.4, "expectedFrameCount": 15 },
+    { "sourceRepo": "insicomet/SprintM", "sourceCommit": "a24b92823c46b20157e26e0dccdb323a06e34727", "sourceSchema": "1.2.0", "projectId": "21639", "sourceFile": "21639.xlsx", "liveSheet": "12м", "span_m": 18, "length_m": 30, "height_m": 6, "manualFrameStep_m": 5, "expectedFrameCount": 7 },
+    { "sourceRepo": "insicomet/SprintM", "sourceCommit": "a24b92823c46b20157e26e0dccdb323a06e34727", "sourceSchema": "1.2.0", "projectId": "21640", "sourceFile": "21640.xlsx", "liveSheet": "12м", "span_m": 18, "length_m": 30, "height_m": 6, "manualFrameStep_m": 5, "expectedFrameCount": 7 },
+    { "sourceRepo": "insicomet/SprintM", "sourceCommit": "a24b92823c46b20157e26e0dccdb323a06e34727", "sourceSchema": "1.2.0", "projectId": "21873", "sourceFile": "21873.xlsx", "liveSheet": "18", "span_m": 20, "length_m": 50, "height_m": 7, "manualFrameStep_m": 5, "expectedFrameCount": 11 },
+    { "sourceRepo": "insicomet/SprintM", "sourceCommit": "a24b92823c46b20157e26e0dccdb323a06e34727", "sourceSchema": "1.2.0", "projectId": "21892", "sourceFile": "21892 (СПРИНТ).xlsx", "liveSheet": "12м", "span_m": 15, "length_m": 66, "height_m": 6, "manualFrameStep_m": 4, "expectedFrameCount": 18 },
+    { "sourceRepo": "insicomet/SprintM", "sourceCommit": "a24b92823c46b20157e26e0dccdb323a06e34727", "sourceSchema": "1.2.0", "projectId": "21998", "sourceFile": "21998.xlsx", "liveSheet": "18", "span_m": 18, "length_m": 81, "height_m": 8, "manualFrameStep_m": 6, "expectedFrameCount": 15 }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "sourceCommit": "a24b92823c46b20157e26e0dccdb323a06e34727",
+  "positionStatus": "UNKNOWN",
+  "fixtures": {
+    "21484": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 4, "width_m": 1, "height_m": 2, "sourceCells": ["J155", "K155", "L155"] }, "gates": { "count": 2, "width_m": 5, "height_m": 5, "sourceCells": ["J156", "K156", "L156"] } },
+    "21501": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 4, "width_m": 1, "height_m": 2, "sourceCells": ["J155", "K155", "L155"] }, "gates": { "count": 2, "width_m": 5, "height_m": 5, "sourceCells": ["J156", "K156", "L156"] } },
+    "21627": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 3, "width_m": 2, "height_m": 2, "sourceCells": ["J155", "K155", "L155"] }, "gates": { "count": 3, "width_m": 4, "height_m": 4.5, "sourceCells": ["J156", "K156", "L156"] } },
+    "21628": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 3, "width_m": 2, "height_m": 2, "sourceCells": ["J155", "K155", "L155"] }, "gates": { "count": 3, "width_m": 4, "height_m": 4.5, "sourceCells": ["J156", "K156", "L156"] } },
+    "21629": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 3, "width_m": 2, "height_m": 2, "sourceCells": ["J155", "K155", "L155"] }, "gates": { "count": 3, "width_m": 4, "height_m": 4.5, "sourceCells": ["J156", "K156", "L156"] } },
+    "21639": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 0 }, "gates": { "count": 1, "width_m": 4, "height_m": 4, "sourceCells": ["J156", "K156", "L156"] } },
+    "21640": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 0 }, "gates": { "count": 1, "width_m": 4, "height_m": 4, "sourceCells": ["J156", "K156", "L156"] } },
+    "21873": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 0 }, "gates": { "count": 2, "width_m": 4.5, "height_m": 4.5, "sourceCells": ["J156", "K156", "L156"] } },
+    "21892": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 0 }, "gates": { "count": 2, "width_m": 4.5, "height_m": 4.5, "sourceCells": ["J156", "K156", "L156"] } },
+    "21998": { "windows": { "count": 0, "provenance": "opening count cell" }, "doors": { "count": 1, "width_m": 1, "height_m": 2.1, "sourceCells": ["J155", "K155", "L155"] }, "gates": { "count": 1, "width_m": 4.1, "height_m": 4.5, "sourceCells": ["J156", "K156", "L156"] } }
+  }
+}
