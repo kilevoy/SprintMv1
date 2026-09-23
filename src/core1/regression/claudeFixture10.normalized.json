@@ -3,7 +3,8 @@
   "source": {
     "sourceRepo": "insicomet/SprintM",
     "sourceCommit": "a24b92823c46b20157e26e0dccdb323a06e34727",
-    "sourceAuditSchema": "1.2.0"
+    "sourceAuditSchema": "1.2.0",
+    "sourceSchema": "1.2.0"
   },
   "fixtures": [
     { "sourceRepo": "insicomet/SprintM", "sourceCommit": "a24b92823c46b20157e26e0dccdb323a06e34727", "sourceSchema": "1.2.0", "projectId": "21484", "sourceFile": "21484.xlsx", "liveSheet": "12м", "span_m": 20, "length_m": 90, "height_m": 7, "manualFrameStep_m": 3.92, "expectedFrameCount": 24 },
