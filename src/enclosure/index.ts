@@ -1,10 +1,15 @@
 export { calculateColdEnclosure } from "./calculateColdEnclosure";
+export { calculateProjectV15WallGirt, calculateProjectWallGirt } from "./calculateProjectWallGirt";
 export { projectInputToColdEnclosureInput } from "./inputAdapter";
 export { replayManualWallGirt } from "./manualWallGirtReplay";
 export { replaySelectedAutoWallGirt, selectAutoWallGirt, toManualWallGirtReplayInput } from "./autoWallGirtSelector";
 export { resolveWallGeometry } from "./wallGeometryResolver";
+export { resolveProjectV15WallGeometry, resolveProjectWallGeometry } from "./projectWallGeometry";
 export type { ResolvedWallGeometry, WallGeometryResolution, WallGeometryResolverInput } from "./wallGeometryResolver";
+export type { ProjectWallGeometryOverride, ProjectWallGeometryResolution } from "./projectWallGeometry";
+export type { ProjectV15WallGeometryControls } from "./projectWallGeometry";
 export type { ColdEnclosureAdapterOptions } from "./inputAdapter";
+export type { ProjectV15WallGirtCalculationInput, ProjectWallGirtCalculationInput, ProjectWallGirtCalculationResult } from "./calculateProjectWallGirt";
 export type {
   ManualWallGirtProfile,
   ManualWallGirtReplayInput,

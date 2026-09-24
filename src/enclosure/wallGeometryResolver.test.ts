@@ -11,6 +11,7 @@ describe("WallGeometryResolver", () => {
         orientation: "SIDE",
         wallCalculationLength_m: 24,
         wallCalculationHeight_m: 9.3,
+        cornerHalfLength_m: 6,
         supportStep_m: 6,
         cornerZoneLength_m: 12,
         typicalZoneLength_m: 12,

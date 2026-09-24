@@ -20,7 +20,9 @@
     "SIDE_HEIGHT_MAPPING": "NO",
     "PRIMARY_ROOF_SLOPE_RULE": "NOT_PROVEN",
     "RIDGE_HEIGHT_MAPPING": "NO",
-    "B11_AUTOMATIC_MAPPING": "NO",
+    "B11_AUTOMATIC_MAPPING": "PROVEN_FOR_V15_FAMILY",
+    "V15_B11_ORIENTATION_RULE": "SIDE_BUILDING_LENGTH_END_SPAN",
+    "V15_B12_B13_CELLS": "LITERAL_CONTROLLER_INPUTS",
     "B12_AUTOMATIC_MAPPING": "NO",
     "B13_AUTOMATIC_MAPPING": "NO",
     "SAFE_TO_IMPLEMENT_SIDE_RESOLVER": "NO",
@@ -41,7 +43,7 @@
     "dimensioned gable/end elevations with vertical supports",
     "sections/elevations with eave and ridge datums",
     "same-project roof slope source",
-    "orientation-specific B11/B12/B13 recalculation evidence",
+    "orientation-specific B12/B13 datum and support-grid evidence",
     "facade-post schedule where not shown on drawings"
   ]
 }

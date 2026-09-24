@@ -14,6 +14,8 @@ export interface ResolvedWallGeometry {
   orientation: EnclosureOrientation;
   wallCalculationLength_m: number;
   wallCalculationHeight_m: number;
+  /** Raw source-backed B7/e value before the support-step rounding in C8. */
+  cornerHalfLength_m: number;
   supportStep_m: number;
   cornerZoneLength_m: number;
   typicalZoneLength_m: number;
@@ -61,6 +63,7 @@ export function resolveWallGeometry(input: WallGeometryResolverInput): WallGeome
       orientation: input.orientation,
       wallCalculationLength_m: input.wallCalculationLength_m,
       wallCalculationHeight_m: input.wallCalculationHeight_m,
+      cornerHalfLength_m: input.cornerHalfLength_m,
       supportStep_m: input.supportStep_m,
       cornerZoneLength_m,
       typicalZoneLength_m,

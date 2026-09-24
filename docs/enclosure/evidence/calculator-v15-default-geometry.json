@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_id": "enclosure-calculator-v15-default",
+  "classification": "REFERENCE_ONLY",
+  "source": {
+    "workbook": "Z:\\Конструктивные расчеты\\Прогоны\\Для предрасчетов\\Калькулятор ограждайки v1.5.xlsx",
+    "sha256": "ED9BD32D0114A058B92CE6876FE35575B9CE4F77DD495BEFF493F17B284F6DE8",
+    "sheets": [
+      "Лист1",
+      "Расчет Угловая",
+      "Расчет Рядовая"
+    ],
+    "normative": {
+      "cell": "Лист1!D17",
+      "value": "СП 20.13330.2016"
+    }
+  },
+  "project_inputs_observed": {
+    "span_m": {
+      "cell": "Лист1!B6",
+      "value": 10
+    },
+    "length_m": {
+      "cell": "Лист1!B7",
+      "value": 48
+    },
+    "height_m": {
+      "cell": "Лист1!B8",
+      "value": 4.75
+    },
+    "cladding": {
+      "cell": "Лист1!B18",
+      "value": "Профнастил"
+    },
+    "sheet": {
+      "cell": "Лист1!B19",
+      "value": "С18-1150-0,5"
+    }
+  },
+  "explicit_wall_geometry": {
+    "orientation": "SIDE",
+    "wall_calculation_length_m": {
+      "cell": "Лист1!B11",
+      "value": 10
+    },
+    "wall_calculation_height_m": {
+      "cell": "Лист1!B12",
+      "value": 4.7
+    },
+    "support_step_m": {
+      "cell": "Лист1!B13",
+      "value": 5
+    },
+    "corner_half_length_m": {
+      "cell": "Расчет Угловая!B7",
+      "formula": "=IF(Лист1!C21=\"Расчёт по СП РК EN\",'Ветер по EN'!G28,'Ветер по СП'!J31)",
+      "value": 2
+    }
+  },
+  "derived_zone_evidence": {
+    "corner_zone_length_m": {
+      "cell": "Расчет Угловая!C8",
+      "formula": "=2*IF('Расчет Угловая'!B7/Лист1!B13<0.5,0,CEILING.MATH('Расчет Угловая'!B7/Лист1!B13,1)*Лист1!B13)",
+      "cached_value": 0
+    },
+    "typical_zone_length_m": {
+      "cell": "Расчет Рядовая!C8",
+      "formula": "=B7",
+      "cached_value": 10
+    }
+  },
+  "policy": {
+    "project_input_auto_wiring": "NOT_PROVEN",
+    "corner_half_length_mapping": "PROVEN_FOR_THIS_FIXTURE_ONLY",
+    "frame_and_facade_positions": "UNKNOWN"
+  }
+}

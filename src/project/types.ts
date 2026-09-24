@@ -10,6 +10,7 @@ import type {
   WindowsInput,
 } from "../core1/types";
 import type { ManualWallGirtReplayInput } from "../enclosure/manualWallGirtReplay";
+import type { EnclosureProvenance } from "../enclosure/provenance";
 
 export interface ProjectClimateLookup {
   mode: "CITY_LOOKUP";
@@ -121,6 +122,13 @@ export interface ProjectOtherFields {
 
 export interface ProjectEnclosure {
   wall_girts: ManualWallGirtReplayInput[];
+  /** Optional audited v1.5 controller values; never inferred from geometry. */
+  wall_geometry?: Partial<Record<"SIDE" | "END", {
+    wallCalculationHeight_m: number;
+    cornerHalfLength_m: number;
+    supportStep_m: number;
+    provenance: EnclosureProvenance[];
+  }>>;
 }
 
 /** Single source of truth for user-entered project data. */

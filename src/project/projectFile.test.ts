@@ -17,7 +17,12 @@ const project: ProjectInput = {
   ],
   special_conditions: { snow_retention_purlin: "есть", enclosure_purlin: "нет", horizontal_bracing_override: "+" },
   other: { selection_mode: "подбор", building_roof_type: "двускатное", purlin_max_step_override_mm: 1200, purlin_min_step_mm: 0, terrain_type: "В", window_scheme_factor: 1, window_utilization_limit: 0.85 },
-  enclosure: { wall_girts: [{ wall: "END", zoneType: "TYPICAL", wallHeight_m: 4.8, zoneLength_m: 12, girtStep_m: 0.6, structuralPostStep_m: 4.5, sectionType: "[]", profile: { profileId: "C140x2", sectionMass_kg_m: 4.2 }, selectionMode: "MANUAL" }] },
+  enclosure: {
+    wall_girts: [{ wall: "END", zoneType: "TYPICAL", wallHeight_m: 4.8, zoneLength_m: 12, girtStep_m: 0.6, structuralPostStep_m: 4.5, sectionType: "[]", profile: { profileId: "C140x2", sectionMass_kg_m: 4.2 }, selectionMode: "MANUAL" }],
+    wall_geometry: {
+      END: { wallCalculationHeight_m: 4.8, cornerHalfLength_m: 2, supportStep_m: 4.5, provenance: [{ status: "LEGACY_PROVEN", fixtureId: "project-file-controller" }] },
+    },
+  },
 };
 
 describe("Sprint-M project file", () => {
@@ -84,5 +89,18 @@ describe("Sprint-M project file", () => {
   it("rejects invalid nested ProjectInput fields atomically", () => {
     const invalid = { ...project, geometry: { ...project.geometry, building_height_m: -1 } };
     expect(parseSprintMProjectFile(JSON.stringify({ format: "SPRINT_M_PROJECT", version: 1, project: invalid }))).toMatchObject({ ok: false });
+  });
+
+  it("rejects an unproven or malformed persisted wall controller", () => {
+    const invalid = {
+      ...project,
+      enclosure: {
+        ...project.enclosure,
+        wall_geometry: {
+          END: { wallCalculationHeight_m: 0, cornerHalfLength_m: 2, supportStep_m: 4.5, provenance: [] },
+        },
+      },
+    };
+    expect(parseSprintMProjectFile(JSON.stringify({ format: "SPRINT_M_PROJECT", version: 2, project: invalid }))).toMatchObject({ ok: false });
   });
 });

@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "contract": "WALL_GEOMETRY_EXTERNAL_AUDIT_FIXTURE",
+  "purpose": "Accept independently verified geometry fixtures without inferring ProjectInput-to-legacy mappings.",
+  "required_provenance": [
+    "project_id",
+    "source_workbook",
+    "source_workbook_sha256",
+    "source_sheet_and_cells",
+    "formula_or_literal",
+    "cached_value"
+  ],
+  "required_geometry": [
+    "orientation",
+    "wall_calculation_length_m",
+    "wall_calculation_height_m",
+    "corner_half_length_m",
+    "support_step_m"
+  ],
+  "optional_grid": [
+    "frame_step_m",
+    "frame_positions_m",
+    "facade_post_step_m",
+    "facade_post_positions_m"
+  ],
+  "allowed_orientation": ["SIDE", "END"],
+  "mapping_policy": {
+    "project_input_auto_inference": "FORBIDDEN_UNTIL_PRIMARY_EVIDENCE",
+    "b11_b12_b13_substitution": "FORBIDDEN_UNLESS_EXACT_FORMULA_AND_CACHED_VALUE_PROVEN",
+    "uniform_grid_fallback": "FORBIDDEN",
+    "nearest_value_or_extrapolation": "FORBIDDEN"
+  },
+  "acceptance_status": "PENDING_PRIMARY_EVIDENCE"
+}

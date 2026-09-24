@@ -85,7 +85,11 @@ function validateProject(value: unknown): value is ProjectInput {
   if (!["есть", "нет"].includes(special.snow_retention_purlin as string) || !["есть", "нет"].includes(special.enclosure_purlin as string) || !(special.horizontal_bracing_override === null || special.horizontal_bracing_override === "+")) return false;
   const other = value.other;
   if (!["стандарт", "подбор"].includes(other.selection_mode as string) || !["двускатное", "односкатное"].includes(other.building_roof_type as string) || (other.purlin_max_step_override_mm !== null && !isFiniteNumber(other.purlin_max_step_override_mm)) || !isFiniteNumber(other.purlin_min_step_mm) || !isFiniteNumber(other.window_scheme_factor) || !isFiniteNumber(other.window_utilization_limit) || typeof other.terrain_type !== "string") return false;
-  if (value.enclosure !== undefined && (!isRecord(value.enclosure) || !Array.isArray(value.enclosure.wall_girts) || !value.enclosure.wall_girts.every(isWallGirt))) return false;
+  if (value.enclosure !== undefined) {
+    if (!isRecord(value.enclosure) || !Array.isArray(value.enclosure.wall_girts) || !value.enclosure.wall_girts.every(isWallGirt)) return false;
+    const wallGeometry = value.enclosure.wall_geometry;
+    if (wallGeometry !== undefined && (!isRecord(wallGeometry) || (wallGeometry.SIDE !== undefined && !isWallGeometryController(wallGeometry.SIDE)) || (wallGeometry.END !== undefined && !isWallGeometryController(wallGeometry.END)))) return false;
+  }
   return true;
 }
 
@@ -99,6 +103,11 @@ function migrateV1Project(value: unknown): ProjectInput | null {
   if (typeof covering !== "string") return null;
   const migrated = { ...value, envelope: { ...value.envelope, system: classifyRoofCoveringEnvelopeSystem(covering as RoofCovering) }, supply: { scope: null } };
   return validateProject(migrated) ? migrated : null;
+}
+
+function isWallGeometryController(value: unknown): boolean {
+  if (!isRecord(value) || !isFiniteNumber(value.wallCalculationHeight_m) || value.wallCalculationHeight_m <= 0 || !isFiniteNumber(value.cornerHalfLength_m) || value.cornerHalfLength_m <= 0 || !isFiniteNumber(value.supportStep_m) || value.supportStep_m <= 0 || !Array.isArray(value.provenance)) return false;
+  return value.provenance.length > 0 && value.provenance.every((item) => isRecord(item) && typeof item.status === "string");
 }
 
 export function parseSprintMProjectFile(text: string): ProjectFileParseResult {

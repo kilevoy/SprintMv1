@@ -13,6 +13,8 @@ export interface AutoWallGirtRuntimeInput {
   wallCalculationLength_m: number;
   wallCalculationHeight_m: number;
   postStep_m: number;
+  /** Optional raw source-backed e/B7 value. When present it is authoritative. */
+  cornerHalfLength_m?: number;
   buildingHeight_m: number;
   w0_kPa: number;
   terrain: AutoWallGirtTerrain;
@@ -213,13 +215,16 @@ function getField(row: EvidenceRow, field: string): EvidenceField {
 function validRuntime(input: AutoWallGirtRuntimeInput): string | null {
   const numeric = [input.buildingLength_m, input.wallCalculationLength_m, input.wallCalculationHeight_m, input.postStep_m, input.buildingHeight_m, input.w0_kPa, input.responsibility, input.insulationThickness_mm, input.utilizationOverride, input.minProfileHeight_mm, input.maxProfileHeight_mm, input.minThickness_mm, input.maxThickness_mm, input.minStep_mm, input.maxStep_mm];
   if (numeric.some((value) => !Number.isFinite(value))) return "Runtime contract contains a non-finite value";
+  if (input.cornerHalfLength_m !== undefined && (!Number.isFinite(input.cornerHalfLength_m) || input.cornerHalfLength_m <= 0)) return "cornerHalfLength_m must be positive when supplied";
   if (input.normativeSystem !== "SP_20" || input.withoutStuds !== true) return "Only SP_20/no-stud restricted AUTO is proven";
   if (input.wallCalculationHeight_m <= 0 || input.postStep_m <= 0 || input.buildingLength_m <= 0 || input.wallCalculationLength_m <= 0) return "Runtime geometry must be positive";
   return null;
 }
 
 function zoneLength(input: AutoWallGirtRuntimeInput): number {
-  const windLength = Math.min(input.buildingLength_m, 2 * Math.max(5, input.buildingHeight_m)) / 5;
+  // Расчет Угловая!B7 → Ветер по СП!J31: e = MIN(length, 2*height), then e/5.
+  // Do not clamp height to 5 m: the source formula uses the literal height.
+  const windLength = input.cornerHalfLength_m ?? (Math.min(input.buildingLength_m, 2 * input.buildingHeight_m) / 5);
   const cornerLength = windLength / input.postStep_m < 0.5 ? 0 : 2 * Math.ceil(windLength / input.postStep_m) * input.postStep_m;
   return input.zoneType === "CORNER" ? cornerLength : input.wallCalculationLength_m - cornerLength;
 }

@@ -72,6 +72,30 @@ describe("restricted legacy AUTO wall-girt selector", () => {
     expect(replay.zone).toMatchObject({ zoneType: "CORNER", rows: 7, girtStep_m: 1.37, zoneLength_m: 12, bracketCount: 14 });
   });
 
+  it("uses literal height in the source e/5 corner-length rule", () => {
+    const result = replaySelectedAutoWallGirt({
+      ...sourceCase,
+      zoneType: "TYPICAL",
+      buildingLength_m: 48,
+      buildingHeight_m: 4.75,
+      wallCalculationLength_m: 10,
+      wallCalculationHeight_m: 4.7,
+      postStep_m: 4,
+    });
+    expect(result.status).toBe("PROVEN");
+    expect(result.zone?.zoneLength_m).toBe(10);
+  });
+
+  it("uses an explicit audited corner half-length when supplied", () => {
+    const result = replaySelectedAutoWallGirt({
+      ...sourceCase,
+      zoneType: "TYPICAL",
+      cornerHalfLength_m: 0.1,
+    });
+    expect(result.status).toBe("PROVEN");
+    expect(result.zone?.zoneLength_m).toBe(24);
+  });
+
   it("keeps the manual replay path unchanged", () => {
     const result = replaySelectedAutoWallGirt({ ...sourceCase, maxStep_mm: 0 });
     expect(result.status).toBe("UNSUPPORTED");

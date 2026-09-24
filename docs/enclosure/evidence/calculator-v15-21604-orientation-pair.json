@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_id": "calculator-v15-21604-orientation-pair",
+  "classification": "REFERENCE_ONLY",
+  "source_files": [
+    {
+      "orientation_variant": "LONGITUDINAL",
+      "workbook": "Z:\\Предварительные расчеты\\21604 спринт профлист\\Калькулятор ограждайки v1.5 торец продольная.xlsx",
+      "sha256": "DAE79A7266A558D9DBDA71FB32958BADAA7330AE119AC17A877FA1AB9F43E44A",
+      "inputs": {"B6_span_m": 18, "B7_length_m": 48, "B8_height_m": 9.75, "B11_wall_length_m": 48, "B12_wall_height_m": 7.5, "B13_support_step_m": 5.35},
+      "cached_zone": {"corner_half_length_m": 3.9, "corner_zone_length_m": 10.7, "typical_zone_length_m": 37.3}
+    },
+    {
+      "orientation_variant": "END",
+      "workbook": "Z:\\Предварительные расчеты\\21604 спринт профлист\\Калькулятор ограждайки v1.5 торец.xlsx",
+      "sha256": "668A7BB463BBD72B80B6728F356EE4AD98B4D50D75EDC1A242E35099DA988363",
+      "inputs": {"B6_span_m": 18, "B7_length_m": 48, "B8_height_m": 9.75, "B11_wall_length_m": 18, "B12_wall_height_m": 9.75, "B13_support_step_m": 6},
+      "cached_zone": {"corner_half_length_m": 3.9, "corner_zone_length_m": 12, "typical_zone_length_m": 6}
+    }
+  ],
+  "formula_contract": {
+    "corner_half_length": "IF(Лист1!C21=\"Расчёт по СП РК EN\",'Ветер по EN'!G28,'Ветер по СП'!J31)",
+    "corner_zone": "2*IF(B7/B13<0.5,0,CEILING.MATH(B7/B13,1)*B13)",
+    "typical_zone": "Лист1!B11 - Расчет Угловая!C8"
+  },
+  "conclusion": "B11/B12/B13 are orientation-specific selected-wall controls; direct universal ProjectInput substitution remains unproven."
+}

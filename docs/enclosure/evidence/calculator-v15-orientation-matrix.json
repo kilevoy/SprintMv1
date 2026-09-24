@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_id": "calculator-v15-orientation-matrix",
+  "classification": "REFERENCE_ONLY",
+  "observations": [
+    {
+      "projectId": "21604",
+      "orientation": "SIDE",
+      "sourceFile": "Z:\\Предварительные расчеты\\21604 спринт профлист\\Калькулятор ограждайки v1.5 торец продольная.xlsx",
+      "sourceSha256": "DAE79A7266A558D9DBDA71FB32958BADAA7330AE119AC17A877FA1AB9F43E44A",
+      "projectInputs": {"span_m": 18, "length_m": 48, "height_m": 9.75},
+      "controllers": {"B11_wallLength_m": 48, "B12_wallHeight_m": 7.5, "B13_supportStep_m": 5.35},
+      "zones": {"B7_cornerHalf_m": 3.9, "C8_corner_m": 10.7, "C8_typical_m": 37.3}
+    },
+    {
+      "projectId": "21604",
+      "orientation": "END",
+      "sourceFile": "Z:\\Предварительные расчеты\\21604 спринт профлист\\Калькулятор ограждайки v1.5 торец.xlsx",
+      "sourceSha256": "668A7BB463BBD72B80B6728F356EE4AD98B4D50D75EDC1A242E35099DA988363",
+      "projectInputs": {"span_m": 18, "length_m": 48, "height_m": 9.75},
+      "controllers": {"B11_wallLength_m": 18, "B12_wallHeight_m": 9.75, "B13_supportStep_m": 6},
+      "zones": {"B7_cornerHalf_m": 3.9, "C8_corner_m": 12, "C8_typical_m": 6}
+    },
+    {
+      "projectId": "22317",
+      "orientation": "SIDE",
+      "sourceFile": "Z:\\Предварительные расчеты\\22317 Благовещенск (рск с опорной кран балкой 5т)\\Подбор ограждайки для продольных стен.xlsx",
+      "sourceSha256": "D2A73D4225F1C1DE6D4C8BF328D92BF9D97263A628ECB44CEEE52DB5135C5D17",
+      "projectInputs": {"span_m": 12, "length_m": 45, "height_m": 7.4},
+      "controllers": {"B11_wallLength_m": 45, "B12_wallHeight_m": 6.8, "B13_supportStep_m": 6},
+      "zones": {"B7_cornerHalf_m": 2.96, "C8_corner_m": 0, "C8_typical_m": 45}
+    },
+    {
+      "projectId": "22317",
+      "orientation": "END",
+      "sourceFile": "Z:\\Предварительные расчеты\\22317 Благовещенск (рск с опорной кран балкой 5т)\\Подбор ограждайки для торцевых стен.xlsx",
+      "sourceSha256": "4E7341A6708BA06284B40D90620448CBA794CFF769960A0EEE47E8AF8723A63C",
+      "projectInputs": {"span_m": 12, "length_m": 45, "height_m": 7.4},
+      "controllers": {"B11_wallLength_m": 12, "B12_wallHeight_m": 7.4, "B13_supportStep_m": 6},
+      "zones": {"B7_cornerHalf_m": 2.96, "C8_corner_m": 0, "C8_typical_m": 12}
+    },
+    {
+      "projectId": "KARGALEIKA",
+      "orientation": "SIDE",
+      "sourceFile": "Z:\\Предварительные расчеты\\Предрасчеты на проверку\\Каргалейка\\Калькулятор ограждайки v1.5 на длину 30м.xlsx",
+      "sourceSha256": "172131613BEECAA3F73D3ECEE49698E7D9BAD636E21BD6FAE19B23DAF2A49EAF",
+      "projectInputs": {"span_m": 12, "length_m": 30, "height_m": 6.5},
+      "controllers": {"B11_wallLength_m": 30, "B12_wallHeight_m": 4.8, "B13_supportStep_m": 6},
+      "zones": {"B7_cornerHalf_m": 2.6, "C8_corner_m": 0, "C8_typical_m": 30}
+    },
+    {
+      "projectId": "KARGALEIKA",
+      "orientation": "END",
+      "sourceFile": "Z:\\Предварительные расчеты\\Предрасчеты на проверку\\Каргалейка\\Калькулятор ограждайки v1.5 на торец 12м.xlsx",
+      "sourceSha256": "A2FC77ABD2B7AB939ED8340D11442DF9EF8CA55E37FBC9D7CB17B7CFD7B7E001",
+      "projectInputs": {"span_m": 12, "length_m": 30, "height_m": 6.5},
+      "controllers": {"B11_wallLength_m": 12, "B12_wallHeight_m": 6.5, "B13_supportStep_m": 4},
+      "zones": {"B7_cornerHalf_m": 2.6, "C8_corner_m": 8, "C8_typical_m": 4}
+    }
+  ],
+  "formulaFingerprint": {
+    "cornerHalf": "IF(Лист1!C21=\"Расчёт по СП РК EN\",'Ветер по EN'!G28,'Ветер по СП'!J31)",
+    "cornerZone": "2*IF(B7/B13<0.5,0,CEILING.MATH(B7/B13,1)*B13)",
+    "typicalZone": "Лист1!B11 - Расчет Угловая!C8"
+  },
+  "controllerCellAudit": {
+    "cells": ["Лист1!B11", "Лист1!B12", "Лист1!B13"],
+    "allSixObservedAsLiteralInputs": true,
+    "formulaCount": 0
+  },
+  "conclusion": "Across two projects and both orientations, B11 follows selected wall length (side=building length, end=span), while B12 and B13 remain orientation/project controller values. Universal ProjectInput height and support-step substitution is not proven."
+}
