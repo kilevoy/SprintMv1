@@ -128,6 +128,20 @@ export async function calculateCore1(
       diagnostics: domain.diagnostics,
     };
   }
+  if (value.construction_scheme === "SPRINT_WITH_TIE") {
+    const diagnostic = createCore1Diagnostic({
+      code: "UNSUPPORTED_CONSTRUCTION_SCHEME",
+      severity: "unsupported",
+      classification: "unsupported",
+      module: "StructuralScheme",
+      message: "Ветка «Спринт с затяжкой» выбрана явно, но её доказанный расчётный модуль ещё не реализован.",
+      source: ["STRUCTURAL_SCHEME_CONTRACT.md", "STRUCTURAL_SCHEME_COST_AUDIT.md"],
+      trigger: "construction_scheme=SPRINT_WITH_TIE",
+      affected_outputs: ["frame", "purlin", "secondary_steel", "mass", "price"],
+      legacy_equivalent: null,
+    });
+    return { status: "unsupported", code: "UNSUPPORTED_CONSTRUCTION_SCHEME", result: null, diagnostics: [diagnostic] };
+  }
   if (designSpanFamily === null) {
     return {
       status: "unknown_domain",

@@ -3,6 +3,7 @@ import type { ProjectInput } from "./types";
 /** Canonical clean project state used by both application surfaces. */
 export function createDefaultProjectInput(): ProjectInput {
   return {
+    construction_scheme: "SPRINT",
     countryCode: "RU",
     climate: {
       mode: "CITY_LOOKUP",

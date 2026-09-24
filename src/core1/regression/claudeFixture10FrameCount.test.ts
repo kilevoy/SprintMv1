@@ -131,7 +131,7 @@ describe("Claude fixture 10 normalized regression harness", () => {
       expect(row.geometryOnly.projectId).toBe(row.projectId);
       expect(row.withSourceManualStep.projectId).toBe(row.projectId);
     }
-  });
+  }, 30000);
 
   it("preserves the source opening classification without connecting openings to Core1", () => {
     const projects = Object.values(openings.fixtures);

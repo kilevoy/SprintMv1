@@ -11,6 +11,7 @@
     "gates_gt_6m_count", "doors_count"
   ],
   "properties": {
+    "construction_scheme": {"type": "string", "enum": ["SPRINT", "SPRINT_WITH_TIE"], "default": "SPRINT", "description": "Explicit legacy structural scheme; formulas are not interchangeable between schemes"},
     "city": {"type": "string", "minLength": 1},
     "country": {"type": "string", "enum": ["RU", "KZ"]},
     "normative_system": {"type": "string", "enum": ["SP_20", "SP_RK_EN"]},

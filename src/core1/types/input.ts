@@ -12,6 +12,8 @@ export type SeismicityClassification = "ACTIVE_CALCULATION_INPUT" | "INFORMATION
 /** Existing Core 1 specifications do not prove seismicity in structural formulas. */
 export const CORE1_SEISMICITY_CLASSIFICATION: SeismicityClassification = "UNKNOWN";
 export type SelectionMode = "стандарт" | "подбор";
+/** Explicit legacy structural scheme; formulas for the tie branch remain separate. */
+export type StructuralScheme = "SPRINT" | "SPRINT_WITH_TIE";
 export type RoofDeckGrade = "С44-1000-0,5" | "С44-1000-0,7" | "Н60-845-0,7" | "Н60-845-0,8";
 
 export type RoofCovering =
@@ -67,6 +69,8 @@ export interface ManualClimateInput {
 export type ClimateInput = CityLookupClimateInput | ManualClimateInput;
 
 export interface Core1Input {
+  /** Defaults to SPRINT for legacy project files that predate this field. */
+  construction_scheme?: StructuralScheme;
   /** @deprecated Use climate.mode=CITY_LOOKUP and climate.city. */
   city?: string;
   country?: CountryCode;

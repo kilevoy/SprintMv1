@@ -26,7 +26,8 @@ export type Core1EngineCode =
   | "CITY_NOT_FOUND"
   | "INVALID_INPUT"
   | "NOT_IMPLEMENTED"
-  | "UNSUPPORTED_FOR_PARITY";
+  | "UNSUPPORTED_FOR_PARITY"
+  | "UNSUPPORTED_CONSTRUCTION_SCHEME";
 
 export interface Core1EngineBase {
   status: Core1EngineStatus;
@@ -47,7 +48,7 @@ export interface Core1EngineLegacyError extends Core1EngineBase {
 
 export interface Core1EngineUnsupported extends Core1EngineBase {
   status: "unsupported";
-  code: "UNSUPPORTED_FOR_PARITY" | "NOT_IMPLEMENTED";
+  code: "UNSUPPORTED_FOR_PARITY" | "UNSUPPORTED_CONSTRUCTION_SCHEME" | "NOT_IMPLEMENTED";
   internal_status?: "NOT_IMPLEMENTED";
   result: null;
 }

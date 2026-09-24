@@ -15,6 +15,7 @@ export type {
   RoofDeckGrade,
   SelectionMode,
   SpanM,
+  StructuralScheme,
   TerrainType,
   WindowsInput,
 } from "./input";

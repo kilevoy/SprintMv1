@@ -126,8 +126,11 @@ export function validateCore1InputDomain(input: unknown): Core1InputDomainResult
     !Number.isFinite(value.building_height_m) ||
     value.building_height_m <= 0 ||
     value.building_height_m > 6.2;
+  // Manual frame steps are resolved against the selected frame dataset by
+  // FrameSelector. Do not reject every non-zero value here: an exact cached
+  // row (for example 6 m in the proven 12 m table) must reach that matcher.
+  // Invalid/non-matching values receive typed diagnostics from FrameSelector.
   const unknownManualDomain =
-    (value.frame_step_override_m !== undefined && value.frame_step_override_m !== null && value.frame_step_override_m !== 0) ||
     (value.purlin_max_step_override_mm !== undefined && value.purlin_max_step_override_mm !== null && value.purlin_max_step_override_mm !== 0 && value.purlin_max_step_override_mm !== 500) ||
     (value.purlin_min_step_mm !== undefined && value.purlin_min_step_mm !== 0);
   if (unknownGeometryDomain || unknownManualDomain) {
@@ -142,7 +145,7 @@ export function validateCore1InputDomain(input: unknown): Core1InputDomainResult
         legacy_equivalent: null,
         trigger: unknownGeometryDomain
           ? "length must be positive and height must be within the proven FrameSelector bands (0, 6.2]"
-          : "manual frame step/purlin override is outside the proven domain",
+          : "purlin override is outside the proven domain",
         affected_outputs: ["frame_step_m", "beam_profile", "column_profile", "purlin_profile", "openings_weight_kg", "kg_per_m2"],
         details: {
           building_length_m: value.building_length_m,

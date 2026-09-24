@@ -50,6 +50,12 @@ describe("Sprint-M project file", () => {
     if (loaded.ok) expect(loaded.file.project).toMatchObject({ envelope: { system: "SANDWICH_PANEL", roof_covering: "С-П 200" }, supply: { scope: null } });
   });
 
+  it("accepts the explicit Sprint-with-tie scheme and rejects unknown scheme values", () => {
+    const tie = { ...project, construction_scheme: "SPRINT_WITH_TIE" as const };
+    expect(parseSprintMProjectFile(JSON.stringify({ format: "SPRINT_M_PROJECT", version: 2, project: tie })).ok).toBe(true);
+    const invalid = { ...project, construction_scheme: "UNKNOWN_SCHEME" };
+    expect(parseSprintMProjectFile(JSON.stringify({ format: "SPRINT_M_PROJECT", version: 2, project: invalid })).ok).toBe(false);
+  });
   it("rejects a v2 semantic mismatch", () => {
     const invalid = { ...project, envelope: { ...project.envelope, system: "PROFILED_SHEET_COLD" as const } };
     expect(parseSprintMProjectFile(JSON.stringify({ format: "SPRINT_M_PROJECT", version: 2, project: invalid })).ok).toBe(false);

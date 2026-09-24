@@ -5,6 +5,7 @@ import type {
   RoofCovering,
   RoofDeckGrade,
   SpanM,
+  StructuralScheme,
   TerrainType,
   WindowsInput,
 } from "../core1/types";
@@ -124,6 +125,8 @@ export interface ProjectEnclosure {
 
 /** Single source of truth for user-entered project data. */
 export interface ProjectInput {
+  /** Explicit structural scheme; absent in older saved files and treated as SPRINT. */
+  construction_scheme?: StructuralScheme;
   /** Explicit project country selector; climate.country mirrors this value. */
   countryCode: CountryCode;
   climate: ProjectClimate;

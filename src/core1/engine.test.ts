@@ -62,6 +62,13 @@ describe("Core 1 input validation and orchestration", () => {
     expect(resultCode(result)).toBe("INVALID_INPUT");
   });
 
+  it("does not calculate Sprint-with-tie as the ordinary Sprint branch", async () => {
+    const input = { ...(await inputFor("baseline_12m") as Record<string, unknown>), construction_scheme: "SPRINT_WITH_TIE" };
+    const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
+    expect(result.status).toBe("unsupported");
+    expect(resultCode(result)).toBe("UNSUPPORTED_CONSTRUCTION_SCHEME");
+    expect(result.diagnostics[0]?.module).toBe("StructuralScheme");
+  });
   it.each([9, 12, 15, 18, 21] as const)("accepts supported span %dm", async (span) => {
     const input = { ...(await inputFor("baseline_12m") as Record<string, unknown>), span_m: span };
     expect(validateCore1InputDomain(input).state).toBe("VALID");
@@ -120,6 +127,35 @@ describe("Core 1 input validation and orchestration", () => {
     expect(result.context?.purlin).toMatchObject({ purlin_profile: "2ПС 200х65х2", purlin_steel: "М.п.390", purlin_step_mm: 1745, purlin_weight_kg: 2214.312 });
     expect(result.context?.openings).toMatchObject({ opening_mass_kg_per_m2: 1.9406614785992218 });
     expect(result.result.kg_per_m2).toBeTypeOf("number");
+  });
+
+  it("routes an exact proven manual frame step to FrameSelector", async () => {
+    const base = await inputFor("baseline_12m") as Record<string, unknown>;
+    const input = { ...base, frame_step_override_m: 6 };
+    expect(validateCore1InputDomain(input).state).toBe("VALID");
+    const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
+    expect(result.status).toBe("success");
+    if (result.status !== "success") return;
+    expect(result.context?.frame?.frame_step_m).toBe(6);
+    expect(result.context?.frame?.trace.selection_reason).toBe("manual_step_match");
+  });
+
+  it("returns a typed unknown-domain diagnostic for a positive step with no matching row", async () => {
+    const base = await inputFor("baseline_12m") as Record<string, unknown>;
+    const input = { ...base, frame_step_override_m: 5 };
+    expect(validateCore1InputDomain(input).state).toBe("VALID");
+    const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
+    expect(result.status).toBe("unknown_domain");
+    expect(resultCode(result)).toBe("UNKNOWN_DOMAIN");
+  });
+
+  it("keeps zero manual frame step invalid rather than silently selecting automatic D8", async () => {
+    const base = await inputFor("baseline_12m") as Record<string, unknown>;
+    const input = { ...base, frame_step_override_m: 0 };
+    expect(validateCore1InputDomain(input).state).toBe("VALID");
+    const result = await calculateCore1(input, new BrowserCore1DataRepository(source));
+    expect(result.status).toBe("invalid_input");
+    expect(resultCode(result)).toBe("INVALID_INPUT");
   });
 
   it("routes non-zero windows to the proven local module boundary without using J20", async () => {

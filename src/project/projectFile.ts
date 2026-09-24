@@ -72,7 +72,7 @@ function isWallGirt(value: unknown): boolean {
 }
 
 function validateProject(value: unknown): value is ProjectInput {
-  if (!isRecord(value) || !isCountry(value.countryCode) || !isRecord(value.climate) || !isRecord(value.geometry) || !isRecord(value.envelope) || !isRecord(value.supply) || !Array.isArray(value.openings) || !isRecord(value.special_conditions) || !isRecord(value.other)) return false;
+  if (!isRecord(value) || (value.construction_scheme !== undefined && !["SPRINT", "SPRINT_WITH_TIE"].includes(value.construction_scheme as string)) || !isCountry(value.countryCode) || !isRecord(value.climate) || !isRecord(value.geometry) || !isRecord(value.envelope) || !isRecord(value.supply) || !Array.isArray(value.openings) || !isRecord(value.special_conditions) || !isRecord(value.other)) return false;
   const climate = value.climate;
   if (!((climate.mode === "CITY_LOOKUP" && typeof climate.city === "string") || (climate.mode === "MANUAL" && isFiniteNumber(climate.snow_load) && isFiniteNumber(climate.wind_load) && typeof climate.snow_region === "string" && typeof climate.wind_region === "string"))) return false;
   if (!isCountry(climate.country) || climate.country !== value.countryCode || !["SP_20", "SP_RK_EN"].includes(climate.normative_system as string)) return false;

@@ -88,6 +88,17 @@ describe("projectInputToCore1Input", () => {
     expect(projectInputToCore1Input(legacy, { project_mode: "LEGACY_REPLAY" }).status).toBe("success");
   });
 
+  it("defaults legacy projects without a scheme to SPRINT", () => {
+    const result = projectInputToCore1Input(project());
+    expect(result.status).toBe("success");
+    if (result.status === "success") expect(result.input.construction_scheme).toBe("SPRINT");
+  });
+  it("projects the explicit Sprint-with-tie construction scheme without changing other inputs", () => {
+    const result = projectInputToCore1Input(project({ construction_scheme: "SPRINT_WITH_TIE" }));
+    expect(result.status).toBe("success");
+    if (result.status === "success") expect(result.input.construction_scheme).toBe("SPRINT_WITH_TIE");
+  });
+
   it("does not project commercial supply scope into Core1Input", () => {
     const frameOnly = project({ supply: { scope: "FRAME_ONLY" } });
     const fullBuilding = project({ supply: { scope: "FULL_BUILDING" } });
