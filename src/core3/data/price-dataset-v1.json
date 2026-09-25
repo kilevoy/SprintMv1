@@ -8,12 +8,71 @@
   },
   "entries": [
     {
+      "id": "outer-corner-angle-50x50-3000-galv",
+      "canonical_mark": "Уголок 50х50 нар",
+      "aliases": [],
+      "category": "TRIM",
+      "unit": "pcs",
+      "price_per_unit": 640,
+      "source": {
+        "workbook": "Z:\\Предварительные расчеты\\Калькуляторы\\Прайс для предрасчетов (не изменять).xlsx",
+        "sha256": "08ea5728ad901409b651081b849dfb6db2c182c6b71c972224674365c0372b87",
+        "effective_date": "2026-03-12",
+        "sheet": "Профлист,доборы",
+        "row": 50,
+        "price_cell": "E50",
+        "unit_cell": "F50",
+        "name_cell": "B50"
+      }
+    },
+    {
+      "id": "wall-girt-pp-145-45-15-p390-galv",
+      "canonical_mark": "ПП 145x45 без перфор. 1,5 П390 (Оцинк.)",
+      "aliases": ["ПП 145х45 без перфор. 1,5 П390 (Оцинк.)", "ПП 145x45 без перфор. 1,5 П390", "ПП 145x45x1,5", "ПП 145х45х1,5"],
+      "unit": "m",
+      "price_per_unit": 396,
+      "source": {
+        "workbook": "ПРАЙС ПОЛНЫЙ на 23.09.2026.xlsx",
+        "sha256": "2f3a9ea415801dc4a93d6c4e3a1f95f95d429c8fd6100cd5d459806ec11433fe",
+        "effective_date": "2026-09-23",
+        "sheet": "TDSheet",
+        "row": 927,
+        "price_cell": "G927",
+        "unit_cell": "H927",
+        "name_cell": "B927",
+        "mass_cell": "I927",
+        "code_cell": "D927"
+      }
+    },
+    {
+      "id": "wall-girt-bracket-special-angle-90-20-p350-galv",
+      "code_1c": "852",
+      "canonical_mark": "Угол специальный 90 гр. 2,0 П350 (Оцинк.)",
+      "aliases": ["Угол специальный 90 гр. 2,0 П350"],
+      "category": "WALL_GIRT_BRACKET",
+      "unit": "m",
+      "price_per_unit": 2278,
+      "mass_kg_per_m": 15.626,
+      "source": {
+        "workbook": "ПРАЙС ПОЛНЫЙ на 23.09.2026.xlsx",
+        "sha256": "2f3a9ea415801dc4a93d6c4e3a1f95f95d429c8fd6100cd5d459806ec11433fe",
+        "effective_date": "2026-09-23",
+        "sheet": "TDSheet",
+        "row": 861,
+        "price_cell": "G861",
+        "unit_cell": "H861",
+        "name_cell": "B861",
+        "code_cell": "D861",
+        "mass_cell": "I861"
+      }
+    },
+    {
       "id": "profiled-wall-s18-05",
       "canonical_mark": "С-18 0,5мм",
       "aliases": ["С-18 окр. (0.5 мм)"],
       "unit": "m2",
       "price_per_unit": 794.65,
-      "source": { "sheet": "Профлист,доборы", "row": 7, "price_cell": "E7", "unit_cell": "F7", "name_cell": "B7" }
+      "source": { "workbook": "Z:\\Предварительные расчеты\\Калькуляторы\\Прайс для предрасчетов (не изменять).xlsx", "sha256": "08ea5728ad901409b651081b849dfb6db2c182c6b71c972224674365c0372b87", "effective_date": "2026-03-12", "sheet": "Профлист,доборы", "row": 7, "price_cell": "E7", "unit_cell": "F7", "name_cell": "B7" }
     },
     {
       "id": "profiled-roof-s44-07",
@@ -21,7 +80,7 @@
       "aliases": ["С-44 оцинк. (0,7 мм)"],
       "unit": "m2",
       "price_per_unit": 691.98,
-      "source": { "sheet": "Профлист,доборы", "row": 15, "price_cell": "E15", "unit_cell": "F15", "name_cell": "B15" }
+      "source": { "workbook": "Z:\\Предварительные расчеты\\Калькуляторы\\Прайс для предрасчетов (не изменять).xlsx", "sha256": "08ea5728ad901409b651081b849dfb6db2c182c6b71c972224674365c0372b87", "effective_date": "2026-03-12", "sheet": "Профлист,доборы", "row": 15, "price_cell": "E15", "unit_cell": "F15", "name_cell": "B15" }
     },
     {
       "id": "profiled-deck-s44-07-zinc",
@@ -29,7 +88,7 @@
       "aliases": ["С-44 оцинк. (0,7 мм)"],
       "unit": "m2",
       "price_per_unit": 691.98,
-      "source": { "sheet": "Профлист,доборы", "row": 15, "price_cell": "E15", "unit_cell": "F15", "name_cell": "B15" }
+      "source": { "workbook": "Z:\\Предварительные расчеты\\Калькуляторы\\Прайс для предрасчетов (не изменять).xlsx", "sha256": "08ea5728ad901409b651081b849dfb6db2c182c6b71c972224674365c0372b87", "effective_date": "2026-03-12", "sheet": "Профлист,доборы", "row": 15, "price_cell": "E15", "unit_cell": "F15", "name_cell": "B15" }
     },
     {
       "id": "ridge-flat-2m",
@@ -37,7 +96,7 @@
       "aliases": ["Конек плоский"],
       "unit": "pcs",
       "price_per_unit": 321,
-      "source": { "sheet": "Профлист,доборы", "row": 53, "price_cell": "E53", "unit_cell": "F53", "name_cell": "B53" }
+      "source": { "workbook": "Z:\\Предварительные расчеты\\Калькуляторы\\Прайс для предрасчетов (не изменять).xlsx", "sha256": "08ea5728ad901409b651081b849dfb6db2c182c6b71c972224674365c0372b87", "effective_date": "2026-03-12", "sheet": "Профлист,доборы", "row": 53, "price_cell": "E53", "unit_cell": "F53", "name_cell": "B53" }
     },
     {
       "id": "gable-2m",
@@ -45,7 +104,7 @@
       "aliases": ["Фронтон (Ф) 2м"],
       "unit": "pcs",
       "price_per_unit": 529,
-      "source": { "sheet": "Комплектушки", "row": 179, "price_cell": "D179", "unit_cell": "E179", "name_cell": "A179" }
+      "source": { "workbook": "Z:\\Предварительные расчеты\\Калькуляторы\\Прайс для предрасчетов (не изменять).xlsx", "sha256": "08ea5728ad901409b651081b849dfb6db2c182c6b71c972224674365c0372b87", "effective_date": "2026-03-12", "sheet": "Комплектушки", "row": 179, "price_cell": "D179", "unit_cell": "E179", "name_cell": "A179" }
     },
     {
       "id": "ridge-seal-2m",
@@ -53,7 +112,7 @@
       "aliases": ["Уплотнитель конька (2м)"],
       "unit": "pcs",
       "price_per_unit": 612,
-      "source": { "sheet": "Профлист,доборы", "row": 57, "price_cell": "E57", "unit_cell": "F57", "name_cell": "B57", "mass_cell": "G57", "mass_status": "UNKNOWN" }
+      "source": { "workbook": "Z:\\Предварительные расчеты\\Калькуляторы\\Прайс для предрасчетов (не изменять).xlsx", "sha256": "08ea5728ad901409b651081b849dfb6db2c182c6b71c972224674365c0372b87", "effective_date": "2026-03-12", "sheet": "Профлист,доборы", "row": 57, "price_cell": "E57", "unit_cell": "F57", "name_cell": "B57", "mass_cell": "G57", "mass_status": "UNKNOWN" }
     },
     {
       "id": "self-tapping-screw-polymer-48x20",
@@ -61,7 +120,7 @@
       "aliases": ["Саморез 4,8x20 (кровля)", "Саморез 4,8x20 (полимер)"],
       "unit": "pcs",
       "price_per_unit": 2.346,
-      "source": { "sheet": "Перекупные", "row": 50, "price_cell": "F50", "unit_cell": "G50", "name_cell": "A50" }
+      "source": { "workbook": "Z:\\Предварительные расчеты\\Калькуляторы\\Прайс для предрасчетов (не изменять).xlsx", "sha256": "08ea5728ad901409b651081b849dfb6db2c182c6b71c972224674365c0372b87", "effective_date": "2026-03-12", "sheet": "Перекупные", "row": 50, "price_cell": "F50", "unit_cell": "G50", "name_cell": "A50" }
     }
   ]
 }

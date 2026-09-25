@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Core3 price-resolution regression seeds; does not assert engineering quantities.",
+  "projects": [
+    {
+      "projectId": "22318",
+      "span_m": 15,
+      "length_m": 24,
+      "known_products": [
+        {"product": "С-18 0,5мм", "unit": "m2"}, {"product": "С-44 0,7 оц", "unit": "m2"}, {"product": "С-44 0,7мм", "unit": "m2"},
+        {"product": "Конек плоский (2м)", "unit": "pcs"}, {"product": "Фронтон (2м)", "unit": "pcs"}, {"product": "Уплотнитель (2м)", "unit": "pcs"},
+        {"product": "Саморез 4,8x20 (стены)", "unit": "pcs"}, {"product": "Саморез 4,8x20 (кровля)", "unit": "pcs"}, {"product": "Уголок 50х50 нар", "unit": "pcs"}, {"product": "Угол специальный 90 гр. 2,0 П350 (Оцинк.)", "unit": "m"}
+      ],
+      "unknown_products": []
+    },
+    {
+      "projectId": "22316",
+      "span_m": 18,
+      "length_m": 30,
+      "known_products": [
+        {"product": "С-18 0,5мм", "unit": "m2"}, {"product": "С-44 0,7 оц", "unit": "m2"}, {"product": "С-44 0,7мм", "unit": "m2"},
+        {"product": "Конек плоский (2м)", "unit": "pcs"}, {"product": "Фронтон (2м)", "unit": "pcs"}, {"product": "Уплотнитель (2м)", "unit": "pcs"},
+        {"product": "Саморез 4,8x20 (стены)", "unit": "pcs"}, {"product": "Саморез 4,8x20 (кровля)", "unit": "pcs"}, {"product": "Уголок 50х50 нар", "unit": "pcs"}, {"product": "Угол специальный 90 гр. 2,0 П350 (Оцинк.)", "unit": "m"}
+      ],
+      "unknown_products": []
+    },
+    {
+      "projectId": "22329",
+      "span_m": 12,
+      "length_m": 26,
+      "known_products": [
+        {"product": "С-18 0,5мм", "unit": "m2"}, {"product": "С-44 0,7 оц", "unit": "m2"}, {"product": "С-44 0,7мм", "unit": "m2"},
+        {"product": "Конек плоский (2м)", "unit": "pcs"}, {"product": "Фронтон (2м)", "unit": "pcs"}, {"product": "Уплотнитель (2м)", "unit": "pcs"},
+        {"product": "Саморез 4,8x20 (стены)", "unit": "pcs"}, {"product": "Саморез 4,8x20 (кровля)", "unit": "pcs"}, {"product": "Уголок 50х50 нар", "unit": "pcs"}, {"product": "Угол специальный 90 гр. 2,0 П350 (Оцинк.)", "unit": "m"}
+      ],
+      "unknown_products": []
+    }
+  ]
+}

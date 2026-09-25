@@ -41,6 +41,15 @@ describe("EngineeringPreviewPage", () => {
     expect(screen.getByRole("combobox", { name: "Preview город" })).toHaveValue("");
   });
 
+  it("exposes the restricted cold profiled-sheet commercial mode", () => {
+    render(<EngineeringPreviewPage />);
+    const system = screen.getByRole("combobox", { name: "Preview система ограждения" });
+    expect(system).toHaveValue("SANDWICH_PANEL");
+    fireEvent.change(system, { target: { value: "PROFILED_SHEET_COLD" } });
+    expect(system).toHaveValue("PROFILED_SHEET_COLD");
+    expect(screen.getByDisplayValue("С-18 0,5мм")).toBeInTheDocument();
+  });
+
   it("calls calculateCore1 through the ProjectInput adapter", async () => {
     render(<EngineeringPreviewPage />);
     const city = screen.getByRole("combobox", { name: "Preview город" });

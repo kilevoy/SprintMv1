@@ -20,6 +20,8 @@ import {
 } from "./project";
 import type { ProjectInput, ProjectOpening } from "./project";
 import type { CountryCode } from "./core1/types";
+import { calculateCore3FromEnclosureResult } from "./core3";
+import type { Core3CommercialResult } from "./core3";
 import {
   calculateColdEnclosure,
   calculateProjectV15WallGirt,
@@ -844,9 +846,11 @@ function EnclosureStatus({
 }
 function EnclosureView({
   result,
+  commercialResult,
   projectWallGirtResults,
 }: {
   result: ColdEnclosureResult | null;
+  commercialResult: Core3CommercialResult | null;
   projectWallGirtResults: Partial<Record<WallOrientation, ProjectWallGirtCalculationResult>>;
 }) {
   if (!result)
@@ -927,7 +931,55 @@ function EnclosureView({
           при его отсутствии показывается typed diagnostic.
         </p>
       </section>
+      <CommercialPriceView result={commercialResult} />
     </div>
+  );
+}
+
+function CommercialPriceView({ result }: { result: Core3CommercialResult | null }) {
+  if (!result) return null;
+  const money = (value: number | null) => value === null
+    ? "НЕ ДОСТУПНО"
+    : `${value.toLocaleString("ru-RU", { maximumFractionDigits: 2 })} ₽`;
+  const sourceLabel = (line: Core3CommercialResult["lines"][number]) => line.source
+    ? `${line.source.sheet}!${line.source.price_cell}`
+    : "не доказан";
+  return (
+    <section className="preview-subcard">
+      <h3>Core 3 · предварительная стоимость</h3>
+      <ValueList
+        title="Коммерческий результат"
+        rows={[
+          ["Статус", result.status],
+          ["Класс стоимости", result.costStatus],
+          ["Известная стоимость, ₽", result.knownCost],
+          ["Неизвестные позиции", result.unknownCostComponents.join(", ") || "нет"],
+          ["Dataset", result.datasetId],
+          ["Дата прайса", result.provenance.effective_date],
+        ]}
+      />
+      <div className="preview-table-wrap">
+        <table className="preview-table">
+          <thead><tr><th>Позиция</th><th>Количество</th><th>Цена</th><th>Стоимость</th><th>Класс</th><th>Источник</th></tr></thead>
+          <tbody>
+            {result.lines.map((line) => (
+              <tr key={`${line.component}-${line.orientation}-${line.product}`}>
+                <td>{line.product}</td>
+                <td>{line.quantity.toLocaleString("ru-RU", { maximumFractionDigits: 3 })} {line.unit}</td>
+                <td>{money(line.unitPrice)}</td>
+                <td>{money(line.lineCost)}</td>
+                <td>{line.costStatus}</td>
+                <td>{sourceLabel(line)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {result.diagnostics.length > 0 ? (
+        <p className="preview-inline-note">Диагностика: {result.diagnostics.map((item) => item.code).join(", ")}</p>
+      ) : null}
+      <p className="preview-inline-note">Неизвестная стоимость не заменяется нулём и не включается в известный итог.</p>
+    </section>
   );
 }
 function CanonicalView({
@@ -1028,6 +1080,7 @@ function ResultTabs({
   projection,
   projectWindowGroups,
   enclosureResult,
+  commercialResult,
   projectWallGirtResults,
   tab,
   setTab,
@@ -1036,6 +1089,7 @@ function ResultTabs({
   projection: Core1Input | null;
   projectWindowGroups: number;
   enclosureResult: ColdEnclosureResult | null;
+  commercialResult: Core3CommercialResult | null;
   projectWallGirtResults: Partial<Record<WallOrientation, ProjectWallGirtCalculationResult>>;
   tab: "excel" | "canonical" | "enclosure" | "diagnostics";
   setTab: (tab: "excel" | "canonical" | "enclosure" | "diagnostics") => void;
@@ -1102,7 +1156,7 @@ function ResultTabs({
           projectWindowGroups={projectWindowGroups}
         />
       ) : null}
-      {tab === "enclosure" ? <EnclosureView result={enclosureResult} projectWallGirtResults={projectWallGirtResults} /> : null}
+      {tab === "enclosure" ? <EnclosureView result={enclosureResult} commercialResult={commercialResult} projectWallGirtResults={projectWallGirtResults} /> : null}
       {success && tab === "diagnostics" ? (
         <div className="preview-tab-content">
           <DiagnosticList
@@ -1143,6 +1197,8 @@ export default function EngineeringPreviewPage() {
   const [projection, setProjection] = useState<Core1Input | null>(null);
   const [enclosureResult, setEnclosureResult] =
     useState<ColdEnclosureResult | null>(null);
+  const [commercialResult, setCommercialResult] =
+    useState<Core3CommercialResult | null>(null);
   const [projectWallGirtResults, setProjectWallGirtResults] = useState<
     Partial<Record<WallOrientation, ProjectWallGirtCalculationResult>>
   >({});
@@ -1355,10 +1411,9 @@ export default function EngineeringPreviewPage() {
           diagnostics: adapted.diagnostics,
           result: null,
         });
-        setEnclosureResult(
-          calculateColdEnclosure(projectInputToColdEnclosureInput(input))
-            .result,
-        );
+        const enclosure = calculateColdEnclosure(projectInputToColdEnclosureInput(input)).result;
+        setEnclosureResult(enclosure);
+        setCommercialResult(calculateCore3FromEnclosureResult(enclosure));
         setProjectWallGirtResults({
           SIDE: calculateProjectV15WallGirt({ project: input, orientation: "SIDE", controls: null, autoRuntime: null }),
           END: calculateProjectV15WallGirt({ project: input, orientation: "END", controls: null, autoRuntime: null }),
@@ -1380,17 +1435,17 @@ export default function EngineeringPreviewPage() {
               },
             }
           : null;
-      setEnclosureResult(
-        calculateColdEnclosure(
-          projectInputToColdEnclosureInput(
-            input,
-            structuralContext,
-            coreResult.status === "success"
-              ? { canonicalClimate: coreResult.result.climate ?? null }
-              : {},
-          ),
-        ).result,
-      );
+      const enclosure = calculateColdEnclosure(
+        projectInputToColdEnclosureInput(
+          input,
+          structuralContext,
+          coreResult.status === "success"
+            ? { canonicalClimate: coreResult.result.climate ?? null }
+            : {},
+        ),
+      ).result;
+      setEnclosureResult(enclosure);
+      setCommercialResult(calculateCore3FromEnclosureResult(enclosure, coreResult.status === "success" ? coreResult.result : null));
       setProjectWallGirtResults({
         SIDE: calculateProjectV15WallGirt({ project: input, orientation: "SIDE", controls: null, autoRuntime: null }),
         END: calculateProjectV15WallGirt({ project: input, orientation: "END", controls: null, autoRuntime: null }),
@@ -1418,6 +1473,7 @@ export default function EngineeringPreviewPage() {
     setProjection(null);
     setResult(null);
     setEnclosureResult(null);
+    setCommercialResult(null);
     setProjectWallGirtResults({});
     setTab("excel");
     setLoadedFileName(file.name);
@@ -1443,6 +1499,7 @@ export default function EngineeringPreviewPage() {
     setProjection(null);
     setResult(null);
     setEnclosureResult(null);
+    setCommercialResult(null);
     setProjectWallGirtResults({});
     setLoadedFileName(null);
     setLoadNotice(null);
@@ -1622,6 +1679,24 @@ export default function EngineeringPreviewPage() {
                 <div><h2>ОГРАЖДАЮЩИЕ КОНСТРУКЦИИ</h2><span>ProjectInput → EnclosureCore</span></div>
                 <span className="preview-badge preview-badge-muted">MANUAL + V1.5 CONTROLLER</span>
               </div>
+              <PreviewField label="Система ограждения">
+                <select
+                  aria-label="Preview система ограждения"
+                  value={input.envelope.system}
+                  onChange={(event) => {
+                    const system = event.target.value as ProjectInput["envelope"]["system"];
+                    updateEnvelope({
+                      system,
+                      ...(system === "PROFILED_SHEET_COLD"
+                        ? { wall_system: "С-18 0,5мм", roof_covering: "профлист" as RoofCovering }
+                        : {}),
+                    });
+                  }}
+                >
+                  <option value="PROFILED_SHEET_COLD">Холодный профнастил</option>
+                  <option value="SANDWICH_PANEL">Сэндвич-панель</option>
+                </select>
+              </PreviewField>
               <PreviewField label="Система стены"><input value={input.envelope.wall_system} onChange={(event) => updateEnvelope({ wall_system: event.target.value })} /></PreviewField>
               <WallGeometryControllerEditor
                 controls={input.enclosure?.wall_geometry ?? {}}
@@ -1781,6 +1856,7 @@ export default function EngineeringPreviewPage() {
                 ).length
               }
               enclosureResult={enclosureResult}
+              commercialResult={commercialResult}
               projectWallGirtResults={projectWallGirtResults}
               tab={tab}
               setTab={setTab}
@@ -1795,6 +1871,10 @@ export default function EngineeringPreviewPage() {
                 <div>
                   <span>EnclosureCore</span>
                   <strong>{enclosureResult ? `${enclosureResult.wallGirts.status} · ${canonicalValue(enclosureResult.totals.knownMass_kg)} кг известной массы` : "NOT CALCULATED"}</strong>
+                </div>
+                <div>
+                  <span>Core 3 · стоимость</span>
+                  <strong>{commercialResult ? `${commercialResult.status} · ${canonicalValue(commercialResult.knownCost)} ₽` : "NOT CALCULATED"}</strong>
                 </div>
                 <div>
                   <span>Промежуточный итог</span>
