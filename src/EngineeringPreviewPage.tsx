@@ -22,11 +22,15 @@ import type { ProjectInput, ProjectOpening } from "./project";
 import type { CountryCode } from "./core1/types";
 import {
   calculateColdEnclosure,
+  calculateProjectV15WallGirt,
   projectInputToColdEnclosureInput,
 } from "./enclosure";
 import type {
   ColdEnclosureResult,
   EnclosureStructuralContext,
+  EnclosureProvenance,
+  ProjectV15WallGeometryControls,
+  ProjectWallGirtCalculationResult,
 } from "./enclosure";
 import type {
   ManualWallGirtReplayInput,
@@ -134,6 +138,11 @@ const defaultWallGirtZone = (): ManualWallGirtReplayInput => ({
   profile: { profileId: "C140x2", sectionMass_kg_m: 4.2 },
   selectionMode: "MANUAL",
 });
+const wallOrientations = ["SIDE", "END"] as const;
+type WallOrientation = (typeof wallOrientations)[number];
+function wallOrientationLabel(orientation: WallOrientation): string {
+  return orientation === "SIDE" ? "Боковая стена" : "Торцевая стена";
+}
 function projectInputToCore1Input(
   project: ProjectInput,
   options?: Parameters<typeof projectInputToCore1InputBase>[1],
@@ -713,13 +722,98 @@ function DiagnosticList({
     </div>
   );
 }
-function EnclosureStatus({ result }: { result: ColdEnclosureResult | null }) {
+function WallGeometryControllerEditor({
+  controls,
+  onChange,
+}: {
+  controls: Partial<Record<WallOrientation, Omit<ProjectV15WallGeometryControls, "orientation">>>;
+  onChange: (
+    orientation: WallOrientation,
+    field: "wallCalculationHeight_m" | "supportStep_m" | "cornerHalfLength_m",
+    value: number,
+  ) => void;
+}) {
+  return (
+    <div className="preview-wall-girt-editor">
+      <div className="preview-inline-note">
+        AUTO-контроллер v1.5: B12, B13 и e вводятся явно по доказанному
+        контракту. Значения не выводятся из общих габаритов проекта.
+      </div>
+      {wallOrientations.map((orientation) => {
+        const current = controls[orientation];
+        return (
+          <article className="preview-opening-card" key={orientation}>
+            <div className="preview-section-title">
+              <h3>{wallOrientationLabel(orientation)}</h3>
+              <span className="preview-badge preview-badge-muted">
+                {current ? "EXPLICIT CONTROLLER" : "NOT ENTERED"}
+              </span>
+            </div>
+            <div className="preview-field-grid">
+              <PreviewField label="Расчётная высота B12, м">
+                <input
+                  aria-label={`${orientation} B12`}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={current?.wallCalculationHeight_m ?? ""}
+                  onChange={(event) =>
+                    onChange(orientation, "wallCalculationHeight_m", numberValue(event.target.value))
+                  }
+                />
+              </PreviewField>
+              <PreviewField label="Шаг опор B13, м">
+                <input
+                  aria-label={`${orientation} B13`}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={current?.supportStep_m ?? ""}
+                  onChange={(event) =>
+                    onChange(orientation, "supportStep_m", numberValue(event.target.value))
+                  }
+                />
+              </PreviewField>
+              <PreviewField label="Половина угловой зоны e, м">
+                <input
+                  aria-label={`${orientation} e`}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={current?.cornerHalfLength_m ?? ""}
+                  onChange={(event) =>
+                    onChange(orientation, "cornerHalfLength_m", numberValue(event.target.value))
+                  }
+                />
+              </PreviewField>
+            </div>
+            <div className="preview-inline-note">
+              Длина B11: {orientation === "SIDE" ? "длина здания" : "пролёт"} · источник: ProjectInput v1.5 mapping.
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+function EnclosureStatus({
+  result,
+  projectWallGirtResults,
+}: {
+  result: ColdEnclosureResult | null;
+  projectWallGirtResults: Partial<Record<WallOrientation, ProjectWallGirtCalculationResult>>;
+}) {
+  const autoStatuses = wallOrientations
+    .map((orientation) => projectWallGirtResults[orientation]?.status)
+    .filter(Boolean);
   const cards = [
     [
       "Стеновые ригели",
       result?.wallGirts.manualZones.length
         ? "CALCULATED · MANUAL"
-        : "AVAILABLE IN MANUAL DOMAIN",
+        : autoStatuses.length
+          ? `AUTO · ${autoStatuses.join(" / ")}`
+          : "AVAILABLE IN MANUAL DOMAIN",
     ],
     ["+ стойки", "NOT IMPLEMENTED"],
     ["Проёмы", "NOT IMPLEMENTED"],
@@ -748,7 +842,13 @@ function EnclosureStatus({ result }: { result: ColdEnclosureResult | null }) {
     </section>
   );
 }
-function EnclosureView({ result }: { result: ColdEnclosureResult | null }) {
+function EnclosureView({
+  result,
+  projectWallGirtResults,
+}: {
+  result: ColdEnclosureResult | null;
+  projectWallGirtResults: Partial<Record<WallOrientation, ProjectWallGirtCalculationResult>>;
+}) {
   if (!result)
     return (
       <div className="preview-tab-content">
@@ -805,6 +905,28 @@ function EnclosureView({ result }: { result: ColdEnclosureResult | null }) {
       {result.wallGirts.manualZones.length === 0 ? (
         <p className="preview-unavailable">Ручные зоны не рассчитаны.</p>
       ) : null}
+      <section className="preview-subcard">
+        <h3>Доказанный v1.5 AUTO-контур</h3>
+        {wallOrientations.map((orientation) => {
+          const wallResult = projectWallGirtResults[orientation];
+          return (
+            <div className="preview-inline-note" key={orientation}>
+              <strong>{wallOrientationLabel(orientation)}:</strong>{" "}
+              {wallResult?.status ?? "НЕ РАССЧИТАНО"}
+              {wallResult?.diagnostics.length
+                ? ` · ${wallResult.diagnostics.map((item) => item.code).join(", ")}`
+                : ""}
+              {wallResult?.status === "PROVEN" && wallResult.zone
+                ? ` · ${wallResult.zone.profile} · шаг ${wallResult.zone.girtStep_m} м · рядов ${wallResult.zone.rows} · масса ${wallResult.zone.totalKnownMass_kg} кг`
+                : ""}
+            </div>
+          );
+        })}
+        <p className="preview-inline-note">
+          Пустой runtime не заменяется климатом или расчётными догадками;
+          при его отсутствии показывается typed diagnostic.
+        </p>
+      </section>
     </div>
   );
 }
@@ -906,6 +1028,7 @@ function ResultTabs({
   projection,
   projectWindowGroups,
   enclosureResult,
+  projectWallGirtResults,
   tab,
   setTab,
 }: {
@@ -913,6 +1036,7 @@ function ResultTabs({
   projection: Core1Input | null;
   projectWindowGroups: number;
   enclosureResult: ColdEnclosureResult | null;
+  projectWallGirtResults: Partial<Record<WallOrientation, ProjectWallGirtCalculationResult>>;
   tab: "excel" | "canonical" | "enclosure" | "diagnostics";
   setTab: (tab: "excel" | "canonical" | "enclosure" | "diagnostics") => void;
 }) {
@@ -978,7 +1102,7 @@ function ResultTabs({
           projectWindowGroups={projectWindowGroups}
         />
       ) : null}
-      {tab === "enclosure" ? <EnclosureView result={enclosureResult} /> : null}
+      {tab === "enclosure" ? <EnclosureView result={enclosureResult} projectWallGirtResults={projectWallGirtResults} /> : null}
       {success && tab === "diagnostics" ? (
         <div className="preview-tab-content">
           <DiagnosticList
@@ -1019,6 +1143,9 @@ export default function EngineeringPreviewPage() {
   const [projection, setProjection] = useState<Core1Input | null>(null);
   const [enclosureResult, setEnclosureResult] =
     useState<ColdEnclosureResult | null>(null);
+  const [projectWallGirtResults, setProjectWallGirtResults] = useState<
+    Partial<Record<WallOrientation, ProjectWallGirtCalculationResult>>
+  >({});
   const [tab, setTab] = useState<
     "excel" | "canonical" | "enclosure" | "diagnostics"
   >("excel");
@@ -1084,6 +1211,36 @@ export default function EngineeringPreviewPage() {
       ...current,
       special_conditions: { ...current.special_conditions, ...patch },
     }));
+  const updateWallGeometryController = (
+    orientation: WallOrientation,
+    field: "wallCalculationHeight_m" | "supportStep_m" | "cornerHalfLength_m",
+    value: number,
+  ) =>
+    setInput((current) => {
+      const existing = current.enclosure?.wall_geometry?.[orientation];
+      const provenance: EnclosureProvenance[] = existing?.provenance ?? [{
+        status: "MANUAL",
+        fixtureId: "engineering-preview-wall-controller",
+        note: "Пользовательский явный контроллер B12/B13/e; не является автоматической проекцией.",
+      }];
+      const next = {
+        wallCalculationHeight_m: existing?.wallCalculationHeight_m ?? 0,
+        cornerHalfLength_m: existing?.cornerHalfLength_m ?? 0,
+        supportStep_m: existing?.supportStep_m ?? 0,
+        provenance,
+        [field]: value,
+      };
+      return {
+        ...current,
+        enclosure: {
+          wall_girts: current.enclosure?.wall_girts ?? [],
+          wall_geometry: {
+            ...(current.enclosure?.wall_geometry ?? {}),
+            [orientation]: next,
+          },
+        },
+      };
+    });
   const updateWallGirt = (
     index: number,
     patch: Partial<ManualWallGirtReplayInput>,
@@ -1202,6 +1359,10 @@ export default function EngineeringPreviewPage() {
           calculateColdEnclosure(projectInputToColdEnclosureInput(input))
             .result,
         );
+        setProjectWallGirtResults({
+          SIDE: calculateProjectV15WallGirt({ project: input, orientation: "SIDE", controls: null, autoRuntime: null }),
+          END: calculateProjectV15WallGirt({ project: input, orientation: "END", controls: null, autoRuntime: null }),
+        });
         return;
       }
       setProjection(adapted.input);
@@ -1230,6 +1391,10 @@ export default function EngineeringPreviewPage() {
           ),
         ).result,
       );
+      setProjectWallGirtResults({
+        SIDE: calculateProjectV15WallGirt({ project: input, orientation: "SIDE", controls: null, autoRuntime: null }),
+        END: calculateProjectV15WallGirt({ project: input, orientation: "END", controls: null, autoRuntime: null }),
+      });
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -1253,6 +1418,7 @@ export default function EngineeringPreviewPage() {
     setProjection(null);
     setResult(null);
     setEnclosureResult(null);
+    setProjectWallGirtResults({});
     setTab("excel");
     setLoadedFileName(file.name);
     setLoadNotice("Расчёт загружен. Нажмите «Рассчитать».");
@@ -1277,6 +1443,7 @@ export default function EngineeringPreviewPage() {
     setProjection(null);
     setResult(null);
     setEnclosureResult(null);
+    setProjectWallGirtResults({});
     setLoadedFileName(null);
     setLoadNotice(null);
     setError(null);
@@ -1453,9 +1620,13 @@ export default function EngineeringPreviewPage() {
             <section className="preview-form-section">
               <div className="preview-section-title">
                 <div><h2>ОГРАЖДАЮЩИЕ КОНСТРУКЦИИ</h2><span>ProjectInput → EnclosureCore</span></div>
-                <span className="preview-badge preview-badge-muted">MANUAL ONLY</span>
+                <span className="preview-badge preview-badge-muted">MANUAL + V1.5 CONTROLLER</span>
               </div>
               <PreviewField label="Система стены"><input value={input.envelope.wall_system} onChange={(event) => updateEnvelope({ wall_system: event.target.value })} /></PreviewField>
+              <WallGeometryControllerEditor
+                controls={input.enclosure?.wall_geometry ?? {}}
+                onChange={updateWallGeometryController}
+              />
               <WallGirtEditor zones={input.enclosure?.wall_girts ?? []} onAdd={addWallGirt} onUpdate={updateWallGirt} onRemove={removeWallGirt} />
               {input.openings.length > 0 ? <div className="preview-inline-note">В текущем manual domain проёмы не участвуют в replay стеновых ригелей; EnclosureCore вернёт диагностический статус без выдуманного результата.</div> : null}
             </section>
@@ -1610,10 +1781,11 @@ export default function EngineeringPreviewPage() {
                 ).length
               }
               enclosureResult={enclosureResult}
+              projectWallGirtResults={projectWallGirtResults}
               tab={tab}
               setTab={setTab}
             />
-            <EnclosureStatus result={enclosureResult} />
+            <EnclosureStatus result={enclosureResult} projectWallGirtResults={projectWallGirtResults} />
             {result?.status === "success" ? (
               <section className="preview-summary">
                 <div>

@@ -1,5 +1,13 @@
 # Sprint M — CORE 1 PURLIN_DECK_GAP
 
+## Product-layer roadmap
+
+The implementation order is fixed in
+[`ROADMAP_CORE1_CORE2_CORE3.md`](ROADMAP_CORE1_CORE2_CORE3.md): finish and
+freeze Core 1, complete the evidence-backed Core 2 enclosure branches, then
+start Core 3 BOM and price calculation. Core 3 must not repair or reinterpret
+engineering outputs from the preceding cores.
+
 ## Current execution overlay — proven legacy climate/frame pipeline
 
 Objective: connect the proven canonical-climate → legacy-derived-climate → legacy-frame-branch chain without changing canonical climate semantics or source XLSX files.

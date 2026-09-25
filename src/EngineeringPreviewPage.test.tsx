@@ -188,4 +188,16 @@ describe("EngineeringPreviewPage", () => {
     expect(screen.getByText("Известная масса зоны, кг")).toBeInTheDocument();
     expect(screen.getByText(/Неизвестные компоненты/)).toBeInTheDocument();
   });
+
+  it("persists explicit v1.5 wall controllers and does not invent AUTO runtime", async () => {
+    render(<EngineeringPreviewPage />);
+    fireEvent.change(screen.getByLabelText("SIDE B12"), { target: { value: "4" } });
+    fireEvent.change(screen.getByLabelText("SIDE B13"), { target: { value: "4.5" } });
+    fireEvent.change(screen.getByLabelText("SIDE e"), { target: { value: "1.2" } });
+    fireEvent.click(screen.getByRole("button", { name: "Рассчитать" }));
+    await waitFor(() => expect(calculateMock).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole("button", { name: "ОГРАЖДАЙКА" }));
+    expect(await screen.findByText(/ENCLOSURE_WALL_GIRT_RUNTIME_REQUIRED/)).toBeInTheDocument();
+    expect(screen.getByText(/EXPLICIT CONTROLLER/)).toBeInTheDocument();
+  });
 });

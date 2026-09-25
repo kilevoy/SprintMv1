@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_id": "profiled-sheet-takeoff-21874-21985",
+  "source": {
+    "price_workbook": {
+      "file": "Z:\\Предварительные расчеты\\Калькуляторы\\Прайс для предрасчетов (не изменять).xlsx",
+      "sha256": "08ea5728ad901409b651081b849dfb6db2c182c6b71c972224674365c0372b87",
+      "role": "cross-check for product names and unit-mass columns; archived H-column values remain the replay authority"
+    },
+    "workbooks": [
+      {
+        "project_id": "21874",
+        "file": "Z:\\Предварительные расчеты\\Архив предрасчетов\\2026\\Савина\\Март 2026\\21874 (15х30х6 Спринт,АХ)\\21874.xlsx",
+        "sheet": "12м",
+        "unit_mass_cells": {
+          "wall_sheet": "H41",
+          "outer_corner_trim": "H40",
+          "roof_deck": "H50",
+          "roof_sheet": "H78",
+          "ridge_trim": "H74",
+          "gable_trim": "H76",
+          "ridge_seal": "H80",
+          "fastener": "H106/H137"
+        }
+      },
+      {
+        "project_id": "21985",
+        "file": "Z:\\Предварительные расчеты\\Архив предрасчетов\\2026\\Савина\\Апрель 2026\\21985 (20х40х4 Спринт,АХ)\\21985.xlsx",
+        "sheet": "12м",
+        "unit_mass_cells": {
+          "wall_sheet": "H41",
+          "outer_corner_trim": "H40",
+          "roof_deck": "H50",
+          "roof_sheet": "H78",
+          "ridge_trim": "H74",
+          "gable_trim": "H76",
+          "ridge_seal": "H80",
+          "fastener": "H106/H137"
+        }
+      }
+    ],
+    "formula_cells": {
+      "wall_sheet_m2": "C41",
+      "outer_corner_trim_pcs": "C40",
+      "roof_deck_m2": "C50",
+      "roof_sheet_m2": "C78",
+      "ridge_trim_pcs": "C74",
+      "gable_trim_pcs": "C76",
+      "ridge_seal_pcs": "C80",
+      "wall_fasteners_pcs": "C106",
+      "roof_fasteners_pcs": "C137"
+    }
+  },
+  "formula_contract": {
+    "proven_product_marks": {
+      "wall": "С-18 0,5мм",
+      "roof": "С-44 0,7мм",
+      "roof_deck_role": "С-44 0,7 оц"
+    },
+    "wall_sheet_m2": "(2*span + 2*length)*(height + 0.5)*1.1 + 2*span*1.1",
+    "outer_corner_trim_pcs": "4*height/2.9",
+    "roof_deck_m2": "span*length*1.1",
+    "roof_sheet_m2": "(span + 0.6)*(length + 1)*1.1",
+    "ridge_trim_pcs": "CEILING(length/1.9,1)",
+    "gable_trim_pcs": "CEILING(2*span/1.8,1)",
+    "ridge_seal_pcs": "2*ridge_trim_pcs",
+    "wall_fasteners_pcs": "10*(wall_sheet_m2)",
+    "roof_fasteners_pcs": "8*(roof_sheet_m2)"
+  },
+  "expected": {
+    "21874": {
+      "span_m": 15,
+      "length_m": 30,
+      "height_m": 6,
+      "wall_sheet_m2": 676.5,
+      "outer_corner_trim_pcs": 8.275862068965518,
+      "roof_deck_m2": 495,
+      "roof_sheet_m2": 531.96,
+      "ridge_trim_pcs": 16,
+      "gable_trim_pcs": 17,
+      "ridge_seal_pcs": 32,
+      "wall_fasteners_pcs": 6765,
+      "roof_fasteners_pcs": 4255.68
+    },
+    "21985": {
+      "span_m": 20,
+      "length_m": 40,
+      "height_m": 4,
+      "wall_sheet_m2": 638,
+      "outer_corner_trim_pcs": 5.517241379310345,
+      "roof_deck_m2": 880,
+      "roof_sheet_m2": 929.06,
+      "ridge_trim_pcs": 22,
+      "gable_trim_pcs": 23,
+      "ridge_seal_pcs": 44,
+      "wall_fasteners_pcs": 6380,
+      "roof_fasteners_pcs": 7432.48
+    }
+  },
+  "mass_contract": {
+    "source": "Archived result-sheet H-column unit masses; E/F remain commercial price and line total.",
+    "unit_masses": {
+      "wall_sheet_kg_per_m2": 5.3,
+      "outer_corner_trim_kg_per_piece": 2.3,
+      "roof_deck_kg_per_m2": 7.0,
+      "roof_sheet_kg_per_m2": 7.4,
+      "ridge_trim_kg_per_piece": 1.7,
+      "gable_trim_kg_per_piece": 1.662,
+      "fastener_kg_per_piece": 0.0026,
+      "ridge_seal_kg_per_piece": null
+    },
+    "known_mass_kg": {
+      "21874": 11090.096250758623,
+      "21985": 16540.672103172416
+    },
+    "legacy_zero_observed": {
+      "source_mass_cell": "12м!G80",
+      "source_unit_mass_cell": "12м!H80",
+      "projects": ["21873", "21874", "21876", "21892", "21953", "21985"],
+      "meaning": "legacy aggregate evaluates the blank unit mass as zero; physical mass remains UNKNOWN"
+    },
+    "missing": ["12м!H80: ridge-seal unit mass is blank in both workbooks"]
+  }
+}

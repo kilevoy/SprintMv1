@@ -4,8 +4,11 @@ import type { EnclosureDiagnostic } from "./diagnostics";
 import type { EnclosureProvenance, EnclosureEvidenceStatus } from "./provenance";
 import type { ManualWallGirtReplayInput, ManualWallGirtZoneResult } from "./manualWallGirtReplay";
 import type { AutoWallGirtRuntimeInput, AutoWallGirtSelectedCandidate } from "./autoWallGirtSelector";
+import type { ProfiledSheetTakeoffResult } from "./profiledSheetTakeoff";
 
 export type EnclosureOrientation = "SIDE" | "END";
+/** Explicit wall panel mounting direction. It is never inferred from the product name. */
+export type EnclosureMountingOrientation = "HORIZONTAL" | "VERTICAL" | "UNKNOWN";
 export type EnclosureComponent = "MAIN_FRAME_COLUMN" | "WALL_GIRT" | "WALL_STUD" | "FACADE_POST" | "OPENING_JAMB" | "SHEET" | "BRACKET" | "FASTENER" | "TRIM";
 export type EnclosureSelectionStatus = EnclosureEvidenceStatus | "NOT_APPLICABLE";
 
@@ -43,6 +46,7 @@ export interface ColdEnclosureInput {
     system: string;
     envelopeSystem: EnvelopeSystem;
     cladding: "COLD_PROFNASTIL" | "INSULATED_SANDWICH" | "UNKNOWN";
+    mountingOrientation?: EnclosureMountingOrientation;
     insulation?: { thickness_mm?: number; material?: string; status: "AUTO" | "LEGACY_MANUAL" | "ENGINEERING_OVERRIDE" | "UNKNOWN" };
   };
   roofSystem: {
@@ -50,6 +54,11 @@ export interface ColdEnclosureInput {
     deck_grade: ProjectInput["envelope"]["roof_deck_grade"];
   };
   openings: ProjectOpening[];
+  /** Explicit source-backed marks for the profiled-sheet replay branch. */
+  profiledSheetProfiles?: {
+    wallProfile: string;
+    roofProfile: string;
+  };
   frameGrid: {
     effectiveFrameStep_m: number | null;
     frameCount: number | null;
@@ -125,6 +134,7 @@ export interface ColdEnclosureResult {
   brackets: BracketResult;
   fasteners: FastenerResult;
   trims: TrimResult;
+  profiledSheetTakeoff: ProfiledSheetTakeoffResult | null;
   diagnostics: EnclosureDiagnostic[];
   provenance: EnclosureProvenance[];
   totals: EnclosureTotals;

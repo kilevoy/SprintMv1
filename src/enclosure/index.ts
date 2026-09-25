@@ -5,11 +5,16 @@ export { replayManualWallGirt } from "./manualWallGirtReplay";
 export { replaySelectedAutoWallGirt, selectAutoWallGirt, toManualWallGirtReplayInput } from "./autoWallGirtSelector";
 export { resolveWallGeometry } from "./wallGeometryResolver";
 export { resolveProjectV15WallGeometry, resolveProjectWallGeometry } from "./projectWallGeometry";
+export { buildProjectV15AutoRuntime } from "./projectWallGirtRuntime";
 export type { ResolvedWallGeometry, WallGeometryResolution, WallGeometryResolverInput } from "./wallGeometryResolver";
 export type { ProjectWallGeometryOverride, ProjectWallGeometryResolution } from "./projectWallGeometry";
 export type { ProjectV15WallGeometryControls } from "./projectWallGeometry";
+export type { ProjectV15AutoRuntimeOverrides, ProjectV15AutoRuntimeResult } from "./projectWallGirtRuntime";
 export type { ColdEnclosureAdapterOptions } from "./inputAdapter";
-export type { ProjectV15WallGirtCalculationInput, ProjectWallGirtCalculationInput, ProjectWallGirtCalculationResult } from "./calculateProjectWallGirt";
+export { calculateProjectV15WallGirtFromInputs } from "./calculateProjectWallGirt";
+export { calculateProfiledSheetTakeoff } from "./profiledSheetTakeoff";
+export { calculateCore2ProfiledSheetScenario } from "./calculateCore2ProfiledSheetScenario";
+export type { ProjectV15WallGirtCalculationInput, ProjectV15WallGirtFromInputs, ProjectWallGirtCalculationInput, ProjectWallGirtCalculationResult } from "./calculateProjectWallGirt";
 export type {
   ManualWallGirtProfile,
   ManualWallGirtReplayInput,
@@ -28,6 +33,8 @@ export type {
 } from "./autoWallGirtSelector";
 export type { EnclosureDiagnostic, EnclosureDiagnosticCode } from "./diagnostics";
 export type { EnclosureEvidenceStatus, EnclosureProvenance } from "./provenance";
+export type { ProfiledSheetTakeoffInput, ProfiledSheetTakeoffLine, ProfiledSheetTakeoffResult } from "./profiledSheetTakeoff";
+export type { Core2ProfiledSheetScenarioInput, Core2ProfiledSheetScenarioResult } from "./calculateCore2ProfiledSheetScenario";
 export type {
   BracketResult,
   ColdEnclosureFixture,
@@ -36,6 +43,7 @@ export type {
   EnclosureComponent,
   EnclosureLineItem,
   EnclosureOrientation,
+  EnclosureMountingOrientation,
   EnclosureSectionResult,
   EnclosureSelectionStatus,
   EnclosureStructuralContext,

@@ -57,12 +57,90 @@ describe("Cold Enclosure skeleton", () => {
     expect(result.result.totals.knownCost).toBeNull();
   });
 
+  it("uses the explicit horizontal sandwich semantic without fabricating full enclosure parity", () => {
+    const input = projectInputToColdEnclosureInput(project, null, {
+      cladding: "INSULATED_SANDWICH",
+      mountingOrientation: "HORIZONTAL",
+    });
+    const result = calculateColdEnclosure(input).result;
+    expect(result.wallGirts.status).toBe("EMPTY");
+    expect(result.wallGirts.knownMass_kg).toBe(0);
+    expect(result.wallGirts.diagnostics).toMatchObject([{ code: "ENCLOSURE_SANDWICH_HORIZONTAL_GIRTS_SKIPPED", severity: "warning" }]);
+    expect(result.totals.unknownMassComponents).not.toContain("wallGirts");
+    expect(result.totals.unknownMassComponents).toContain("wallSheet");
+    expect(result.totals.unknownMassComponents).toContain("roofSheet");
+  });
+
+  it("does not infer horizontal mounting or skip vertical sandwich support", () => {
+    const input = projectInputToColdEnclosureInput(project, null, { cladding: "INSULATED_SANDWICH", mountingOrientation: "VERTICAL" });
+    const result = calculateColdEnclosure(input).result;
+    expect(result.wallGirts.diagnostics.map((item) => item.code)).toContain("ENCLOSURE_WALL_GIRT_NOT_PROVEN");
+    expect(result.wallGirts.diagnostics.map((item) => item.code)).not.toContain("ENCLOSURE_SANDWICH_HORIZONTAL_GIRTS_SKIPPED");
+  });
+
+  it("keeps profiled-sheet path typed partial when full enclosure rules are absent", () => {
+    const profiledProject = {
+      ...project,
+      envelope: { ...project.envelope, system: "PROFILED_SHEET_COLD" as const, roof_covering: "профлист" as const, wall_system: "Профнастил" },
+      openings: [],
+    };
+    const result = calculateColdEnclosure(projectInputToColdEnclosureInput(profiledProject)).result;
+    expect(result.diagnostics.map((item) => item.code)).toContain("ENCLOSURE_SOURCE_EVIDENCE_MISSING");
+    expect(result.totals.unknownMassComponents).toContain("wallSheet");
+    expect(result.totals.unknownCostComponents).toContain("all enclosure components");
+  });
+
   it("keeps provenance statuses serializable", () => {
     const input = projectInputToColdEnclosureInput(project, null, { canonicalClimate: null });
     const result = calculateColdEnclosure(input);
     const serialized = JSON.stringify({ status: "REAL_PROJECT_VALIDATED", sourceWorkbook: "fixture.xlsx", fixtureId: "fixture-1" });
     expect(JSON.parse(serialized)).toMatchObject({ status: "REAL_PROJECT_VALIDATED", fixtureId: "fixture-1" });
     expect(result.result.provenance[0]?.status).toBe("UNKNOWN");
+  });
+
+  it("exposes the proven profiled-sheet quantity takeoff and known unit masses", () => {
+    const profiledProject = {
+      ...project,
+      envelope: { ...project.envelope, system: "PROFILED_SHEET_COLD" as const, roof_covering: "профлист" as const, wall_system: "С-18 0,5мм" },
+      geometry: { ...project.geometry, span_m: 15, building_length_m: 30, building_height_m: 6 },
+      openings: [],
+    };
+    const result = calculateColdEnclosure(projectInputToColdEnclosureInput(profiledProject)).result;
+    expect(result.profiledSheetTakeoff?.status).toBe("PARTIAL");
+    expect(result.profiledSheetTakeoff?.lines.find((line) => line.sourceCell === "12м!C41")?.quantity).toBeCloseTo(676.5, 10);
+    expect(result.profiledSheetTakeoff?.lines.find((line) => line.sourceCell === "12м!C106")?.quantity).toBeCloseTo(6765, 10);
+    expect(result.profiledSheetTakeoff?.lines.find((line) => line.sourceCell === "12м!C78")?.quantity).toBeCloseTo(531.96, 10);
+    expect(result.profiledSheetTakeoff?.knownMass_kg).toBeCloseTo(7153.59225075862, 8);
+    expect(result.profiledSheetTakeoff?.lines.find((line) => line.sourceCell === "12м!C78")?.mass_kg).toBeNull();
+    expect(result.profiledSheetTakeoff?.diagnostics[0]?.code).toBe("ENCLOSURE_MATERIAL_MASS_NOT_PROVEN");
+  });
+
+  it("does not run the profiled-sheet takeoff for an explicit plus-stud branch", () => {
+    const profiledProject = {
+      ...project,
+      envelope: { ...project.envelope, system: "PROFILED_SHEET_COLD" as const, roof_covering: "профлист" as const, wall_system: "Профнастил" },
+      openings: [],
+    };
+    const input = {
+      ...projectInputToColdEnclosureInput(profiledProject),
+      wallGirts: {
+        mode: "MANUAL" as const,
+        zones: [{
+          wall: "SIDE" as const,
+          zoneType: "CORNER" as const,
+          wallHeight_m: 6,
+          zoneLength_m: 12,
+          girtStep_m: 1.2,
+          structuralPostStep_m: 4,
+          sectionType: "]" as const,
+          profile: { profileId: "]ПП 145x45x1,5", sectionMass_kg_m: 2.6716 },
+          plusStands: true,
+        }],
+      },
+    };
+    const result = calculateColdEnclosure(input).result;
+    expect(result.profiledSheetTakeoff).toBeNull();
+    expect(result.wallGirts.diagnostics.map((item) => item.code)).toContain("ENCLOSURE_PLUS_STUDS_UNSUPPORTED");
   });
 });
 

@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_id": "core2-project-wall-girt-no-stud-v15",
+  "classification": "REFERENCE_ONLY",
+  "source": {
+    "workbook": "Z:\\Конструктивные расчеты\\Прогоны\\Для предрасчетов\\Калькулятор ограждайки v1.5.xlsx",
+    "sha256": "ED9BD32D0114A058B92CE6876FE35575B9CE4F77DD495BEFF493F17B284F6DE8",
+    "sheets": ["Лист1", "Расчет Угловая", "Расчет Рядовая"],
+    "normative": "SP_20"
+  },
+  "project_input": {
+    "span_m": 12,
+    "building_length_m": 18,
+    "building_height_m": 3,
+    "responsibility_factor": 0.8,
+    "terrain": "В",
+    "openings": 0,
+    "plus_studs": false
+  },
+  "climate": { "wind_load_kPa": 0.3 },
+  "controllers": {
+    "wall_calculation_height_m": 9.3,
+    "corner_half_length_m": 6,
+    "support_step_m": 6
+  },
+  "runtime_filters": {
+    "zone_type": "CORNER",
+    "insulation_thickness_mm": 0,
+    "profile_family": "all",
+    "section_type": "all",
+    "material": "all",
+    "profile_height_mm": [145, 145],
+    "thickness_mm": [0, 100],
+    "step_mm": [0, 1500],
+    "manual_step_mode": "none"
+  },
+  "expected": {
+    "corner_zone_length_m": 12,
+    "typical_zone_length_m": { "SIDE": 6, "END": 0 },
+    "selected_profile": "[]ПП 145x45x1,5",
+    "section_type": "[]",
+    "girt_step_m": 1.36,
+    "rows": 7,
+    "profile_length_m": 84,
+    "bracket_count": 14,
+    "total_known_mass_kg": 469.8288
+  }
+}

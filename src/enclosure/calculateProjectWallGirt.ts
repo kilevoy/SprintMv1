@@ -5,6 +5,8 @@ import type { EnclosureProvenance } from "./provenance";
 import { resolveProjectV15WallGeometry, resolveProjectWallGeometry, type ProjectV15WallGeometryControls, type ProjectWallGeometryOverride } from "./projectWallGeometry";
 import type { ResolvedWallGeometry } from "./wallGeometryResolver";
 import type { ManualWallGirtZoneResult } from "./manualWallGirtReplay";
+import type { Core1ClimateResult } from "../core1/types";
+import { buildProjectV15AutoRuntime, type ProjectV15AutoRuntimeOverrides } from "./projectWallGirtRuntime";
 
 export interface ProjectWallGirtCalculationInput {
   project: ProjectInput;
@@ -17,6 +19,14 @@ export interface ProjectV15WallGirtCalculationInput {
   orientation: ProjectV15WallGeometryControls["orientation"];
   controls: Omit<ProjectV15WallGeometryControls, "orientation"> | null;
   autoRuntime: AutoWallGirtRuntimeInput | null;
+}
+
+export interface ProjectV15WallGirtFromInputs {
+  project: ProjectInput;
+  climate: Core1ClimateResult | null;
+  orientation: ProjectV15WallGeometryControls["orientation"];
+  controls: Omit<ProjectV15WallGeometryControls, "orientation"> | null;
+  runtimeOverrides: ProjectV15AutoRuntimeOverrides | null;
 }
 
 export type ProjectWallGirtCalculationResult =
@@ -91,5 +101,37 @@ export function calculateProjectV15WallGirt(input: ProjectV15WallGirtCalculation
       provenance: controls.provenance,
     },
     autoRuntime: input.autoRuntime,
+  });
+}
+
+/**
+ * Full typed orchestration boundary for callers that have ProjectInput and a
+ * canonical climate result. The selector itself remains unchanged; missing
+ * runtime fields stop before engineering selection.
+ */
+export function calculateProjectV15WallGirtFromInputs(input: ProjectV15WallGirtFromInputs): ProjectWallGirtCalculationResult {
+  const controls = input.controls ?? input.project.enclosure?.wall_geometry?.[input.orientation] ?? null;
+  const runtime = buildProjectV15AutoRuntime({
+    project: input.project,
+    climate: input.climate,
+    orientation: input.orientation,
+    controls,
+    overrides: input.runtimeOverrides,
+  });
+  if (runtime.status !== "READY") {
+    return {
+      status: runtime.status === "UNSUPPORTED" ? "UNSUPPORTED" : "UNSUPPORTED",
+      project: input.project,
+      geometry: null,
+      zone: null,
+      provenance: controls?.provenance ?? [],
+      diagnostics: runtime.diagnostics,
+    };
+  }
+  return calculateProjectV15WallGirt({
+    project: input.project,
+    orientation: input.orientation,
+    controls,
+    autoRuntime: runtime.runtime,
   });
 }

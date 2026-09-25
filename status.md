@@ -1,18 +1,31 @@
 # Sprint M — Execution Status
 
+## Product-layer status
+
+- **Core 1:** structural parity is proven for the three normative real-project
+  references; the final contract is not frozen yet.
+- **Core 2:** partial; the restricted cold profiled-sheet path now reaches
+  source-backed sheet/trim/fastener quantities and known unit masses. Generic
+  ridge-seal mass, openings, complete panel/BOM parity and commercial pricing
+  remain open.
+- **Core 3:** not started; it begins only after the Core 1/Core 2 output
+  contracts are frozen. See `ROADMAP_CORE1_CORE2_CORE3.md`.
+
 ## Current phase
 
 Generic legacy connection model implemented for automatic 9–21 m; supported-domain regression expansion next
 
 ### Active enclosure AUTO phase
 
-Pure restricted no-stud wall-girt selector implemented. It consumes an explicit
-runtime contract and is not wired to ProjectInput/Core1/UI. Golden corner and
-typical parity are passing; geometry and insulation mapping remain blockers for
-project wiring.
+Pure restricted no-stud wall-girt selector implemented. Persisted v1.5
+B12/B13/e controllers now flow from ProjectInput through SIDE/END geometry,
+restricted SP20/no-stud selection and quantity/mass replay. Ordinary
+dimensions still do not infer these controllers.
 
-Next: run the full validation gates, then preserve the implementation report
-and stop before any ProjectInput adapter work.
+The first profiled-sheet vertical path is proven for zero openings and no
+additional studs. Sheet/trim/fastener quantities and all available unit masses
+are replayed; the generic ridge-seal weight is explicitly unknown. Opening
+framing, broader panel parity and cost remain outside this path.
 
 Decisions:
 
@@ -21,6 +34,8 @@ Decisions:
 - `B13` is only partially comparable to effective frame step.
 - Existing `replayManualWallGirt()` remains the sole quantity/mass/bracket
   calculation path.
+- Core2 path fixture: `docs/enclosure/evidence/project-wall-girt-core2-no-stud.json`.
+- Core2 path report: `docs/enclosure/evidence/CORE2_PROFILED_SHEET_PATH_REPORT.md`.
 
 ## Status
 

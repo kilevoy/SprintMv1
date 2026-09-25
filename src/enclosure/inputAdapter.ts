@@ -1,11 +1,13 @@
 import type { Core1ClimateResult } from "../core1/types";
 import type { ProjectInput } from "../project/types";
-import type { ColdEnclosureInput, EnclosureStructuralContext } from "./types";
+import type { ColdEnclosureInput, EnclosureMountingOrientation, EnclosureStructuralContext } from "./types";
 
 export interface ColdEnclosureAdapterOptions {
   canonicalClimate?: Core1ClimateResult | null;
   cladding?: ColdEnclosureInput["wallSystem"]["cladding"];
   insulation?: ColdEnclosureInput["wallSystem"]["insulation"];
+  /** Explicit panel direction; never inferred from SANDWICH_PANEL. */
+  mountingOrientation?: EnclosureMountingOrientation;
   enclosureOverrides?: Record<string, unknown>;
 }
 
@@ -29,6 +31,7 @@ export function projectInputToColdEnclosureInput(
       system: project.envelope.wall_system,
       envelopeSystem: project.envelope.system,
       cladding: options.cladding ?? (project.envelope.system === "PROFILED_SHEET_COLD" ? "COLD_PROFNASTIL" : project.envelope.system === "SANDWICH_PANEL" ? "INSULATED_SANDWICH" : "UNKNOWN"),
+      ...(options.mountingOrientation ? { mountingOrientation: options.mountingOrientation } : {}),
       ...(options.insulation ? { insulation: options.insulation } : {}),
     },
     roofSystem: {

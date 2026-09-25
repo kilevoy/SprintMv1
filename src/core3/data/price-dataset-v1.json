@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0.0",
+  "dataset_id": "core3-price-dataset-v1-2026-03-12",
+  "effective_date": "2026-03-12",
+  "source": {
+    "workbook": "Z:\\Предварительные расчеты\\Калькуляторы\\Прайс для предрасчетов (не изменять).xlsx",
+    "sha256": "08ea5728ad901409b651081b849dfb6db2c182c6b71c972224674365c0372b87"
+  },
+  "entries": [
+    {
+      "id": "profiled-wall-s18-05",
+      "canonical_mark": "С-18 0,5мм",
+      "aliases": ["С-18 окр. (0.5 мм)"],
+      "unit": "m2",
+      "price_per_unit": 794.65,
+      "source": { "sheet": "Профлист,доборы", "row": 7, "price_cell": "E7", "unit_cell": "F7", "name_cell": "B7" }
+    },
+    {
+      "id": "profiled-roof-s44-07",
+      "canonical_mark": "С-44 0,7мм",
+      "aliases": ["С-44 оцинк. (0,7 мм)"],
+      "unit": "m2",
+      "price_per_unit": 691.98,
+      "source": { "sheet": "Профлист,доборы", "row": 15, "price_cell": "E15", "unit_cell": "F15", "name_cell": "B15" }
+    },
+    {
+      "id": "profiled-deck-s44-07-zinc",
+      "canonical_mark": "С-44 0,7 оц",
+      "aliases": ["С-44 оцинк. (0,7 мм)"],
+      "unit": "m2",
+      "price_per_unit": 691.98,
+      "source": { "sheet": "Профлист,доборы", "row": 15, "price_cell": "E15", "unit_cell": "F15", "name_cell": "B15" }
+    },
+    {
+      "id": "ridge-flat-2m",
+      "canonical_mark": "Конек плоский (2м)",
+      "aliases": ["Конек плоский"],
+      "unit": "pcs",
+      "price_per_unit": 321,
+      "source": { "sheet": "Профлист,доборы", "row": 53, "price_cell": "E53", "unit_cell": "F53", "name_cell": "B53" }
+    },
+    {
+      "id": "gable-2m",
+      "canonical_mark": "Фронтон (2м)",
+      "aliases": ["Фронтон (Ф) 2м"],
+      "unit": "pcs",
+      "price_per_unit": 529,
+      "source": { "sheet": "Комплектушки", "row": 179, "price_cell": "D179", "unit_cell": "E179", "name_cell": "A179" }
+    },
+    {
+      "id": "ridge-seal-2m",
+      "canonical_mark": "Уплотнитель (2м)",
+      "aliases": ["Уплотнитель конька (2м)"],
+      "unit": "pcs",
+      "price_per_unit": 612,
+      "source": { "sheet": "Профлист,доборы", "row": 57, "price_cell": "E57", "unit_cell": "F57", "name_cell": "B57", "mass_cell": "G57", "mass_status": "UNKNOWN" }
+    },
+    {
+      "id": "self-tapping-screw-polymer-48x20",
+      "canonical_mark": "Саморез 4,8x20 (стены)",
+      "aliases": ["Саморез 4,8x20 (кровля)", "Саморез 4,8x20 (полимер)"],
+      "unit": "pcs",
+      "price_per_unit": 2.346,
+      "source": { "sheet": "Перекупные", "row": 50, "price_cell": "F50", "unit_cell": "G50", "name_cell": "A50" }
+    }
+  ]
+}
